@@ -7,39 +7,37 @@ import java.util.Scanner;
 public class Customer {
     static Scanner s = new Scanner(System.in); // class scope
     public static void main(String[] Args) {
-    boolean running = true;
+        boolean running = true;
+        while(running){
+            int choice = -1;
 
-    while(running){
-        int choice = -1;
+            System.out.println("-----------------------------------------");
+            System.out.println("           Customer's Features");
+            System.out.println("-----------------------------------------");
 
-        System.out.println("-----------------------------------------");
-        System.out.println("           Customer's Features");
-        System.out.println("-----------------------------------------");
+            System.out.println("0. EXIT");
+            System.out.println("1. Register an account");
+            System.out.println("2. Edit your profile");
+            System.out.println("3. View details of available cars");
+            System.out.println("4. Give feedback regarding your purchases");
+            System.out.println("5. View history");
 
-        System.out.println("0. EXIT");
-        System.out.println("1. Register an account");
-        System.out.println("2. Edit your profile");
-        System.out.println("3. View details of available cars");
-        System.out.println("4. Give feedback regarding your purchases");
-        System.out.println("5. View history");
+            System.out.println("-----------------------------------------");
+            while (!Arrays.asList( 1, 2, 3, 4, 5, 0).contains(choice)){
+                System.out.print("Enter your choice (0-5): ");
+                choice = s.nextInt();
+            }
 
-        System.out.println("-----------------------------------------");
-        while (!Arrays.asList( 1, 2, 3, 4, 5, 0).contains(choice)){
-            System.out.print("Enter your choice (0-5): ");
-            choice = s.nextInt();
+            switch (choice){
+                case 0 -> running = false;
+                case 1 -> registerAccount();
+                case 2 -> editProfile();
+                case 3 -> viewCars();
+                case 4 -> giveFeedback();
+                case 5 -> viewHistory();
+                default -> System.out.println("Invalid choice.");
+            }
         }
-
-        switch (choice){
-            case 0 -> running = false;
-            case 1 -> registerAccount();
-            case 2 -> editProfile();
-            case 3 -> viewCars();
-            case 4 -> giveFeedback();
-            case 5 -> viewHistory();
-            default -> System.out.println("Invalid choice.");
-        }
-    }
-
     }
     static void registerAccount(){
         String name;
