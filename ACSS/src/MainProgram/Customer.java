@@ -1,94 +1,67 @@
 package MainProgram;
 
-import java.util.Arrays;
+import java.awt.*;
 import java.util.Scanner;
 
 
-public class Customer {
+public class Customer extends Frame {
     static Scanner s = new Scanner(System.in); // class scope
     public static void main(String[] Args) {
-        boolean running = true;
-        while(running){
-            int choice = -1;
-
-            System.out.println("-----------------------------------------");
-            System.out.println("           Customer's Features");
-            System.out.println("-----------------------------------------");
-
-            System.out.println("0. EXIT");
-            System.out.println("1. Register an account");
-            System.out.println("2. Edit your profile");
-            System.out.println("3. View details of available cars");
-            System.out.println("4. Give feedback regarding your purchases");
-            System.out.println("5. View history");
-
-            System.out.println("-----------------------------------------");
-            while (!Arrays.asList( 1, 2, 3, 4, 5, 0).contains(choice)){
-                System.out.print("Enter your choice (0-5): ");
-                choice = s.nextInt();
-            }
-
-            switch (choice){
-                case 0 -> running = false;
-                case 1 -> registerAccount();
-                case 2 -> editProfile();
-                case 3 -> viewCars();
-                case 4 -> giveFeedback();
-                case 5 -> viewHistory();
-                default -> System.out.println("Invalid choice.");
-            }
-        }
+        Customer customer = new Customer();
     }
-    static void registerAccount(){
-        String name;
-        String pwd;
+    public Customer() { 
+        super("Customer Features");
+        
+        setSize(400,300);
+        setLocation(100,100);
+        setTitle("Customer's Features");
+        // setLayout(new FlowLayout());
+        setLayout(null);
+        
+        // Create labels for menu options
+        Label title = new Label("--- Customer's Features ---");
+        title.setBounds(130, 30, 200, 20);
 
-        System.out.println("-----------------------------------------");
-        System.out.println("Registering an account...");
-        System.out.println("-----------------------------------------");
-        s.nextLine(); // // Consume left over newline from main menu choice input
-        System.out.print("Enter your name: ");
-        name = s.nextLine();
-        System.out.print("Enter your pwd: ");
-        pwd = s.nextLine();
+        Label option0 = new Label("0. EXIT");
+        option0.setBounds(50, 50, 100, 20);
 
-        System.out.printf("Account created: %s%s\n", name, pwd);
-    }
-    static void editProfile() {
-        System.out.println("Edit your profile...");
-    }
-    static void viewCars() {
-        System.out.println("View details of available cars...");
-    }
-    static void giveFeedback() {
-        System.out.println("Give feedback regarding your purchases...");
-    }
-    static void viewHistory() {
-        while (true) {
-            int choice = -1;
-            System.out.println("-----------------------------------------");
-            System.out.println("0. EXIT");
-            System.out.println("1. View purchase history");
-            System.out.println("2. View feedback history");
-            System.out.println("-----------------------------------------");
-            while (!Arrays.asList( 1, 2, 0).contains(choice)){
-                System.out.print("Enter your choice (0-2): ");
-                choice = s.nextInt();
-            }
-            switch (choice){
-                case 0 -> {
-                    return;
-                }
-                case 1 -> viewPurchaseHistory();
-                case 2 -> viewFeedbackHistory();
-            }
-        }
+        Label option1 = new Label("1. Register an account");
+        option1.setBounds(50, 70, 200, 20);
 
-    }
-    static void viewPurchaseHistory() {
-        System.out.println("Viewing purchase history...");
-    }
-    static void viewFeedbackHistory() {
-        System.out.println("Viewing feedback history...");
+        Label option2 = new Label("2. Edit your profile");
+        option2.setBounds(50, 90, 200, 20);
+
+        Label option3 = new Label("3. View details of available cars");
+        option3.setBounds(50, 110, 250, 20);
+
+        Label option4 = new Label("4. Give feedback regarding your purchases");
+        option4.setBounds(50, 130, 300, 20);
+
+        Label option5 = new Label("5. View history");
+        option5.setBounds(50, 150, 150, 20);
+
+        Label prompt = new Label("Enter your choice (0-5):");
+        prompt.setBounds(50, 180, 150, 20);
+
+        // Create input field and button
+        TextField inputField = new TextField(5);
+        inputField.setBounds(200, 180, 50, 20);
+
+        Button okButton = new Button("OK");
+        okButton.setBounds(260, 180, 50, 20);
+
+        // Add components to frame
+        add(title);
+        add(option0);
+        add(option1);
+        add(option2);
+        add(option3);
+        add(option4);
+        add(option5);
+        add(prompt);
+        add(inputField);
+        add(okButton);
+        
+        setVisible(true);
     }
 }
