@@ -1,21 +1,21 @@
 package MainProgram;
 
 import java.awt.*;
-import java.util.Scanner;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Customer extends Frame {
-    static Scanner s = new Scanner(System.in); // class scope
+    private Label dynamicLabel;
     public static void main(String[] Args) {
         Customer customer = new Customer();
     }
-    public Customer() { 
+
+    public Customer() {        
         super("Customer Features");
         
         setSize(400,300);
         setLocation(100,100);
         setTitle("Customer's Features");
-        // setLayout(new FlowLayout());
         setLayout(null);
         
         // Create labels for menu options
@@ -62,6 +62,24 @@ public class Customer extends Frame {
         add(inputField);
         add(okButton);
         
+        dynamicLabel = new Label();
+        dynamicLabel.setBounds(50, 210, 300, 20);
+        dynamicLabel.setVisible(false);
+
+        okButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String userInput = inputField.getText();
+                System.out.println("You entered: " + userInput);
+                
+                // Add dynamic label
+                dynamicLabel.setText("Your choice: "+userInput);
+                add(dynamicLabel);
+                dynamicLabel.setVisible(true);
+                repaint();
+            }
+        });
+
         setVisible(true);
     }
 }
