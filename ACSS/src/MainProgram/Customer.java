@@ -4,13 +4,16 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+// Class for the main customer features
 public class Customer extends Frame {
     private Label dynamicLabel;
+    private TextField inputField;
+
     public static void main(String[] Args) {
         Customer customer = new Customer();
     }
 
-    public Customer() {        
+    public Customer() {
         super("Customer Features");
         
         setSize(400,300);
@@ -19,7 +22,7 @@ public class Customer extends Frame {
         setLayout(null);
         
         // Create labels for menu options
-        Label title = new Label("--- Customer's Features ---");
+        Label title = new Label("--- Select a Customer Features ---");
         title.setBounds(130, 30, 200, 20);
 
         Label option0 = new Label("0. EXIT");
@@ -44,7 +47,7 @@ public class Customer extends Frame {
         prompt.setBounds(50, 180, 150, 20);
 
         // Create input field and button
-        TextField inputField = new TextField(5);
+        inputField = new TextField(5);
         inputField.setBounds(200, 180, 50, 20);
 
         Button okButton = new Button("OK");
@@ -70,16 +73,37 @@ public class Customer extends Frame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String userInput = inputField.getText();
-                System.out.println("You entered: " + userInput);
                 
                 // Add dynamic label
                 dynamicLabel.setText("Your choice: "+userInput);
-                add(dynamicLabel);
                 dynamicLabel.setVisible(true);
                 repaint();
+                
+                if (userInput.equals("1")) {
+                    dispose(); // Close the current frame
+                    RegisterAccount registerAccount = new RegisterAccount();
+                }
             }
         });
+        
+        setVisible(true);
+    }
+}
 
+// Separate class for registering an account
+class RegisterAccount extends Frame {
+    public RegisterAccount() {
+        super("Registering Customer Account");
+        setSize(400,300);
+        setLocation(100,100);
+        setTitle("Registering Customer Account");
+        setLayout(null);
+        
+        Label title = new Label("--- Register a Customer Account---");
+        title.setBounds(130, 30, 200, 20);
+        
+        add(title);
+        
         setVisible(true);
     }
 }
