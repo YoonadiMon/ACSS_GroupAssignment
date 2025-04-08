@@ -1,4 +1,4 @@
-package MainProgram;
+package Manager;
 
 public class Manager {
 }
