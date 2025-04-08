@@ -1,4 +1,4 @@
-package MainProgram;
+package Customer;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -90,20 +90,3 @@ public class Customer extends Frame {
     }
 }
 
-// Separate class for registering an account
-class RegisterAccount extends Frame {
-    public RegisterAccount() {
-        super("Registering Customer Account");
-        setSize(400,300);
-        setLocation(100,100);
-        setTitle("Registering Customer Account");
-        setLayout(null);
-        
-        Label title = new Label("--- Register a Customer Account---");
-        title.setBounds(130, 30, 200, 20);
-        
-        add(title);
-        
-        setVisible(true);
-    }
-}
