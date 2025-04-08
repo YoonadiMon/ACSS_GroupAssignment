@@ -10,48 +10,57 @@ public class Customer extends Frame {
     private TextField inputField;
 
     public static void main(String[] Args) {
-        Customer customer = new Customer();
+        Customer customer = new Customer(600,300);
     }
 
-    public Customer() {
+    public Customer(int width, int height) {
         super("Customer Features");
+
+        // Content Alignment Variables
+        int ContentH = 30;
+        int GapX = 25;
+        int leftPad = 50;
+        int titleWidth = 200;
         
-        setSize(400,300);
+        setSize(width, height);
         setLocation(100,100);
         setTitle("Customer's Features");
         setLayout(null);
         
         // Create labels for menu options
         Label title = new Label("--- Select a Customer Features ---");
-        title.setBounds(130, 30, 200, 20);
+        title.setBounds((width-titleWidth)/2, ContentH, titleWidth, 20);
 
         Label option0 = new Label("0. EXIT");
-        option0.setBounds(50, 50, 100, 20);
+        option0.setBounds(leftPad, ContentH += GapX, 100, 20);
 
         Label option1 = new Label("1. Register an account");
-        option1.setBounds(50, 70, 200, 20);
+        option1.setBounds(leftPad, ContentH += GapX, 200, 20);
 
-        Label option2 = new Label("2. Edit your profile");
-        option2.setBounds(50, 90, 200, 20);
+        Label option2 = new Label("2. Log In");
+        option2.setBounds(leftPad, ContentH += GapX, 200, 20);
 
-        Label option3 = new Label("3. View details of available cars");
-        option3.setBounds(50, 110, 250, 20);
+        Label option3 = new Label("3. Edit your profile");
+        option3.setBounds(leftPad, ContentH += GapX, 250, 20);
 
-        Label option4 = new Label("4. Give feedback regarding your purchases");
-        option4.setBounds(50, 130, 300, 20);
+        Label option4 = new Label("4. View details of available cars");
+        option4.setBounds(leftPad, ContentH += GapX, 300, 20);
 
-        Label option5 = new Label("5. View history");
-        option5.setBounds(50, 150, 150, 20);
+        Label option5 = new Label("5. Give feedback regarding your purchases");
+        option5.setBounds(leftPad, ContentH += GapX, 150, 20);
 
-        Label prompt = new Label("Enter your choice (0-5):");
-        prompt.setBounds(50, 180, 150, 20);
+        Label option6 = new Label("6. View history");
+        option6.setBounds(leftPad, ContentH += GapX, 150, 20);
+
+        Label prompt = new Label("Enter your choice (0-6):");
+        prompt.setBounds(leftPad, ContentH += GapX, 150, 20);
 
         // Create input field and button
         inputField = new TextField(5);
-        inputField.setBounds(200, 180, 50, 20);
+        inputField.setBounds(200, ContentH, 50, 20);
 
         Button okButton = new Button("OK");
-        okButton.setBounds(260, 180, 50, 20);
+        okButton.setBounds(260, ContentH, 50, 20);
 
         // Add components to frame
         add(title);
@@ -61,27 +70,40 @@ public class Customer extends Frame {
         add(option3);
         add(option4);
         add(option5);
+        add(option6);
         add(prompt);
         add(inputField);
         add(okButton);
         
         dynamicLabel = new Label();
-        dynamicLabel.setBounds(50, 210, 300, 20);
+        dynamicLabel.setBounds(leftPad, ContentH += GapX, 300, 20);
+        dynamicLabel.setForeground(Color.RED);
         dynamicLabel.setVisible(false);
 
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String userInput = inputField.getText();
-                
-                // Add dynamic label
-                dynamicLabel.setText("Your choice: "+userInput);
-                dynamicLabel.setVisible(true);
-                repaint();
-                
-                if (userInput.equals("1")) {
-                    dispose(); // Close the current frame
-                    RegisterAccount registerAccount = new RegisterAccount();
+
+                switch(userInput){
+                    case "0" -> {
+                        System.out.println("0");
+                    }
+                    case "1" -> {
+                        dispose(); // Close the current frame
+                        RegisterAccount registerAccount = new RegisterAccount(getWidth(), getHeight());
+                    }
+                    case "2" -> System.out.println("2");
+                    case "3" -> System.out.println("3");
+                    case "4" -> System.out.println("4");
+                    case "5" -> System.out.println("5");
+                    case "6" -> System.out.println("6");
+                    default -> {
+                        // Add dynamic label
+                        dynamicLabel.setText("Your choice ("+userInput+") is not a valid option!");
+                        dynamicLabel.setVisible(true);
+                        add(dynamicLabel);
+                    }
                 }
             }
         });
