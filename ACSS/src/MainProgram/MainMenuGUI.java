@@ -8,11 +8,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class MainMenuGUI {
     JFrame x;
     private JLabel dynamicLabel;
     private JTextField inputField;
+    private static final String ADMIN_PASSWORD = "admin123"; // Change this to your desired password
 
     public MainMenuGUI() {
         x = new JFrame();
@@ -21,7 +24,7 @@ public class MainMenuGUI {
         x.setLayout(null); // Use absolute positioning
 
         // Content Alignment Variables
-        int ContentH = 30;
+        int ContentH = 10;
         int GapX = 25;
         int leftPad = 50;
         int titleWidth = 200;
@@ -50,7 +53,7 @@ public class MainMenuGUI {
         inputField.setBounds(200, ContentH, 50, 20);
 
         JButton okButton = new JButton("OK");
-        okButton.setBounds(260, ContentH, 50, 20);
+        okButton.setBounds(260, ContentH, 80, 20);
 
         // Add components to frame
         x.add(title);
@@ -70,16 +73,11 @@ public class MainMenuGUI {
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try{
+                try {
                     String userInput = inputField.getText();
 
                     switch (userInput) {
-                        case "0" -> {
-                            String input = JOptionPane.showInputDialog("Enter admin password: ");
-                            System.out.println("Exiting...");
-                            x.dispose(); // Close the frame
-                            System.exit(0);
-                        }
+                        case "0" -> verifyAdminPassword();
                         case "1" -> {
                             x.dispose();
                             CustomerGUI customer = new CustomerGUI(x.getWidth(), x.getHeight());
@@ -102,13 +100,30 @@ public class MainMenuGUI {
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(x, "Invalid Input");
                 }
+            }
+        });
 
-
+        // Add window listener for the close button (X)
+        x.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                verifyAdminPassword();
             }
         });
 
         x.add(dynamicLabel);
-        x.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close on window close
+        x.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         x.setVisible(true);
+    }
+
+    private void verifyAdminPassword() {
+        String input = JOptionPane.showInputDialog(x, "Enter admin password:");
+        if (input != null && input.equals(ADMIN_PASSWORD)) {
+            System.out.println("Exiting...");
+            x.dispose();
+            System.exit(0);
+        } else {
+            JOptionPane.showMessageDialog(x, "Incorrect password. Access denied.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
