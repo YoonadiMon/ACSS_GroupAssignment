@@ -1,6 +1,6 @@
 package MainProgram;
 
-import Customer.Customer;
+import Customer.CustomerGUI;
 import Manager.Manager;
 import Salesman.Salesman;
 
@@ -82,7 +82,7 @@ public class MainMenuGUI {
                         }
                         case "1" -> {
                             x.dispose();
-                            Customer customer = new Customer(x.getWidth(), x.getHeight());
+                            CustomerGUI customer = new CustomerGUI(x.getWidth(), x.getHeight());
                         }
                         case "2" -> {
                             x.dispose();
