@@ -1,22 +1,26 @@
 package MainProgram;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import Customer.Customer;
-import Manager.Manager;
-import Salesman.Salesman;
+import Customer.CustomerGUI;
+import Manager.ManagerGUI;
+import Salesman.SalesmanGUI;
 
-public class MainProgram extends Frame {
-    private Label dynamicLabel;
-    private TextField inputField;
-    
+public class MainProgramGUI extends JFrame {
+    private JLabel dynamicLabel;
+    private JTextField inputField;
+
     public static void main(String[] args) {
-        MainProgram mainProgram = new MainProgram();
+        SwingUtilities.invokeLater(() -> {
+            MainProgramGUI mainProgram = new MainProgramGUI();
+            mainProgram.setVisible(true);
+        });
     }
-    
-    public MainProgram() {
+
+    public MainProgramGUI() {
         super("Main Program");
 
         // Content Alignment Variables
@@ -25,34 +29,34 @@ public class MainProgram extends Frame {
         int leftPad = 50;
         int titleWidth = 200;
 
-        setSize(600,300);
-        setLocation(100,100);
-        setLayout(null);
+        setSize(600, 300);
+        setLocationRelativeTo(null); // Center the frame
+        setLayout(null); // Use absolute positioning
 
         // Create labels for menu options
-        Label title = new Label("--- Main Program ---");
-        title.setBounds((getWidth()-titleWidth)/2, ContentH, titleWidth, 20);
+        JLabel title = new JLabel("--- Main Program ---");
+        title.setBounds((getWidth() - titleWidth) / 2, ContentH, titleWidth, 20);
 
-        Label option0 = new Label("0. Exit");
+        JLabel option0 = new JLabel("0. Exit");
         option0.setBounds(leftPad, ContentH += GapX, 100, 20);
 
-        Label option1 = new Label("1. Customer");
+        JLabel option1 = new JLabel("1. Customer");
         option1.setBounds(leftPad, ContentH += GapX, 150, 20);
 
-        Label option2 = new Label("2. Manager");
+        JLabel option2 = new JLabel("2. Manager");
         option2.setBounds(leftPad, ContentH += GapX, 150, 20);
 
-        Label option3 = new Label("3. Salesman");
+        JLabel option3 = new JLabel("3. Salesman");
         option3.setBounds(leftPad, ContentH += GapX, 150, 20);
 
-        Label prompt = new Label("Enter your choice (0-3):");
+        JLabel prompt = new JLabel("Enter your choice (0-3):");
         prompt.setBounds(leftPad, ContentH += GapX, 150, 20);
 
         // Create input field and button
-        inputField = new TextField(5);
+        inputField = new JTextField(5);
         inputField.setBounds(200, ContentH, 50, 20);
 
-        Button okButton = new Button("OK");
+        JButton okButton = new JButton("OK");
         okButton.setBounds(260, ContentH, 50, 20);
 
         // Add components to frame
@@ -64,8 +68,8 @@ public class MainProgram extends Frame {
         add(prompt);
         add(inputField);
         add(okButton);
-        
-        dynamicLabel = new Label();
+
+        dynamicLabel = new JLabel();
         dynamicLabel.setBounds(50, ContentH += GapX, 300, 20);
         dynamicLabel.setForeground(Color.RED);
         dynamicLabel.setVisible(false);
@@ -78,24 +82,24 @@ public class MainProgram extends Frame {
                 switch (userInput) {
                     case "0" -> {
                         System.out.println("Exiting...");
-//                        dispose(); // Close the frame
-//                        System.exit(0);
+                        dispose(); // Close the frame
+                        System.exit(0);
                     }
                     case "1" -> {
                         dispose();
-                        Customer customer = new Customer(getWidth(), getHeight());
+                        CustomerGUI customer = new CustomerGUI(getWidth(), getHeight());
                     }
                     case "2" -> {
                         dispose();
-                        Manager manager = new Manager();
+                        ManagerGUI manager = new ManagerGUI();
                     }
                     case "3" -> {
                         dispose();
-                        Salesman salesman = new Salesman();
+                        SalesmanGUI salesman = new SalesmanGUI();
                     }
                     default -> {
                         // Add dynamic label
-                        dynamicLabel.setText("Your choice ("+userInput+") is not a valid option!");
+                        dynamicLabel.setText("Your choice (" + userInput + ") is not a valid option!");
                         dynamicLabel.setVisible(true);
                         add(dynamicLabel);
                     }
@@ -103,8 +107,8 @@ public class MainProgram extends Frame {
 
             }
         });
-        
-        setVisible(true);
+
+        add(dynamicLabel);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close on window close
     }
-    
 }
