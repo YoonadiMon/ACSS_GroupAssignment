@@ -109,5 +109,6 @@ public class MainMenuGUI {
 
         x.add(dynamicLabel);
         x.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close on window close
+        x.setVisible(true);
     }
 }
