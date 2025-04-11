@@ -5,22 +5,22 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import Customer.CustomerGUI;
-import Manager.ManagerGUI;
-import Salesman.SalesmanGUI;
+import Customer.Customer;
+import Manager.Manager;
+import Salesman.Salesman;
 
-public class MainProgramGUI extends JFrame {
+public class MainProgram extends JFrame {
     private JLabel dynamicLabel;
     private JTextField inputField;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            MainProgramGUI mainProgram = new MainProgramGUI();
+            MainProgram mainProgram = new MainProgram();
             mainProgram.setVisible(true);
         });
     }
 
-    public MainProgramGUI() {
+    public MainProgram() {
         super("Main Program");
 
         // Content Alignment Variables
@@ -87,15 +87,15 @@ public class MainProgramGUI extends JFrame {
                     }
                     case "1" -> {
                         dispose();
-                        CustomerGUI customer = new CustomerGUI(getWidth(), getHeight());
+                        Customer customer = new Customer(getWidth(), getHeight());
                     }
                     case "2" -> {
                         dispose();
-                        ManagerGUI manager = new ManagerGUI();
+                        Manager manager = new Manager();
                     }
                     case "3" -> {
                         dispose();
-                        SalesmanGUI salesman = new SalesmanGUI();
+                        Salesman salesman = new Salesman();
                     }
                     default -> {
                         // Add dynamic label

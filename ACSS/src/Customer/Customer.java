@@ -5,15 +5,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 // Class for the main customer features
-public class CustomerGUI extends Frame {
+public class Customer extends Frame {
     private Label dynamicLabel;
     private TextField inputField;
 
     public static void main(String[] Args) {
-        CustomerGUI customer = new CustomerGUI(600,300);
+        Customer customer = new Customer(600,300);
     }
 
-    public CustomerGUI(int width, int height) {
+    public Customer(int width, int height) {
         super("Customer Features");
 
         // Content Alignment Variables
@@ -91,7 +91,7 @@ public class CustomerGUI extends Frame {
                     }
                     case "1" -> {
                         dispose(); // Close the current frame
-                        RegisterAccountGUI registerAccount = new RegisterAccountGUI(getWidth(), getHeight());
+                        RegisterAccount registerAccount = new RegisterAccount(getWidth(), getHeight());
                     }
                     case "2" -> System.out.println("2");
                     case "3" -> System.out.println("3");

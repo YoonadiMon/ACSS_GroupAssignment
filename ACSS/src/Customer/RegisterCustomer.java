@@ -1,8 +1,8 @@
 package Customer;
 import java.awt.*;
 
-class RegisterAccountGUI extends Frame {
-    public RegisterAccountGUI(int width, int height) {
+class RegisterAccount extends Frame {
+    public RegisterAccount(int width, int height) {
         super("Registering Customer Account");
 
         // Content Alignment Variables

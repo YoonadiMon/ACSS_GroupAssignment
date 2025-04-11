@@ -8,7 +8,7 @@ package Salesman;
  *
  * @author hp
  */
-public class SalesmanGUI {
+public class Salesman {
     // felisha
     
 }
