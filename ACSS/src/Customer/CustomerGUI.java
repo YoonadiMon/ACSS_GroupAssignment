@@ -1,13 +1,12 @@
 package Customer;
 
 import MainProgram.MainMenuGUI;
+import Utils.WindowNav;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 public class CustomerGUI {
     private JLabel dynamicLabel;
@@ -21,7 +20,6 @@ public class CustomerGUI {
     public CustomerGUI(int width, int height) {
         // Create the frame
         frame = new JFrame("Customer's Features");
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
         frame.setLayout(null);
@@ -34,6 +32,7 @@ public class CustomerGUI {
 
         // Create labels for menu options
         JLabel title = new JLabel("--- Select a Customer Features ---");
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
         title.setBounds((width - titleWidth) / 2, ContentH, titleWidth, 20);
 
         JLabel option0 = new JLabel("0. EXIT");
@@ -112,13 +111,7 @@ public class CustomerGUI {
                 }
             }
         });
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                frame.dispose();
-                new MainMenuGUI();
-            }
-        });
+        WindowNav.setCloseOperation(frame, () -> new MainMenuGUI());
 
         frame.setVisible(true);
     }

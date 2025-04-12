@@ -1,61 +1,83 @@
 package Customer;
-import java.awt.*;
 
-class RegisterAccount extends Frame {
+import Utils.WindowNav;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+class RegisterAccount {
+    private JFrame frame;
     public RegisterAccount(int width, int height) {
-        super("Registering Customer Account");
+        frame = new JFrame("Customer's Features");
+        frame.setSize(width, height);
+        frame.setLocationRelativeTo(null);
+        frame.setTitle("Registering Customer Account");
+        frame.setLayout(null);
 
         // Content Alignment Variables
         int ContentH = 30;
         int GapX = 30;
         int titleWidth = 250;
 
-        setSize(width, height);
-        setLocation(100,100);
-        setTitle("Registering Customer Account");
-        setLayout(null);
-        
-        Label title = new Label("--- Register a new Customer Account ---");
+
+
+        JLabel title = new JLabel("--- Register a new Customer Account ---");
         title.setBounds((width-titleWidth)/2, ContentH, titleWidth, 20);
 
         ContentH += GapX;
-        Label username = new Label("Username");
+        JLabel username = new JLabel("Username");
         username.setBounds(50, ContentH, 80, 20);
 
-        TextField usernameTF = new TextField();
+        JTextField usernameTF = new JTextField();
         usernameTF.setBounds(150, ContentH, 150, 20);
 
         ContentH += GapX;
-        Label email = new Label("Email");
+        JLabel email = new JLabel("Email");
         email.setBounds(50, ContentH, 80, 20);
 
-        TextField emailTF = new TextField();
+        JTextField emailTF = new JTextField();
         emailTF.setBounds(150, ContentH, 150, 20);
 
         ContentH += GapX;
-        Label password = new Label("Password");
+        JLabel password = new JLabel("Password");
         password.setBounds(50, ContentH, 80, 20);
 
-        TextField passwordTF = new TextField();
+        JPasswordField passwordTF = new JPasswordField();
         passwordTF.setBounds(150, ContentH, 150, 20);
 
         ContentH += GapX;
-        Button sbmt = new Button("Submit");
+        JButton sbmt = new JButton("Submit");
         sbmt.setBounds(50, ContentH, 100, 30);
 
-        Button reset = new Button("Reset");
+        JButton reset = new JButton("Reset");
         reset.setBounds(170,ContentH,100,30);
-        
-        add(title);
-        add(username);
-        add(email);
-        add(password);
-        add(usernameTF);
-        add(emailTF);
-        add(passwordTF);
-        add(sbmt);
-        add(reset);
 
-        setVisible(true);
+        frame.add(title);
+        frame.add(username);
+        frame.add(email);
+        frame.add(password);
+        frame.add(usernameTF);
+        frame.add(emailTF);
+        frame.add(passwordTF);
+        frame.add(sbmt);
+        frame.add(reset);
+
+        // Button actions
+        sbmt.addActionListener(e -> {
+            System.out.println("Username: " + usernameTF.getText());
+            System.out.println("Email: " + emailTF.getText());
+            System.out.println("Password: " + new String(passwordTF.getPassword()));
+        });
+
+        reset.addActionListener(e -> {
+            usernameTF.setText("");
+            emailTF.setText("");
+            passwordTF.setText("");
+        });
+
+        WindowNav.setCloseOperation(frame, () -> new CustomerGUI(width, height));
+        frame.setVisible(true);
     }
 }
