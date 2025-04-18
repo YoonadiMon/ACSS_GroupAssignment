@@ -78,13 +78,13 @@ public class MainMenuGUI implements ActionListener {
         if (e.getSource() == exitButton) {
             verifyAdminPassword();
         } else if (e.getSource() == customerButton) {
-            x.dispose();
+            x.setVisible(false);
             new CustomerGUI(x.getWidth(), x.getHeight());
         } else if (e.getSource() == managerButton) {
-            x.dispose();
+            x.setVisible(false);
             new Manager();
         } else if (e.getSource() == salesmanButton) {
-            x.dispose();
+            x.setVisible(false);
             new Salesman();
         }
     }

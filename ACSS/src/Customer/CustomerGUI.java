@@ -1,6 +1,7 @@
 package Customer;
 
 import MainProgram.MainMenuGUI;
+import Utils.ButtonStyler;
 import Utils.WindowNav;
 
 import javax.swing.*;
@@ -32,8 +33,11 @@ public class CustomerGUI implements ActionListener {
         loginButton = new JButton("Log In");
 
         exitButton.addActionListener(this);
+        ButtonStyler.styleExitButton(exitButton);
         registerButton.addActionListener(this);
+        ButtonStyler.styleButton(registerButton);
         loginButton.addActionListener(this);
+        ButtonStyler.styleButton(loginButton);
 
         frame.add(registerButton);
         frame.add(loginButton);
