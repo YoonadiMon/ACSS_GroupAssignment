@@ -25,19 +25,16 @@ public class CustomerGUI implements ActionListener {
         frame = new JFrame("Customer's Features");
         frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
-        frame.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20)); // Use FlowLayout for buttons
+        frame.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
 
-        // Create buttons for customer features
         exitButton = new JButton("Go Back");
         registerButton = new JButton("Register an account");
         loginButton = new JButton("Log In");
 
-        // Add action listeners to the buttons
         exitButton.addActionListener(this);
         registerButton.addActionListener(this);
         loginButton.addActionListener(this);
 
-        // Add components to frame
         frame.add(registerButton);
         frame.add(loginButton);
         frame.add(exitButton);
