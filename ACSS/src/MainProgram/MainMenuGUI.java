@@ -2,7 +2,7 @@ package MainProgram;
 
 import Customer.CustomerGUI;
 import Manager.Manager;
-import Salesman.Salesman;
+import Salesman.SalesmanGUI;
 import Utils.ButtonStyler;
 
 import javax.swing.*;
@@ -85,7 +85,7 @@ public class MainMenuGUI implements ActionListener {
             new Manager();
         } else if (e.getSource() == salesmanButton) {
             x.setVisible(false);
-            new Salesman();
+            new SalesmanGUI(x.getWidth(), x.getHeight());
         }
     }
 
