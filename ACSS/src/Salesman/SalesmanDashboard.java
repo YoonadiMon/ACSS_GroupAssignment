@@ -4,15 +4,17 @@
  */
 package Salesman;
 
+import MainProgram.MainMenuGUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import Utils.WindowNav;
 
 public class SalesmanDashboard implements ActionListener {
 
     private JFrame frame;
-    private JButton editProfileButton, viewCarsButton, logoutButton;
+    private JButton editProfileButton, viewCarsButton, updateCarStatusButton, recordSalesHistory, logoutButton;
 
     public SalesmanDashboard() {
         frame = new JFrame("Salesman Dashboard");
@@ -22,15 +24,23 @@ public class SalesmanDashboard implements ActionListener {
 
         editProfileButton = new JButton("Edit Profile");
         viewCarsButton = new JButton("View Car Status");
+        updateCarStatusButton = new JButton("Update Car Status");
+        recordSalesHistory = new JButton("View Sales History");
         logoutButton = new JButton("Logout");
 
         editProfileButton.addActionListener(this);
         viewCarsButton.addActionListener(this);
+        updateCarStatusButton.addActionListener(this);
+        recordSalesHistory.addActionListener(this);
         logoutButton.addActionListener(this);
 
         frame.add(editProfileButton);
         frame.add(viewCarsButton);
+        frame.add(updateCarStatusButton);
+        frame.add(recordSalesHistory);
         frame.add(logoutButton);
+
+        WindowNav.setCloseOperation(frame, () -> new MainMenuGUI());
 
         frame.setVisible(true);
     }
@@ -40,6 +50,10 @@ public class SalesmanDashboard implements ActionListener {
         if (e.getSource() == editProfileButton) {
             openEditProfileWindow();
         } else if (e.getSource() == viewCarsButton) {
+            JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
+        } else if (e.getSource() == updateCarStatusButton) {
+            JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
+        } else if (e.getSource() == recordSalesHistory) {
             JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
         } else if (e.getSource() == logoutButton) {
             frame.dispose();
