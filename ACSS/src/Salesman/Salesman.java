@@ -9,6 +9,29 @@ package Salesman;
  * @author hp
  */
 public class Salesman {
-    // emma
+
+    String ID;
+    String name;
+    String password;
+
+    public Salesman(String ID,String name, String password) {
+        this.ID = ID;
+        this.name=name;
+        this.password = password;
+    }
+
+    public String getID() {
+        return ID;
+    }
     
+    public String getName(){
+        return name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+    
+    
+
 }

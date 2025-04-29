@@ -43,10 +43,15 @@ public class SalesmanDashboard implements ActionListener {
         WindowNav.setCloseOperation(frame, () -> new MainMenuGUI());
 
         frame.setVisible(true);
+        
+        
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        
+        
+        
         if (e.getSource() == editProfileButton) {
             openEditProfileWindow();
         } else if (e.getSource() == viewCarsButton) {
