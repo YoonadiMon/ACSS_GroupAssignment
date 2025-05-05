@@ -4,11 +4,13 @@
  */
 package Car;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.FilterOutputStream;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 
 /**
@@ -29,11 +31,11 @@ public class CarList {
         carList.add(new Car("C003", "Myvi", 15000, "available", "S002"));
         carList.add(new Car("C004", "BMW", 100000, "available", "S002"));
 
-        saveSalesmanDataToFile(carList);
+        saveCarListToFile(carList);
 
     }
 
-    public static void saveSalesmanDataToFile(ArrayList<Car> carList) {
+    public static void saveCarListToFile(ArrayList<Car> carList) {
         // Save to file
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("carList.txt"))) {
             for (int i = 0; i < carList.size(); i++) {
@@ -45,6 +47,27 @@ public class CarList {
         } catch (IOException e) {
             System.out.println("Problem with file output.");
         }
+    }
+
+    public static ArrayList<Car> loadCarDataFromFile() {
+        ArrayList<Car> carList = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("carList.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length == 5) {
+                    String carId = data[0];
+                    String brand = data[1];
+                    double price = Double.parseDouble(data[2]);
+                    String status = data[3];
+                    String salesmanId = data[4];
+                    carList.add(new Car(carId, brand, price, status, salesmanId));
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading car data.");
+        }
+        return carList;
     }
 
 }

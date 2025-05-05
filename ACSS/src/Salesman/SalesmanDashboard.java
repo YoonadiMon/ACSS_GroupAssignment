@@ -10,13 +10,23 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import Utils.WindowNav;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import javax.swing.table.DefaultTableModel;
 
 public class SalesmanDashboard implements ActionListener {
+
+    private Salesman currentSalesman;
 
     private JFrame frame;
     private JButton editProfileButton, viewCarsButton, updateCarStatusButton, recordSalesHistory, logoutButton;
 
-    public SalesmanDashboard() {
+    public SalesmanDashboard(Salesman salesman) {
+        this.currentSalesman = salesman;
+
+        System.out.println("Logged in as: " + currentSalesman.getID());
+
         frame = new JFrame("Salesman Dashboard");
         frame.setSize(500, 300);
         frame.setLocationRelativeTo(null);
@@ -43,19 +53,17 @@ public class SalesmanDashboard implements ActionListener {
         WindowNav.setCloseOperation(frame, () -> new MainMenuGUI());
 
         frame.setVisible(true);
-        
-        
+
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        
-        
-        
+
         if (e.getSource() == editProfileButton) {
             openEditProfileWindow();
         } else if (e.getSource() == viewCarsButton) {
-            JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
+//            JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
+            viewCarStatusWindow();
         } else if (e.getSource() == updateCarStatusButton) {
             JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
         } else if (e.getSource() == recordSalesHistory) {
@@ -78,22 +86,23 @@ public class SalesmanDashboard implements ActionListener {
         editProfileFrame.add(title);
 
         // Name label and input field
+        // Name
         JLabel nameLabel = new JLabel("Name:");
-        nameLabel.setBounds(50, 70, 80, 20);
+        nameLabel.setBounds(50, 70, 120, 20);  // Width 120 for alignment
         JTextField nameField = new JTextField(20);
-        nameField.setBounds(150, 70, 150, 20);
+        nameField.setBounds(180, 70, 150, 20); // Same Y as label
 
-        // Password label and input field
+// Password
         JLabel passwordLabel = new JLabel("Password:");
-        passwordLabel.setBounds(50, 100, 80, 20);
-        JPasswordField passwordField = new JPasswordField(20); // Use JPasswordField for password input
-        passwordField.setBounds(150, 100, 150, 20);
+        passwordLabel.setBounds(50, 100, 120, 20);
+        JPasswordField passwordField = new JPasswordField(20);
+        passwordField.setBounds(180, 100, 150, 20);
 
-        // Confirm Password label and input field
+// Confirm Password
         JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
         confirmPasswordLabel.setBounds(50, 130, 120, 20);
-        JPasswordField confirmPasswordField = new JPasswordField(20); // Use JPasswordField for confirmation
-        confirmPasswordField.setBounds(150, 130, 150, 20);
+        JPasswordField confirmPasswordField = new JPasswordField(20);
+        confirmPasswordField.setBounds(180, 130, 150, 20);
 
         // Show password checkbox
         JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
@@ -139,5 +148,102 @@ public class SalesmanDashboard implements ActionListener {
 
         // Make the frame visible
         editProfileFrame.setVisible(true);
+    }
+
+//    private void viewCarStatusWindow() {
+//        // Open new frame to show car list
+//        JFrame carListFrame = new JFrame("Cars Assigned to Salesman " + currentSalesman.ID);
+//        carListFrame.setSize(500, 400);
+//        carListFrame.setLocationRelativeTo(null);
+//        carListFrame.setLayout(new BorderLayout());
+//
+//        JTextArea carTextArea = new JTextArea();
+//        carTextArea.setEditable(false);
+//
+//        // Read from file and filter cars
+//        try (BufferedReader reader = new BufferedReader(new FileReader("carList.txt"))) {
+//            String line;
+//            boolean found = false;
+//            while ((line = reader.readLine()) != null) {
+//                String[] parts = line.split(",");
+//                if (parts.length == 5 && parts[4].equals(currentSalesman.ID)) {
+//                    found = true;
+//                    carTextArea.append("Car ID: " + parts[0]
+//                            + ", Brand: " + parts[1]
+//                            + ", Price: " + parts[2]
+//                            + ", Status: " + parts[3] + "\n");
+//                }
+//            }
+//
+//            if (!found) {
+//                carTextArea.setText("No cars assigned to Salesman ID: " + currentSalesman.ID);
+//            }
+//
+//        } catch (IOException ex) {
+//            carTextArea.setText("Error reading car list file.");
+//        }
+//
+//        JScrollPane scrollPane = new JScrollPane(carTextArea);
+//        carListFrame.add(scrollPane, BorderLayout.CENTER);
+//
+//        carListFrame.setVisible(true);
+//
+//    }
+    private void viewCarStatusWindow() {
+        // Create new frame
+        JFrame carListFrame = new JFrame("Cars Assigned to Salesman " + currentSalesman.ID);
+        carListFrame.setSize(600, 400);
+        carListFrame.setLocationRelativeTo(null);
+        carListFrame.setLayout(new BorderLayout(10, 10));
+
+        // Title label
+        JLabel titleLabel = new JLabel("Cars Assigned to Salesman " + currentSalesman.ID, JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        carListFrame.add(titleLabel, BorderLayout.NORTH);
+
+        // Table setup
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Price", "Status"}, 0);
+        JTable carTable = new JTable(tableModel);
+        carTable.setEnabled(false); // Read-only
+
+        // Read data from file
+        boolean found = false;
+        try (BufferedReader reader = new BufferedReader(new FileReader("carList.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 5 && parts[4].equals(currentSalesman.ID)) {
+                    found = true;
+                    tableModel.addRow(new Object[]{parts[0], parts[1], parts[2], parts[3]});
+                }
+            }
+            if (!found) {
+                JOptionPane.showMessageDialog(carListFrame,
+                        "No cars assigned to Salesman ID: " + currentSalesman.ID,
+                        "Info", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(carListFrame,
+                    "Error reading car list file.",
+                    "File Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Add table in scroll pane
+        JScrollPane scrollPane = new JScrollPane(carTable);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        carListFrame.add(scrollPane, BorderLayout.CENTER);
+
+        // Close button
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> carListFrame.dispose());
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        buttonPanel.add(closeButton);
+        carListFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Display the window
+        carListFrame.setVisible(true);
     }
 }

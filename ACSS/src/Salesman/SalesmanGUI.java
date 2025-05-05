@@ -70,87 +70,156 @@ public class SalesmanGUI implements ActionListener {
 
     }
 
+//    private void loginPage() {
+//        JFrame loginPageFrame = new JFrame("Edit Profile");
+//        loginPageFrame.setSize(400, 350); // Adjusted size to fit the extra fields
+//        loginPageFrame.setLocationRelativeTo(null);
+//        loginPageFrame.setLayout(null); // Use absolute positioning
+//
+//        // Title label centered at the top
+//        JLabel title = new JLabel("--- Login Salesman Profile ---");
+//        title.setBounds(100, 20, 200, 30);  // Manually set the bounds
+//        loginPageFrame.add(title);
+//
+//        // ID label and input field
+//        JLabel IDLabel = new JLabel("ID:");
+//        IDLabel.setBounds(50, 70, 80, 20);
+//        JTextField IDField = new JTextField(20);
+//        IDField.setBounds(150, 70, 150, 20);
+//
+//        // Password label and input field
+//        JLabel passwordLabel = new JLabel("Password:");
+//        passwordLabel.setBounds(50, 100, 80, 20);
+//        JPasswordField passwordField = new JPasswordField(20); // Use JPasswordField for password input
+//        passwordField.setBounds(150, 100, 150, 20);
+//
+//        // Show password checkbox
+//        JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
+//        showPasswordCheckbox.setBounds(150, 160, 150, 20);  // Position the checkbox below password fields
+//
+//        // Action listener for the checkbox to toggle password visibility
+//        showPasswordCheckbox.addActionListener(e -> {
+//            if (showPasswordCheckbox.isSelected()) {
+//                // Set password field visibility to true
+//                passwordField.setEchoChar((char) 0);  // Shows the password
+//
+//            } else {
+//                // Set password field visibility to false
+//                passwordField.setEchoChar('*');  // Hides the password (default)
+//
+//            }
+//        });
+//
+//        loginPageFrame.add(IDLabel);
+//        loginPageFrame.add(IDField);
+//        loginPageFrame.add(passwordLabel);
+//        loginPageFrame.add(passwordField);
+//        loginPageFrame.add(showPasswordCheckbox);
+//
+//        JButton loginButton = new JButton("Login");
+//        loginButton.setBounds(150, 180, 120, 30); // Set position of the button
+//
+//        // Show password checkbox
+//        showPasswordCheckbox.setBounds(150, 160, 150, 20);  // Position the checkbox below password fields
+//
+//        loginButton.addActionListener(e -> {
+//            String enteredID = IDField.getText();
+//            String enteredPassword = String.valueOf(passwordField.getPassword());
+//
+//            boolean loginSuccess = false;
+//            ArrayList<Salesman> salesmanList = SalesmenList.loadSalesmanDataFromFile();
+//
+//            for (Salesman salesman : salesmanList) {
+//                if (salesman.getID().equals(enteredID) && salesman.getPassword().equals(enteredPassword)) {
+//                    loginSuccess = true;
+//                    break;
+//                }
+//            }
+//
+//            if (loginSuccess) {
+//                JOptionPane.showMessageDialog(loginPageFrame, "Login Successful!");
+//                loginPageFrame.dispose();
+//                new SalesmanDashboard(); // You can open the dashboard after successful login
+//            } else {
+//                JOptionPane.showMessageDialog(loginPageFrame, "Invalid ID or Password. Please try again.");
+//            }
+//        });
+//
+//        // Add the login button
+//        loginPageFrame.add(loginButton);
+//
+//        // Make the frame visible
+//        loginPageFrame.setVisible(true);
+//
+//    }
     private void loginPage() {
         JFrame loginPageFrame = new JFrame("Edit Profile");
-        loginPageFrame.setSize(400, 350); // Adjusted size to fit the extra fields
+        loginPageFrame.setSize(400, 350);
         loginPageFrame.setLocationRelativeTo(null);
-        loginPageFrame.setLayout(null); // Use absolute positioning
+        loginPageFrame.setLayout(null);
 
-        // Title label centered at the top
+        // Title label
         JLabel title = new JLabel("--- Login Salesman Profile ---");
-        title.setBounds(100, 20, 200, 30);  // Manually set the bounds
+        title.setBounds(100, 20, 200, 30);
         loginPageFrame.add(title);
 
-        // ID label and input field
+        // ID field
         JLabel IDLabel = new JLabel("ID:");
         IDLabel.setBounds(50, 70, 80, 20);
         JTextField IDField = new JTextField(20);
         IDField.setBounds(150, 70, 150, 20);
 
-        // Password label and input field
+        // Password field
         JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setBounds(50, 100, 80, 20);
-        JPasswordField passwordField = new JPasswordField(20); // Use JPasswordField for password input
+        JPasswordField passwordField = new JPasswordField(20);
         passwordField.setBounds(150, 100, 150, 20);
 
         // Show password checkbox
         JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
-        showPasswordCheckbox.setBounds(150, 160, 150, 20);  // Position the checkbox below password fields
-
-        // Action listener for the checkbox to toggle password visibility
+        showPasswordCheckbox.setBounds(150, 130, 150, 20);
         showPasswordCheckbox.addActionListener(e -> {
             if (showPasswordCheckbox.isSelected()) {
-                // Set password field visibility to true
-                passwordField.setEchoChar((char) 0);  // Shows the password
-
+                passwordField.setEchoChar((char) 0);
             } else {
-                // Set password field visibility to false
-                passwordField.setEchoChar('*');  // Hides the password (default)
-
+                passwordField.setEchoChar('*');
             }
         });
 
-        loginPageFrame.add(IDLabel);
-        loginPageFrame.add(IDField);
-        loginPageFrame.add(passwordLabel);
-        loginPageFrame.add(passwordField);
-        loginPageFrame.add(showPasswordCheckbox);
-
+        // Login button
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(150, 180, 120, 30); // Set position of the button
-
-        // Show password checkbox
-        
-        showPasswordCheckbox.setBounds(150, 160, 150, 20);  // Position the checkbox below password fields
-
+        loginButton.setBounds(150, 160, 120, 30);
         loginButton.addActionListener(e -> {
             String enteredID = IDField.getText();
             String enteredPassword = String.valueOf(passwordField.getPassword());
 
-            boolean loginSuccess = false;
+            Salesman loggedInSalesman = null;
             ArrayList<Salesman> salesmanList = SalesmenList.loadSalesmanDataFromFile();
 
             for (Salesman salesman : salesmanList) {
                 if (salesman.getID().equals(enteredID) && salesman.getPassword().equals(enteredPassword)) {
-                    loginSuccess = true;
+                    loggedInSalesman = salesman;
                     break;
                 }
             }
 
-            if (loginSuccess) {
+            if (loggedInSalesman != null) {
                 JOptionPane.showMessageDialog(loginPageFrame, "Login Successful!");
                 loginPageFrame.dispose();
-                new SalesmanDashboard(); // You can open the dashboard after successful login
+                new SalesmanDashboard(loggedInSalesman); // Pass salesman to dashboard
             } else {
                 JOptionPane.showMessageDialog(loginPageFrame, "Invalid ID or Password. Please try again.");
             }
         });
 
-        // Add the login button
+        // Add components
+        loginPageFrame.add(IDLabel);
+        loginPageFrame.add(IDField);
+        loginPageFrame.add(passwordLabel);
+        loginPageFrame.add(passwordField);
+        loginPageFrame.add(showPasswordCheckbox);
         loginPageFrame.add(loginButton);
 
-        // Make the frame visible
         loginPageFrame.setVisible(true);
-
     }
 }
