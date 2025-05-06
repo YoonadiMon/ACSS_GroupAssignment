@@ -27,17 +27,20 @@ public class CustomerGUI implements ActionListener {
         frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
-
-        exitButton = new JButton("Go Back");
-        registerButton = new JButton("Register an account");
-        loginButton = new JButton("Log In");
-
-        exitButton.addActionListener(this);
+        exitButton = new JButton("\u2190");
+        exitButton.setFont(new Font("Arial Unicode MS", Font.PLAIN, 16));
         ButtonStyler.styleExitButton(exitButton);
-        registerButton.addActionListener(this);
+
+        registerButton = new JButton("Register an account");
         ButtonStyler.styleButton(registerButton);
-        loginButton.addActionListener(this);
+
+        loginButton = new JButton("Log In");
         ButtonStyler.styleButton(loginButton);
+
+        // Button actions
+        exitButton.addActionListener(this);
+        registerButton.addActionListener(this);
+        loginButton.addActionListener(this);
 
         frame.add(registerButton);
         frame.add(loginButton);
@@ -51,10 +54,10 @@ public class CustomerGUI implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == exitButton) {
-            frame.dispose();
+            frame.setVisible(false);
             new MainMenuGUI();
         } else if (e.getSource() == registerButton) {
-            frame.dispose();
+            frame.setVisible(false);
             new RegisterAccount(windowWidth, windowHeight);
         } else if (e.getSource() == loginButton) {
             System.out.println("Login functionality to be implemented");
