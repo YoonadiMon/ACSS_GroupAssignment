@@ -1,17 +1,11 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Car;
 
-import java.io.BufferedReader;
+import java.io.*;
 import java.util.ArrayList;
-import java.io.PrintWriter;
-import java.io.IOException;
-import java.io.FilterOutputStream;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 
 /**
  *
@@ -19,29 +13,28 @@ import java.io.FileWriter;
  */
 public class CarList {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
+    public static ArrayList<Car> carList = new ArrayList<>();
 
-        ArrayList<Car> carList = new ArrayList<>();
+    public static void initializeCars() {
 
         carList.add(new Car("C001", "Toyota", 10000, "available", "S001"));
         carList.add(new Car("C002", "Honda", 20000, "available", "S001"));
         carList.add(new Car("C003", "Myvi", 15000, "available", "S002"));
         carList.add(new Car("C004", "BMW", 100000, "available", "S002"));
-
-        saveCarListToFile(carList);
-
+        carList.add(new Car("C005", "Mercedes", 120000, "sold", "S001"));
+        carList.add(new Car("C007", "Hyundai", 22000, "available", "S001"));
+        carList.add(new Car("C008", "Proton", 13000, "sold", "S002"));
+        carList.add(new Car("C010", "Mazda", 27000, "available", "S002"));
+        carList.add(new Car("C012", "Ford", 24000, "sold", "S001"));
+        carList.add(new Car("C014", "Tesla", 150000, "available", "S002"));
     }
 
-    public static void saveCarListToFile(ArrayList<Car> carList) {
-        // Save to file
+    public static void saveCarListToFile() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("carList.txt"))) {
-            for (int i = 0; i < carList.size(); i++) {
-                Car car = carList.get(i);
-                writer.write(car.getCarId() + "," + car.getBrand() + "," + car.getPrice() + "," + car.getStatus() + "," + car.getSalesmanId());
-                writer.newLine(); // Move to next line
+            for (Car car : carList) {
+                writer.write(car.getCarId() + "," + car.getBrand() + "," + car.getPrice() + ","
+                        + car.getStatus() + "," + car.getSalesmanId());
+                writer.newLine();
             }
             System.out.println("Car list saved to file.");
         } catch (IOException e) {
@@ -50,7 +43,7 @@ public class CarList {
     }
 
     public static ArrayList<Car> loadCarDataFromFile() {
-        ArrayList<Car> carList = new ArrayList<>();
+        ArrayList<Car> loadedList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("carList.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -61,13 +54,39 @@ public class CarList {
                     double price = Double.parseDouble(data[2]);
                     String status = data[3];
                     String salesmanId = data[4];
-                    carList.add(new Car(carId, brand, price, status, salesmanId));
+                    loadedList.add(new Car(carId, brand, price, status, salesmanId));
                 }
             }
         } catch (IOException e) {
             System.out.println("Error loading car data.");
         }
+        return loadedList;
+    }
+
+    //  getter if you need the current list elsewhere
+    public static ArrayList<Car> getCarList() {
         return carList;
     }
 
+    public static void filterCars(String searchInput, ArrayList<Car> carList) {
+        boolean found = false;
+
+        for (Car car : carList) {
+            if (car.getCarId().equalsIgnoreCase(searchInput) || car.getBrand().equalsIgnoreCase(searchInput)|| car.getStatus().equalsIgnoreCase(searchInput)) {
+                System.out.println("Car ID: " + car.getCarId());
+                System.out.println("Brand: " + car.getBrand());
+                System.out.println("Price: " + car.getPrice());
+                System.out.println("Status: " + car.getStatus());
+                System.out.println("Salesman ID: " + car.getSalesmanId());
+                System.out.println("----------------------------------");
+                found = true;
+
+            }
+        }
+
+        if (!found) {
+            System.out.println("No car found matching input: " + searchInput);
+        }
+
+    }
 }

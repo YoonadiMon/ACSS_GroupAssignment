@@ -4,6 +4,7 @@
  */
 package Salesman;
 
+import Car.Car;
 import MainProgram.MainMenuGUI;
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +15,13 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import javax.swing.table.DefaultTableModel;
+import Car.CarList;
+import Manager.SalesmanList;
+import static Manager.SalesmanList.loadSalesmanDataFromFile;
+import static Manager.SalesmanList.salesmanList;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.ArrayList;
 
 public class SalesmanDashboard implements ActionListener {
 
@@ -133,14 +141,39 @@ public class SalesmanDashboard implements ActionListener {
         // Save changes button
         JButton saveButton = new JButton("Save Changes");
         saveButton.setBounds(150, 180, 120, 30); // Set position of the button
+
         saveButton.addActionListener(e -> {
-            // Check if the passwords match
-            if (String.valueOf(passwordField.getPassword()).equals(String.valueOf(confirmPasswordField.getPassword()))) {
-                JOptionPane.showMessageDialog(editProfileFrame, "Changes Saved!");
-                editProfileFrame.dispose();  // Close the window after saving
-            } else {
-                JOptionPane.showMessageDialog(editProfileFrame, "Passwords do not match. Please try again.");
+            String newName = nameField.getText().trim();
+            String newPassword = String.valueOf(passwordField.getPassword()).trim();
+            String confirmPassword = String.valueOf(confirmPasswordField.getPassword()).trim();
+            if (newName.isEmpty() || newPassword.isEmpty()) {
+                JOptionPane.showMessageDialog(editProfileFrame, "Name and password cannot be empty.");
+                return;
             }
+
+            if (!newPassword.equals(confirmPassword)) {
+                JOptionPane.showMessageDialog(editProfileFrame, "Passwords do not match. Please try again.");
+                return;
+            }
+
+//            ArrayList<Salesman> salesmanList = loadSalesmanDataFromFile(); // Load existing data
+            ArrayList<Salesman> updatedList = SalesmanList.loadSalesmanDataFromFile();
+
+            // Find and update current salesman
+            for (int i = 0; i < updatedList.size(); i++) {
+                if (updatedList.get(i).getID().equals(currentSalesman.ID)) {
+                    updatedList.set(i, new Salesman(currentSalesman.ID, newName, newPassword));
+                    System.out.println("Saved Edited " + currentSalesman.ID + " to file");
+                    break;
+                }
+            }
+
+            // Save updated list back to file
+//            saveEditedSalesmanDataToFile(salesmanList);
+            saveEditedSalesmanDataToFile(updatedList);
+
+            JOptionPane.showMessageDialog(editProfileFrame, "Changes Saved!");
+            editProfileFrame.dispose();
         });
 
         // Add the save button
@@ -150,45 +183,19 @@ public class SalesmanDashboard implements ActionListener {
         editProfileFrame.setVisible(true);
     }
 
-//    private void viewCarStatusWindow() {
-//        // Open new frame to show car list
-//        JFrame carListFrame = new JFrame("Cars Assigned to Salesman " + currentSalesman.ID);
-//        carListFrame.setSize(500, 400);
-//        carListFrame.setLocationRelativeTo(null);
-//        carListFrame.setLayout(new BorderLayout());
-//
-//        JTextArea carTextArea = new JTextArea();
-//        carTextArea.setEditable(false);
-//
-//        // Read from file and filter cars
-//        try (BufferedReader reader = new BufferedReader(new FileReader("carList.txt"))) {
-//            String line;
-//            boolean found = false;
-//            while ((line = reader.readLine()) != null) {
-//                String[] parts = line.split(",");
-//                if (parts.length == 5 && parts[4].equals(currentSalesman.ID)) {
-//                    found = true;
-//                    carTextArea.append("Car ID: " + parts[0]
-//                            + ", Brand: " + parts[1]
-//                            + ", Price: " + parts[2]
-//                            + ", Status: " + parts[3] + "\n");
-//                }
-//            }
-//
-//            if (!found) {
-//                carTextArea.setText("No cars assigned to Salesman ID: " + currentSalesman.ID);
-//            }
-//
-//        } catch (IOException ex) {
-//            carTextArea.setText("Error reading car list file.");
-//        }
-//
-//        JScrollPane scrollPane = new JScrollPane(carTextArea);
-//        carListFrame.add(scrollPane, BorderLayout.CENTER);
-//
-//        carListFrame.setVisible(true);
-//
-//    }
+    public static void saveEditedSalesmanDataToFile(ArrayList<Salesman> updatedList) {
+        // Save to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("salesmenList.txt"))) {
+            for (Salesman salesman : updatedList) {
+                writer.write(salesman.getID() + "," + salesman.getName() + "," + salesman.getPassword());
+                writer.newLine(); // Move to next line
+            }
+            System.out.println("Changed Salesmen data saved to file.");
+        } catch (IOException e) {
+            System.out.println("Problem with file output.");
+        }
+    }
+
     private void viewCarStatusWindow() {
         // Create new frame
         JFrame carListFrame = new JFrame("Cars Assigned to Salesman " + currentSalesman.ID);
@@ -207,26 +214,20 @@ public class SalesmanDashboard implements ActionListener {
         JTable carTable = new JTable(tableModel);
         carTable.setEnabled(false); // Read-only
 
-        // Read data from file
+        // Load and display all cars assigned to the salesman
+        ArrayList<Car> allCars = CarList.loadCarDataFromFile();
         boolean found = false;
-        try (BufferedReader reader = new BufferedReader(new FileReader("carList.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 5 && parts[4].equals(currentSalesman.ID)) {
-                    found = true;
-                    tableModel.addRow(new Object[]{parts[0], parts[1], parts[2], parts[3]});
-                }
+        for (Car car : allCars) {
+            if (car.getSalesmanId().equals(currentSalesman.ID)) {
+                tableModel.addRow(new Object[]{car.getCarId(), car.getBrand(), car.getPrice(), car.getStatus()});
+                found = true;
             }
-            if (!found) {
-                JOptionPane.showMessageDialog(carListFrame,
-                        "No cars assigned to Salesman ID: " + currentSalesman.ID,
-                        "Info", JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (IOException ex) {
+        }
+
+        if (!found) {
             JOptionPane.showMessageDialog(carListFrame,
-                    "Error reading car list file.",
-                    "File Error", JOptionPane.ERROR_MESSAGE);
+                    "No cars assigned to Salesman ID: " + currentSalesman.ID,
+                    "Info", JOptionPane.INFORMATION_MESSAGE);
         }
 
         // Add table in scroll pane
@@ -234,6 +235,54 @@ public class SalesmanDashboard implements ActionListener {
         scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         carListFrame.add(scrollPane, BorderLayout.CENTER);
+
+        // Search bar and button
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        JLabel searchLabel = new JLabel("Search:");
+        JTextField searchField = new JTextField(20);
+        JButton searchButton = new JButton("Search");
+        searchPanel.add(searchLabel);
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        carListFrame.add(searchPanel, BorderLayout.BEFORE_FIRST_LINE);
+
+        // Search button action
+        searchButton.addActionListener(e -> {
+            String searchInput = searchField.getText().trim();
+            if (!searchInput.isEmpty()) {
+                ArrayList<Car> carList = CarList.loadCarDataFromFile();
+                ArrayList<Car> filteredCars = new ArrayList<>();
+
+                for (Car car : carList) {
+                    if (car.getSalesmanId().equals(currentSalesman.ID)
+                            && ((car.getCarId().equalsIgnoreCase(searchInput)
+                            || car.getBrand().equalsIgnoreCase(searchInput))
+                            || car.getStatus().equalsIgnoreCase(searchInput))) {
+                        filteredCars.add(car);
+                    }
+                }
+
+                // Clear existing rows
+                tableModel.setRowCount(0);
+
+                if (!filteredCars.isEmpty()) {
+                    for (Car car : filteredCars) {
+                        tableModel.addRow(new Object[]{
+                            car.getCarId(), car.getBrand(), car.getPrice(), car.getStatus()
+                        });
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(carListFrame,
+                            "No matching car found for input: " + searchInput,
+                            "Search Result", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(carListFrame,
+                        "Please enter a Car ID or Brand or status to search.",
+                        "Search Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         // Close button
         JButton closeButton = new JButton("Close");
