@@ -7,11 +7,12 @@ import java.util.Scanner;
 
 public class CustomerDataIO {
     public static ArrayList<Customer> allCustomers = new ArrayList<Customer>();
-    private static final String FILE_NAME = "CustomersTxtFile.txt";
+    private static final String FILE_NAME = "CustomersList.txt";
     public static void writeCustomer(){
         try(PrintWriter writer = new PrintWriter(FILE_NAME);){
             for (Customer customer : allCustomers){
-                writer.print(customer.name + ",");
+                writer.print(customer.username + ",");
+                writer.print(customer.email + ",");
                 writer.println(customer.password);
             }
         }catch(Exception e){
@@ -32,7 +33,7 @@ public class CustomerDataIO {
     }
     public static Customer searchName(String name){
         for(Customer customer : allCustomers){
-            if(name.equals(customer.name)){
+            if(name.equals(customer.username)){
                 return customer;
             }
         }

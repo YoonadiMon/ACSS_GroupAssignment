@@ -77,23 +77,36 @@ class RegisterAccount implements ActionListener, KeyListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == sbmtBtn) {
-            String password = new String(passwordTF.getPassword());
-            String confirmPassword = new String(confirmPasswordTF.getPassword());
+        try {
+            if (e.getSource() == sbmtBtn) {
+                String username = usernameTF.getText();
+                String email = emailTF.getText();
+                String password = new String(passwordTF.getPassword());
+                String confirmPassword = new String(confirmPasswordTF.getPassword());
+                if(CustomerDataIO.searchName(username) != null){
+                    JOptionPane.showMessageDialog(frame, "Username already exists!");
+                }
+                else {
+                    if (password.equals(confirmPassword)) {
+                        CustomerDataIO.allCustomers.add(new Customer(username, email, password));
+                        CustomerDataIO.writeCustomer();
+                        JOptionPane.showMessageDialog(frame, "Account has been added! Waiting for approval.");
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Passwords do not match!", "Password Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
 
-            if (password.equals(confirmPassword)) {
-                System.out.println("Username: " + usernameTF.getText());
-                System.out.println("Email: " + emailTF.getText());
-                System.out.println("Password: " + password);
-                // Here you would typically save the user data
-            } else {
-                JOptionPane.showMessageDialog(frame, "Passwords do not match!", "Password Error", JOptionPane.ERROR_MESSAGE);
+            } else if (e.getSource() == resetBtn) {
+                usernameTF.setText("");
+                emailTF.setText("");
+                passwordTF.setText("");
+                confirmPasswordTF.setText("");
             }
-        } else if (e.getSource() == resetBtn) {
-            usernameTF.setText("");
-            emailTF.setText("");
-            passwordTF.setText("");
         }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame,"Invalid input!");
+        }
+
     }
 
     @Override
@@ -109,6 +122,8 @@ class RegisterAccount implements ActionListener, KeyListener {
             } else if (e.getSource() == emailTF) {
                 passwordTF.requestFocusInWindow();
             } else if (e.getSource() == passwordTF) {
+                confirmPasswordTF.requestFocusInWindow();
+            } else if (e.getSource() == confirmPasswordLbl) {
                 sbmtBtn.requestFocusInWindow();
             }
         }
