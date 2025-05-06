@@ -15,13 +15,25 @@ import java.awt.event.WindowEvent;
 public class MainMenuGUI implements ActionListener {
     JFrame x;
     JButton customerButton, managerButton, salesmanButton, exitButton;
+    JLabel welcomeTxt, roleTxt;
     private static final String ADMIN_PASSWORD = "admin123"; // Change this to your desired password
 
     public MainMenuGUI() {
         x = new JFrame("--- Main Program ---");
-        x.setSize(400, 250);
+        x.setSize(500, 300);
         x.setLocationRelativeTo(null); // Center the frame
-        x.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20)); // Use FlowLayout for button arrangement
+        x.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15)); // Use FlowLayout for button arrangement
+
+        // Welcome Message
+        welcomeTxt = new JLabel("Welcome to APU Car Sales System");
+        welcomeTxt.setFont(new Font("Arial", Font.BOLD, 20));
+        welcomeTxt.setHorizontalAlignment(JLabel.CENTER);
+
+        // Select Role Message
+        roleTxt = new JLabel("Please select your role.");
+        roleTxt.setFont(new Font("Arial", Font.PLAIN, 14));
+        roleTxt.setHorizontalAlignment(JLabel.CENTER);
+        roleTxt.setForeground(new Color(150, 150, 150));
 
         // Create buttons for menu options
         exitButton = new JButton("Exit");
@@ -40,15 +52,14 @@ public class MainMenuGUI implements ActionListener {
         ButtonStyler.styleExitButton(exitButton);
 
         // Create a JPanel for the top buttons using FlowLayout
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-        topPanel.add(customerButton);
-        topPanel.add(managerButton);
-        topPanel.add(salesmanButton);
+        JPanel centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 30));
+        centerPanel.add(customerButton);
+        centerPanel.add(managerButton);
+        centerPanel.add(salesmanButton);
 
-        // Add the top panel to the CENTER of BorderLayout
-        x.add(topPanel, BorderLayout.CENTER);
-
-        // Add the exit button to the SOUTH of BorderLayout
+        x.add(welcomeTxt);
+        x.add(roleTxt);
+        x.add(centerPanel, BorderLayout.CENTER);
         x.add(exitButton, BorderLayout.SOUTH);
 
         // Add window listener for the close button (X)

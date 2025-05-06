@@ -57,7 +57,7 @@ class RegisterAccount implements ActionListener, KeyListener {
 
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-        sbmtBtn = new JButton("Submit");
+        sbmtBtn = new JButton("Register");
         ButtonStyler.stylePrimaryButton(sbmtBtn);
         resetBtn = new JButton("Reset");
         ButtonStyler.styleButton(resetBtn);

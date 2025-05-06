@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 public class CustomerGUI implements ActionListener {
     private JFrame frame;
     private JButton registerButton, loginButton, exitButton;
+    private JLabel welcomeTxt;
     private int windowWidth, windowHeight;
 
     public static void main(String[] Args) {
@@ -23,11 +24,17 @@ public class CustomerGUI implements ActionListener {
         windowHeight = height;
 
         // Create the frame
-        frame = new JFrame("Customer's Features");
+        frame = new JFrame("CUSTOMER");
         frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
-        exitButton = new JButton("\u2190");
+
+        // Welcome message
+        welcomeTxt = new JLabel("Welcome Customer!");
+        welcomeTxt.setFont(new Font("Arial", Font.BOLD, 20));
+        welcomeTxt.setHorizontalAlignment(JLabel.CENTER);
+
+        exitButton = new JButton("BACK");
         exitButton.setFont(new Font("Arial Unicode MS", Font.PLAIN, 16));
         ButtonStyler.styleExitButton(exitButton);
 
@@ -42,6 +49,7 @@ public class CustomerGUI implements ActionListener {
         registerButton.addActionListener(this);
         loginButton.addActionListener(this);
 
+        frame.add(welcomeTxt);
         frame.add(registerButton);
         frame.add(loginButton);
         frame.add(exitButton);
