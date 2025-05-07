@@ -68,9 +68,10 @@ public class SalesmanDashboard implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == editProfileButton) {
+            frame.dispose();
             openEditProfileWindow();
         } else if (e.getSource() == viewCarsButton) {
-//            JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
+            frame.dispose();
             viewCarStatusWindow();
         } else if (e.getSource() == updateCarStatusButton) {
             JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
@@ -140,7 +141,7 @@ public class SalesmanDashboard implements ActionListener {
 
         // Save changes button
         JButton saveButton = new JButton("Save Changes");
-        saveButton.setBounds(150, 180, 120, 30); // Set position of the button
+        saveButton.setBounds(80, 200, 110, 30); // Set position of the button
 
         saveButton.addActionListener(e -> {
             String newName = nameField.getText().trim();
@@ -178,6 +179,11 @@ public class SalesmanDashboard implements ActionListener {
 
         // Add the save button
         editProfileFrame.add(saveButton);
+        
+        JButton closeButton = new JButton("Go Back");
+        closeButton.setBounds(210, 200, 90, 30);
+        closeButton.addActionListener(e ->{ editProfileFrame.dispose(); new SalesmanDashboard(currentSalesman);});
+        editProfileFrame.add(closeButton);
 
         // Make the frame visible
         editProfileFrame.setVisible(true);
@@ -285,8 +291,8 @@ public class SalesmanDashboard implements ActionListener {
         });
 
         // Close button
-        JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> carListFrame.dispose());
+        JButton closeButton = new JButton("Go Back");
+        closeButton.addActionListener(e -> {carListFrame.dispose();new SalesmanDashboard(currentSalesman);});
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         buttonPanel.add(closeButton);

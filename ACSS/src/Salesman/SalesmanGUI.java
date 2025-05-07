@@ -65,12 +65,13 @@ public class SalesmanGUI implements ActionListener {
         } else if (e.getSource() == loginButton) {
             frame.dispose();
             loginPage(); // Open the login page instead of directly opening dashboard
-//            new SalesmanDashboard();  // Open Dashboard after login
+
         }
 
     }
 
     private void loginPage() {
+        FlowLayout layout = new FlowLayout(FlowLayout.CENTER);
         JFrame loginPageFrame = new JFrame("Edit Profile");
         loginPageFrame.setSize(400, 350);
         loginPageFrame.setLocationRelativeTo(null);
@@ -105,8 +106,9 @@ public class SalesmanGUI implements ActionListener {
         });
 
         // Login button
+        
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(150, 160, 120, 30);
+        loginButton.setBounds(100, 160, 90, 30);
         loginButton.addActionListener(e -> {
             String enteredID = IDField.getText();
             String enteredPassword = String.valueOf(passwordField.getPassword());
@@ -137,6 +139,13 @@ public class SalesmanGUI implements ActionListener {
         loginPageFrame.add(passwordField);
         loginPageFrame.add(showPasswordCheckbox);
         loginPageFrame.add(loginButton);
+
+//       close button
+        
+        JButton closeButton = new JButton("Go Back");
+        closeButton.setBounds(200, 160, 90, 30);
+        closeButton.addActionListener(e ->{ loginPageFrame.dispose(); new MainMenuGUI();});
+        loginPageFrame.add(closeButton);
 
         loginPageFrame.setVisible(true);
     }
