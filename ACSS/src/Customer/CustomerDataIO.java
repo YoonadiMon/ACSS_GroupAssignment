@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class CustomerDataIO {
     public static ArrayList<Customer> allCustomers = new ArrayList<Customer>();
@@ -12,10 +13,11 @@ public class CustomerDataIO {
     public static void writeCustomer() {
         try (PrintWriter writer = new PrintWriter(FILE_NAME)) {
             for (Customer customer : allCustomers){
+                writer.print(customer.getCustomerId() + ",");  // Write customer ID first
                 writer.print(customer.getUsername() + ",");
                 writer.print(customer.getEmail() + ",");
                 writer.print(customer.getPassword() + ",");
-                writer.println(customer.isApproved()); // Add approval status to file
+                writer.println(customer.isApproved());
             }
         } catch(Exception e) {
             System.out.printf("Error writing to %s file: %s", FILE_NAME, e.getMessage());
@@ -29,18 +31,18 @@ public class CustomerDataIO {
                 String line = s.nextLine();
                 String[] parts = line.split(",");
 
-                if (parts.length >= 3) {
-                    String username = parts[0];
-                    String email = parts[1];
-                    String password = parts[2];
+                if (parts.length >= 4) {
+                    String customerId = parts[0];
+                    String username = parts[1];
+                    String email = parts[2];
+                    String password = parts[3];
 
-                    // Handle approval status - default to false if not in file (for backward compatibility)
                     boolean isApproved = false;
-                    if (parts.length >= 4) {
-                        isApproved = Boolean.parseBoolean(parts[3]);
+                    if (parts.length >= 5) {
+                        isApproved = Boolean.parseBoolean(parts[4]);
                     }
 
-                    Customer customer = new Customer(username, email, password, isApproved);
+                    Customer customer = new Customer(customerId, username, email, password, isApproved);
                     allCustomers.add(customer);
                 }
             }
@@ -52,6 +54,15 @@ public class CustomerDataIO {
                 directory.mkdirs();
             }
         }
+    }
+
+    public static Customer searchId(String customerId) {
+        for(Customer customer : allCustomers) {
+            if(customerId.equals(customer.getCustomerId())) {
+                return customer;
+            }
+        }
+        return null;
     }
 
     public static Customer searchName(String name) {
@@ -97,5 +108,10 @@ public class CustomerDataIO {
         }
 
         return customer != null && customer.isApproved();
+    }
+
+    // Generate a unique customer ID
+    public static String generateCustomerId() {
+        return UUID.randomUUID().toString().substring(0, 8);
     }
 }

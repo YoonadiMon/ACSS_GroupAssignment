@@ -7,11 +7,11 @@ public class CustomerDashboard {
     private JFrame frame;
     private Customer customer;
 
-    public CustomerDashboard(Customer customer, int width, int height) {
+    public CustomerDashboard(Customer customer) {
         this.customer = customer;
 
         frame = new JFrame("Customer Dashboard");
-        frame.setSize(width, height);
+        frame.setSize(600, 600);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -47,7 +47,7 @@ public class CustomerDashboard {
 
         logoutButton.addActionListener(e -> {
             frame.dispose();
-            new CustomerGUI();
+            new CustomerLandingGUI();
         });
 
         // Add components to main panel

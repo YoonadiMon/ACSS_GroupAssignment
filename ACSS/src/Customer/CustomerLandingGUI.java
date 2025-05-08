@@ -3,6 +3,7 @@ package Customer;
 import MainProgram.MainMenuGUI;
 import Utils.ButtonStyler;
 import Utils.WindowNav;
+import Utils.CustomerDataValidator;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,7 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class CustomerGUI implements ActionListener, KeyListener {
+public class CustomerLandingGUI implements ActionListener, KeyListener {
     private JFrame frame;
     private JPanel cards;
     private CardLayout cardLayout;
@@ -34,11 +35,11 @@ public class CustomerGUI implements ActionListener, KeyListener {
         CustomerDataIO.readCustomer();
 
         SwingUtilities.invokeLater(() -> {
-            new CustomerGUI();
+            new CustomerLandingGUI();
         });
     }
 
-    public CustomerGUI() {
+    public CustomerLandingGUI() {
         frame = new JFrame("Customer Account");
         frame.setSize(400, 550);
         frame.setLocationRelativeTo(null);
@@ -139,7 +140,6 @@ public class CustomerGUI implements ActionListener, KeyListener {
         // Login button
         loginBtn = new JButton("Login");
         ButtonStyler.stylePrimaryButton(loginBtn);
-        loginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         loginBtn.addActionListener(this);
 
         // Back button
@@ -150,6 +150,8 @@ public class CustomerGUI implements ActionListener, KeyListener {
 
         bottomPanel.add(backToMainBtn);
         bottomPanel.add(loginBtn);
+        bottomPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        bottomPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
 
         // Show password checkbox
         JCheckBox showPasswordCheckBox = new JCheckBox(" Show Password");
@@ -197,7 +199,7 @@ public class CustomerGUI implements ActionListener, KeyListener {
         loginPanel.add(forgotPasswordLbl);
         loginPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         loginPanel.add(registerTextPanel);
-        loginPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        loginPanel.add(Box.createRigidArea(new Dimension(0, 0)));
         loginPanel.add(showPasswordCheckBox);
         loginPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         loginPanel.add(bottomPanel);
@@ -290,6 +292,8 @@ public class CustomerGUI implements ActionListener, KeyListener {
 
         bottomPanel.add(backToMainFromRegisterBtn);
         bottomPanel.add(registerBtn);
+        bottomPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        bottomPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
 
         // Add action listeners
         loginTabBtn.addActionListener(e -> cardLayout.show(cards, "login"));
@@ -355,9 +359,8 @@ public class CustomerGUI implements ActionListener, KeyListener {
                     // Check if customer is approved
                     if (customer.isApproved()) {
                         JOptionPane.showMessageDialog(frame, "Login successful!");
-                        // Navigate to customer dashboard
                         frame.dispose();
-                        new CustomerDashboard(customer, windowWidth, windowHeight);
+                        new CustomerDashboard(customer);
                     } else {
                         JOptionPane.showMessageDialog(frame,
                                 "Your account is pending approval by admin. Please try again later.",
@@ -388,6 +391,12 @@ public class CustomerGUI implements ActionListener, KeyListener {
                     JOptionPane.showMessageDialog(frame, "Username already taken!", "Register Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!password.equals(confirmPassword)) {
                     JOptionPane.showMessageDialog(frame, "Passwords do not match!", "Password Error", JOptionPane.ERROR_MESSAGE);
+                } else if (!CustomerDataValidator.isValidEmail(email)) {
+                    JOptionPane.showMessageDialog(frame, "Email is not valid!", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
+                } else if (!CustomerDataValidator.isValidPassword(password)){
+                    JOptionPane.showMessageDialog(frame, "Passwords is not valid! (At least 8 characters containing one uppercase letter)", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
+                } else if (!CustomerDataValidator.isValidUsername(username)) {
+                    JOptionPane.showMessageDialog(frame, "Username is not valid! (At least 3 characters. Must not contain any special characters except underscore)", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
                 } else {
                     // Register the new customer with approval status set to false by default
                     Customer newCustomer = new Customer(username, email, password);
@@ -419,7 +428,7 @@ public class CustomerGUI implements ActionListener, KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        // Not needed
+        // Nothing's here
     }
 
     @Override
@@ -443,6 +452,6 @@ public class CustomerGUI implements ActionListener, KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        // Not needed
+        // Nothing's here
     }
 }
