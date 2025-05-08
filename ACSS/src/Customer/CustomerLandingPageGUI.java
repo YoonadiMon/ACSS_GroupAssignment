@@ -1,6 +1,5 @@
 package Customer;
 
-import MainProgram.MainMenuGUI;
 import Utils.ButtonStyler;
 import Utils.WindowNav;
 
@@ -72,7 +71,7 @@ class RegisterAccount implements ActionListener, KeyListener {
         frame.add(contentPanel, BorderLayout.CENTER);
         frame.add(buttonPanel, BorderLayout.SOUTH);
 
-        WindowNav.setCloseOperation(frame, () -> new CustomerGUI(width, height));
+        WindowNav.setCloseOperation(frame, () -> new CustomerGUI());
         frame.setVisible(true);
     }
     @Override

@@ -90,7 +90,7 @@ public class MainMenuGUI implements ActionListener {
             verifyAdminPassword();
         } else if (e.getSource() == customerButton) {
             x.setVisible(false);
-            new CustomerGUI(x.getWidth(), x.getHeight());
+            new CustomerGUI();
         } else if (e.getSource() == managerButton) {
             x.setVisible(false);
             new Manager();
