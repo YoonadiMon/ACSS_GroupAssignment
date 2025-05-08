@@ -389,14 +389,14 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                     JOptionPane.showMessageDialog(frame, "Email already registered!", "Register Error", JOptionPane.ERROR_MESSAGE);
                 } else if (CustomerDataIO.searchName(username) != null) {
                     JOptionPane.showMessageDialog(frame, "Username already taken!", "Register Error", JOptionPane.ERROR_MESSAGE);
-                } else if (!password.equals(confirmPassword)) {
-                    JOptionPane.showMessageDialog(frame, "Passwords do not match!", "Password Error", JOptionPane.ERROR_MESSAGE);
+                } else if (!CustomerDataValidator.isValidUsername(username)) {
+                    JOptionPane.showMessageDialog(frame, "Username is not valid! (At least 3 characters. Must not contain any special characters except underscore)", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidEmail(email)) {
                     JOptionPane.showMessageDialog(frame, "Email is not valid!", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidPassword(password)){
                     JOptionPane.showMessageDialog(frame, "Passwords is not valid! (At least 8 characters containing one uppercase letter)", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
-                } else if (!CustomerDataValidator.isValidUsername(username)) {
-                    JOptionPane.showMessageDialog(frame, "Username is not valid! (At least 3 characters. Must not contain any special characters except underscore)", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
+                } else if (!password.equals(confirmPassword)) {
+                    JOptionPane.showMessageDialog(frame, "Passwords do not match!", "Password Error", JOptionPane.ERROR_MESSAGE);
                 } else {
                     // Register the new customer with approval status set to false by default
                     Customer newCustomer = new Customer(username, email, password);
