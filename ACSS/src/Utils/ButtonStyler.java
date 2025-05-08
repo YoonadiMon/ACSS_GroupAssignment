@@ -7,8 +7,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class ButtonStyler {
-
-    // Helper method to add hover effect to a button
     private static void addHoverEffect(JButton button, Color normalBg, Color hoverBg) {
         button.addMouseListener(new MouseAdapter() {
             @Override
@@ -46,15 +44,17 @@ public class ButtonStyler {
     public static void stylePrimaryButton(JButton button) {
         Font buttonFont = new Font("Arial", Font.BOLD, 16);
         Color foregroundColor = Color.WHITE;
-        Color backgroundColor = new Color(0, 123, 255); // Primary Blue
+        Color backgroundColor = new Color(0, 84, 159);
         Color hoverBackgroundColor = new Color(0, 100, 210); // Darker blue for hover
-        Border border = BorderFactory.createEmptyBorder(12, 25, 12, 25);
+        Border border = BorderFactory.createEmptyBorder(10, 0, 10, 0);
 
         button.setFont(buttonFont);
         button.setForeground(foregroundColor);
         button.setBackground(backgroundColor);
         button.setBorder(border);
         button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         button.setOpaque(true);
 
         addHoverEffect(button, backgroundColor, hoverBackgroundColor);
@@ -72,6 +72,7 @@ public class ButtonStyler {
         button.setBackground(backgroundColor);
         button.setBorder(border);
         button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setOpaque(true);
 
         addHoverEffect(button, backgroundColor, hoverBackgroundColor);

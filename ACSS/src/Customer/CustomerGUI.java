@@ -26,8 +26,8 @@ public class CustomerGUI implements ActionListener, KeyListener {
     private JLabel forgotPasswordLbl;
 
     // Colors
-    private final Color PRIMARY_COLOR = new Color(0, 84, 159); // Dark blue color from the image
-    private final Color LIGHT_TEXT_COLOR = new Color(111, 143, 175); // Light blue for links
+    private final Color PRIMARY_COLOR = new Color(0, 84, 159);
+    private final Color LIGHT_TEXT_COLOR = new Color(111, 143, 175);
 
     public static void main(String[] args) {
         // Load customer data
@@ -84,9 +84,11 @@ public class CustomerGUI implements ActionListener, KeyListener {
         tabPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         // Username or Email field
-        JLabel userOrEmailLabel = new JLabel("Username or Email Address");
+        JLabel userOrEmailLabel = new JLabel("Username or Email Address: ");
         userOrEmailLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         userOrEmailLabel.setForeground(Color.GRAY);
+        userOrEmailLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         loginUserOrEmailTF = new JTextField();
         loginUserOrEmailTF.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
@@ -95,14 +97,18 @@ public class CustomerGUI implements ActionListener, KeyListener {
         loginUserOrEmailTF.addKeyListener(this);
 
         // Password field
-        JLabel passwordLabel = new JLabel("Password");
+        JLabel passwordLabel = new JLabel("Password: ");
         passwordLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         passwordLabel.setForeground(Color.GRAY);
+        passwordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         loginPasswordTF = new JPasswordField();
         loginPasswordTF.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         loginPasswordTF.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        loginPasswordTF.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         loginPasswordTF.addKeyListener(this);
 
         // Forgot password link
@@ -110,36 +116,56 @@ public class CustomerGUI implements ActionListener, KeyListener {
         forgotPasswordLbl.setFont(new Font("Arial", Font.PLAIN, 12));
         forgotPasswordLbl.setForeground(LIGHT_TEXT_COLOR);
         forgotPasswordLbl.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        forgotPasswordLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Login button
-        loginBtn = new JButton("Login");
-        loginBtn.setBackground(PRIMARY_COLOR);
-        loginBtn.setForeground(Color.WHITE);
-        loginBtn.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        loginBtn.setFocusPainted(false);
-        loginBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        loginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        loginBtn.addActionListener(this);
 
         // Not a member text
         JPanel registerTextPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         registerTextPanel.setBackground(Color.WHITE);
+        registerTextPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         JLabel notMemberLabel = new JLabel("Not a member?");
         notMemberLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+
         JLabel registerNowLabel = new JLabel("Register now");
         registerNowLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         registerNowLabel.setForeground(LIGHT_TEXT_COLOR);
         registerNowLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
         registerTextPanel.add(notMemberLabel);
         registerTextPanel.add(registerNowLabel);
 
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        // Login button
+        loginBtn = new JButton("Login");
+        ButtonStyler.stylePrimaryButton(loginBtn);
+        loginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        loginBtn.addActionListener(this);
+
         // Back button
         backToMainBtn = new JButton("BACK");
-        backToMainBtn.setFont(new Font("Arial Unicode MS", Font.PLAIN, 12));
-        ButtonStyler.styleExitButton(backToMainBtn);
         backToMainBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        backToMainBtn.setMaximumSize(new Dimension(100, 30));
+        ButtonStyler.styleExitButton(backToMainBtn);
         backToMainBtn.addActionListener(this);
+
+        bottomPanel.add(backToMainBtn);
+        bottomPanel.add(loginBtn);
+
+        // Show password checkbox
+        JCheckBox showPasswordCheckBox = new JCheckBox(" Show Password");
+        showPasswordCheckBox.setBackground(Color.WHITE);
+        showPasswordCheckBox.setFont(new Font("Arial", Font.PLAIN, 14));
+        showPasswordCheckBox.setFocusable(false);
+        showPasswordCheckBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+        showPasswordCheckBox.addActionListener(e -> {
+            if (showPasswordCheckBox.isSelected()) {
+                loginPasswordTF.setEchoChar((char) 0);
+            } else {
+                loginPasswordTF.setEchoChar('\u2022');
+            }
+        });
+
+
 
         // Add action listeners
         switchToRegisterBtn.addActionListener(this);
@@ -167,14 +193,14 @@ public class CustomerGUI implements ActionListener, KeyListener {
         loginPanel.add(passwordLabel);
         loginPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         loginPanel.add(loginPasswordTF);
-        loginPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        loginPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         loginPanel.add(forgotPasswordLbl);
         loginPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        loginPanel.add(loginBtn);
-        loginPanel.add(Box.createRigidArea(new Dimension(0, 15)));
         loginPanel.add(registerTextPanel);
         loginPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        loginPanel.add(backToMainBtn);
+        loginPanel.add(showPasswordCheckBox);
+        loginPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        loginPanel.add(bottomPanel);
     }
 
     private void createRegisterPanel() {
@@ -198,9 +224,11 @@ public class CustomerGUI implements ActionListener, KeyListener {
         tabPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         // Username field
-        JLabel usernameLabel = new JLabel("Username");
+        JLabel usernameLabel = new JLabel("Username: ");
         usernameLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         usernameLabel.setForeground(Color.GRAY);
+        usernameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         registerUsernameTF = new JTextField();
         registerUsernameTF.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
@@ -209,9 +237,11 @@ public class CustomerGUI implements ActionListener, KeyListener {
         registerUsernameTF.addKeyListener(this);
 
         // Email field
-        JLabel emailLabel = new JLabel("Email Address");
+        JLabel emailLabel = new JLabel("Email Address: ");
         emailLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         emailLabel.setForeground(Color.GRAY);
+        emailLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         registerEmailTF = new JTextField();
         registerEmailTF.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
@@ -220,9 +250,11 @@ public class CustomerGUI implements ActionListener, KeyListener {
         registerEmailTF.addKeyListener(this);
 
         // Password field
-        JLabel passwordLabel = new JLabel("Password");
+        JLabel passwordLabel = new JLabel("Password: ");
         passwordLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         passwordLabel.setForeground(Color.GRAY);
+        passwordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         registerPasswordTF = new JPasswordField();
         registerPasswordTF.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
@@ -231,9 +263,11 @@ public class CustomerGUI implements ActionListener, KeyListener {
         registerPasswordTF.addKeyListener(this);
 
         // Confirm Password field
-        JLabel confirmPasswordLabel = new JLabel("Confirm password");
+        JLabel confirmPasswordLabel = new JLabel("Confirm password: ");
         confirmPasswordLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         confirmPasswordLabel.setForeground(Color.GRAY);
+        confirmPasswordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         confirmPasswordTF = new JPasswordField();
         confirmPasswordTF.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
@@ -241,23 +275,21 @@ public class CustomerGUI implements ActionListener, KeyListener {
         confirmPasswordTF.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         confirmPasswordTF.addKeyListener(this);
 
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         // Register button
         registerBtn = new JButton("Register");
-        registerBtn.setBackground(PRIMARY_COLOR);
-        registerBtn.setForeground(Color.WHITE);
-        registerBtn.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        registerBtn.setFocusPainted(false);
-        registerBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        registerBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        ButtonStyler.stylePrimaryButton(registerBtn);
         registerBtn.addActionListener(this);
 
         // Back button
         backToMainFromRegisterBtn = new JButton("BACK");
-        backToMainFromRegisterBtn.setFont(new Font("Arial Unicode MS", Font.PLAIN, 12));
         ButtonStyler.styleExitButton(backToMainFromRegisterBtn);
         backToMainFromRegisterBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        backToMainFromRegisterBtn.setMaximumSize(new Dimension(100, 30));
         backToMainFromRegisterBtn.addActionListener(this);
+
+
+        bottomPanel.add(backToMainFromRegisterBtn);
+        bottomPanel.add(registerBtn);
 
         // Add action listeners
         loginTabBtn.addActionListener(e -> cardLayout.show(cards, "login"));
@@ -283,9 +315,7 @@ public class CustomerGUI implements ActionListener, KeyListener {
         registerPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         registerPanel.add(confirmPasswordTF);
         registerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        registerPanel.add(registerBtn);
-        registerPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        registerPanel.add(backToMainFromRegisterBtn);
+        registerPanel.add(bottomPanel);
     }
 
     private JButton createTabButton(String text, boolean isActive) {
