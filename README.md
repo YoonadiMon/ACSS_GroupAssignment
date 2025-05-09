@@ -2,6 +2,12 @@
 
 This section lists the contributions of each contributor to the repository.
 
+## Sections
+
+### Customer
+### Managing Staff
+### Salesman
+
 ## Contributions
 
 - **[YoonadiMon](https://github.com/YoonadiMon)**: 14 commits
