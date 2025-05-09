@@ -4,9 +4,9 @@ This section lists the contributions of each contributor to the repository.
 
 ## Sections
 
-### Customer
-### Managing Staff
-### Salesman
+### Customer      : **[YoonadiMon](https://github.com/YoonadiMon)**
+### Salesman      : **[Emma031506](https://github.com/Emma031506)**
+### Managing Staff: **[felikhan](https://github.com/felikhan)**
 
 ## Contributions
 
