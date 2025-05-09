@@ -12,11 +12,11 @@ import java.util.ArrayList;
  */
 public class Car {
 
-    String carId;
-    String brand;
-    double price;
-    String status; // available / booked / paid / cancel
-    String salesmanId; // the ID of the salesman responsible for this car
+    private String carId;
+    private String brand;
+    private double price;
+    private String status; // available / booked / paid / cancel
+    private String salesmanId; // the ID of the salesman responsible for this car
 
     public Car(String carId, String brand, double price, String status, String salesmanId) {
         this.carId = carId;

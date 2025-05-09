@@ -16,8 +16,9 @@ public class CarMain {
     public static void main(String[] args) {
         CarList.initializeCars();
         CarList.saveCarListToFile();
-        
-        
+
+        CarRequest.saveInitialCarRequestsToFile();
+
     }
-    
+
 }
