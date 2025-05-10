@@ -82,7 +82,8 @@ public class SalesmanDashboard implements ActionListener {
             frame.dispose();
             viewCarRequestWindow();
         } else if (e.getSource() == updateCarStatusButton) {
-            JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
+            frame.dispose();
+            updateCarStatusWindow();
         } else if (e.getSource() == recordSalesHistory) {
             JOptionPane.showMessageDialog(frame, "Car status functionality to be implemented!");
         } else if (e.getSource() == logoutButton) {
@@ -430,6 +431,140 @@ public class SalesmanDashboard implements ActionListener {
 
         // Display the window
         requestFrame.setVisible(true);
+    }
+
+    public void updateCarStatusWindow() {
+        JFrame updateFrame = new JFrame("Update Car Status");
+        updateFrame.setSize(600, 400);
+        updateFrame.setLocationRelativeTo(null);
+        updateFrame.setLayout(new BorderLayout(10, 10));
+
+        // Title label
+        JLabel titleLabel = new JLabel("All Car Requests", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        updateFrame.add(titleLabel, BorderLayout.NORTH);
+
+        // Table with only Customer ID and Car ID
+        DefaultTableModel tableModel = new DefaultTableModel(
+                new Object[]{"Customer ID", "Car ID"}, 0
+        );
+        JTable requestTable = new JTable(tableModel);
+        requestTable.setEnabled(false);
+        JScrollPane scrollPane = new JScrollPane(requestTable);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        updateFrame.add(scrollPane, BorderLayout.CENTER);
+
+        // Search bar and button
+        JTextField searchField = new JTextField(20);
+        JButton searchButton = new JButton("Search");
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        searchPanel.add(new JLabel("Search (Customer ID / Car ID):"));
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        updateFrame.add(searchPanel, BorderLayout.BEFORE_FIRST_LINE);
+
+        // Input field and approve/reject buttons
+        JTextField carIDField = new JTextField(15);
+        JButton approveBtn = new JButton("Approve");
+        JButton rejectBtn = new JButton("Reject");
+
+        JPanel inputPanel = new JPanel(new FlowLayout());
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        inputPanel.add(new JLabel("Enter Car ID:"));
+        inputPanel.add(carIDField);
+        inputPanel.add(approveBtn);
+        inputPanel.add(rejectBtn);
+        updateFrame.add(inputPanel, BorderLayout.SOUTH);
+
+        // Load all requests
+        Runnable loadAllRequests = () -> {
+            tableModel.setRowCount(0); // Clear table
+            ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+            for (CarRequest req : requests) {
+                if (req.getSalesmanID().equals(currentSalesman.ID)) {
+                    tableModel.addRow(new Object[]{
+                        req.getCustomerID(),
+                        req.getCarID()
+                    });
+                }
+            }
+        };
+        loadAllRequests.run();
+
+        // Search logic
+        searchButton.addActionListener(e -> {
+            String searchInput = searchField.getText().trim();
+            if (!searchInput.isEmpty()) {
+                ArrayList<CarRequest> requestList = CarRequest.loadCarRequestDataFromFile();
+                ArrayList<CarRequest> filteredRequests = new ArrayList<>();
+
+                for (CarRequest req : requestList) {
+                    if (req.getSalesmanID().equals(currentSalesman.ID)
+                            && (req.getCustomerID().equalsIgnoreCase(searchInput)
+                            || req.getCarID().equalsIgnoreCase(searchInput))) {
+                        filteredRequests.add(req);
+                    }
+                }
+
+                tableModel.setRowCount(0);
+                if (!filteredRequests.isEmpty()) {
+                    for (CarRequest req : filteredRequests) {
+                        tableModel.addRow(new Object[]{
+                            req.getCustomerID(),
+                            req.getCarID()
+                        });
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(updateFrame,
+                            "No matching request found for input: " + searchInput,
+                            "Search Result", JOptionPane.INFORMATION_MESSAGE);
+                    searchField.setText("");
+                    loadAllRequests.run();
+                }
+            } else {
+                JOptionPane.showMessageDialog(updateFrame,
+                        "Please enter a keyword to search.",
+                        "Search Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Approve/Reject button logic
+//        approveBtn.addActionListener(e -> {
+//            String carID = carIDField.getText().trim();
+//            if (!carID.isEmpty()) {
+//                handleStatusUpdate(carID, "approved", updateFrame);
+//                loadAllRequests.run(); // Refresh table
+//            } else {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "Please enter a Car ID.",
+//                        "Input Error", JOptionPane.ERROR_MESSAGE);
+//            }
+//        });
+//
+//        rejectBtn.addActionListener(e -> {
+//            String carID = carIDField.getText().trim();
+//            if (!carID.isEmpty()) {
+//                handleStatusUpdate(carID, "rejected", updateFrame);
+//                loadAllRequests.run(); // Refresh table
+//            } else {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "Please enter a Car ID.",
+//                        "Input Error", JOptionPane.ERROR_MESSAGE);
+//            }
+//        });
+
+        // Close button
+        JButton closeButton = new JButton("Go Back");
+        closeButton.addActionListener(e -> {
+            updateFrame.dispose();
+            new SalesmanDashboard(currentSalesman);
+        });
+        inputPanel.add(closeButton);
+
+        updateFrame.setVisible(true);
     }
 
 }
