@@ -108,7 +108,7 @@ public class SalesmanGUI implements ActionListener {
         // Login button
         
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(100, 160, 90, 30);
+        loginButton.setBounds(110, 160, 100, 30);
         loginButton.addActionListener(e -> {
             String enteredID = IDField.getText();
             String enteredPassword = String.valueOf(passwordField.getPassword());
@@ -143,7 +143,7 @@ public class SalesmanGUI implements ActionListener {
 //       close button
         
         JButton closeButton = new JButton("Go Back");
-        closeButton.setBounds(200, 160, 90, 30);
+        closeButton.setBounds(230, 160, 100, 30);
         closeButton.addActionListener(e ->{ loginPageFrame.dispose(); new MainMenuGUI();});
         loginPageFrame.add(closeButton);
 

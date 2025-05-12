@@ -27,9 +27,10 @@ public class CarList {
         carList.add(new Car("C010", "Mazda", 27000, "available", "S002"));
         carList.add(new Car("C012", "Ford", 24000, "sold", "S001"));
         carList.add(new Car("C014", "Tesla", 150000, "available", "S002"));
+
     }
 
-    public static void saveCarListToFile() {
+    public static void saveInitializedCarListToFile() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("carList.txt"))) {
             for (Car car : carList) {
                 writer.write(car.getCarId() + "," + car.getBrand() + "," + car.getPrice() + ","
@@ -39,6 +40,20 @@ public class CarList {
             System.out.println("Car list saved to file.");
         } catch (IOException e) {
             System.out.println("Problem with file output.");
+        }
+    }
+
+    public static void saveUpdatedCarToFile(ArrayList<Car> updatedCars) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("CarList.txt"))) {
+            for (Car car : updatedCars) {
+                writer.print(car.getCarId() + ",");
+                writer.print(car.getBrand() + ",");
+                writer.print(car.getPrice() + ",");
+                writer.print(car.getStatus()+",");
+                writer.print(car.getSalesmanId());
+            }
+        } catch (IOException e) {
+            System.out.println("Error writing to CarList.txt: " + e.getMessage());
         }
     }
 
@@ -72,7 +87,7 @@ public class CarList {
         boolean found = false;
 
         for (Car car : carList) {
-            if (car.getCarId().equalsIgnoreCase(searchInput) || car.getBrand().equalsIgnoreCase(searchInput)|| car.getStatus().equalsIgnoreCase(searchInput)) {
+            if (car.getCarId().equalsIgnoreCase(searchInput) || car.getBrand().equalsIgnoreCase(searchInput) || car.getStatus().equalsIgnoreCase(searchInput)) {
                 System.out.println("Car ID: " + car.getCarId());
                 System.out.println("Brand: " + car.getBrand());
                 System.out.println("Price: " + car.getPrice());

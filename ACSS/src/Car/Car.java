@@ -45,9 +45,9 @@ public class Car {
     public String getSalesmanId() {
         return salesmanId;
     }
-    
-   
-    
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }
-
-

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -83,7 +84,6 @@ public class CarRequest {
 
     }
 
-
     public static ArrayList<CarRequest> loadCarRequestDataFromFile() {
         ArrayList<CarRequest> loadedRequestList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("CarRequest.txt"))) {
@@ -105,4 +105,30 @@ public class CarRequest {
         return loadedRequestList;
     }
 
+    public static boolean updateRequestStatusWithComment(String carID, String salesmanID, String newStatus, String comment) {
+        ArrayList<CarRequest> requests = loadCarRequestDataFromFile();
+        boolean found = false;
+
+        for (int i = 0; i < requests.size(); i++) {
+            CarRequest req = requests.get(i);
+            if (req.getCarID().equalsIgnoreCase(carID) && req.getSalesmanID().equals(salesmanID)) {
+                CarRequest updatedRequest = new CarRequest(
+                        req.getCustomerID(),
+                        req.getCarID(),
+                        req.getSalesmanID(),
+                        newStatus,
+                        (comment == null || comment.trim().isEmpty() ? "." : comment)
+                );
+                requests.set(i, updatedRequest);
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            writeCarRequests(requests);
+            return true;
+        }
+        return false;
+    }
 }
