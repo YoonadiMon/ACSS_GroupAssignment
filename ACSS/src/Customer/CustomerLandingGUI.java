@@ -30,16 +30,8 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
     private final Color PRIMARY_COLOR = new Color(0, 84, 159);
     private final Color LIGHT_TEXT_COLOR = new Color(111, 143, 175);
 
-    public static void main(String[] args) {
-        // Load customer data
-        CustomerDataIO.readCustomer();
-
-        SwingUtilities.invokeLater(() -> {
-            new CustomerLandingGUI();
-        });
-    }
-
     public CustomerLandingGUI() {
+        CustomerDataIO.readCustomer();
         frame = new JFrame("Customer Account");
         frame.setSize(400, 550);
         frame.setLocationRelativeTo(null);

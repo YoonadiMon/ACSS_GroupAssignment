@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class CustomerDataIO {
     public static ArrayList<Customer> allCustomers = new ArrayList<Customer>();
-    private static final String FILE_NAME = "ACSS/data/CustomersList.txt";
+    private static final String FILE_NAME = "data/CustomersList.txt";
 
     public static void writeCustomer() {
         try (PrintWriter writer = new PrintWriter(FILE_NAME)) {
@@ -49,7 +49,7 @@ public class CustomerDataIO {
         } catch(Exception e) {
             System.out.println("Error reading from file: " + e.getMessage());
             // Make sure the directory exists
-            File directory = new File("ACSS/data");
+            File directory = new File("data");
             if (!directory.exists()) {
                 directory.mkdirs();
             }

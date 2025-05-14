@@ -1,11 +1,14 @@
 package Customer;
 
+import MainProgram.MainMenuGUI;
+import Utils.WindowNav;
 import javax.swing.*;
 import java.awt.*;
 
 public class CustomerDashboard {
     private JFrame frame;
     private Customer customer;
+    
 
     public CustomerDashboard(Customer customer) {
         this.customer = customer;
@@ -54,6 +57,8 @@ public class CustomerDashboard {
         mainPanel.add(welcomeLabel, BorderLayout.NORTH);
         mainPanel.add(infoPanel, BorderLayout.CENTER);
         mainPanel.add(logoutButton, BorderLayout.SOUTH);
+        
+        WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
 
         frame.add(mainPanel);
         frame.setVisible(true);
