@@ -27,7 +27,7 @@ public class SalesmanList {
 
     public static void saveInitializedSalesmanDataToFile() {
         // Save to file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("salesmenList.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/salesmenList.txt"))) {
             for (Salesman salesman : salesmanList) {
                 writer.write(salesman.getID() + "," + salesman.getName() + "," + salesman.getPassword());
                 writer.newLine(); // Move to next line
@@ -40,7 +40,7 @@ public class SalesmanList {
     
      public static void saveSalesmanDataToFile(ArrayList<Salesman> List) {
         // Save to file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("salesmenList.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/salesmenList.txt"))) {
             for (Salesman salesman : salesmanList) {
                 writer.write(salesman.getID() + "," + salesman.getName() + "," + salesman.getPassword());
                 writer.newLine(); // Move to next line
@@ -54,7 +54,7 @@ public class SalesmanList {
     public static ArrayList<Salesman> loadSalesmanDataFromFile() {
         ArrayList<Salesman> salesmanList = new ArrayList<>();
 
-        try (java.util.Scanner scanner = new java.util.Scanner(new java.io.File("salesmenList.txt"))) {
+        try (java.util.Scanner scanner = new java.util.Scanner(new java.io.File("data/salesmenList.txt"))) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String[] parts = line.split(",");

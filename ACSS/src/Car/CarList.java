@@ -31,7 +31,7 @@ public class CarList {
     }
 
     public static void saveInitializedCarListToFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("carList.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/carList.txt"))) {
             for (Car car : carList) {
                 writer.write(car.getCarId() + "," + car.getBrand() + "," + car.getPrice() + ","
                         + car.getStatus() + "," + car.getSalesmanId());
@@ -44,7 +44,7 @@ public class CarList {
     }
 
     public static void saveUpdatedCarToFile(ArrayList<Car> updatedCars) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("CarList.txt"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/CarList.txt"))) {
             for (Car car : updatedCars) {
                 writer.write(car.getCarId() + "," + car.getBrand() + "," + car.getPrice() + ","
                         + car.getStatus() + "," + car.getSalesmanId());
@@ -58,7 +58,7 @@ public class CarList {
 
     public static ArrayList<Car> loadCarDataFromFile() {
         ArrayList<Car> loadedList = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader("carList.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("data/carList.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");

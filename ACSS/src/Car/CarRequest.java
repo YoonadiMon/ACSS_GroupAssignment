@@ -19,7 +19,7 @@ import javax.swing.JOptionPane;
  */
 public class CarRequest {
 
-    private static final String REQUEST_FILE = "CarRequest.txt";
+    private static final String REQUEST_FILE = "data/CarRequest.txt";
     public static ArrayList<CarRequest> carRequestsList = new ArrayList<>();
 
     private String customerID;
@@ -86,7 +86,7 @@ public class CarRequest {
 
     public static ArrayList<CarRequest> loadCarRequestDataFromFile() {
         ArrayList<CarRequest> loadedRequestList = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader("CarRequest.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("data/CarRequest.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
