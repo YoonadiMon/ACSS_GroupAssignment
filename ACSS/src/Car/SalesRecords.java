@@ -1,3 +1,4 @@
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -21,7 +22,7 @@ public class SalesRecords {
     private String carID;
     private String salesmanID;
     private double price;
-    private String status; // e.g., "paid"
+    private String status; 
     private String comment;
 
     public SalesRecords(String customerID, String carID, String salesmanID, double price, String status, String comment) {
