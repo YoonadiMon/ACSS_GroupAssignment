@@ -17,7 +17,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
     private JFrame frame;
     private JPanel cards;
     private CardLayout cardLayout;
-    private int windowWidth, windowHeight;
+    //private int windowWidth, windowHeight; i dun think this is needed
 
     // Login and Register components
     private JPanel loginPanel, registerPanel;
