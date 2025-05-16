@@ -99,8 +99,4 @@ public class MainMenuGUI implements ActionListener {
             new SalesmanGUI(x.getWidth(), x.getHeight());
         }
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(MainMenuGUI::new);
-    }
 }
