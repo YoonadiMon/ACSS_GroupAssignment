@@ -13,6 +13,9 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.border.EmptyBorder;
 
+
+/// DELETE THE ON CLOSE FUNC 
+
 public class CustomerDashboard implements ActionListener   {
     
     private JFrame frame;
