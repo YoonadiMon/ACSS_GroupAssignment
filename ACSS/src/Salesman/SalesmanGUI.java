@@ -8,7 +8,6 @@ import MainProgram.MainMenuGUI;
 import Salesman.SalesmanDashboard;
 import Utils.ButtonStyler;
 import Utils.WindowNav;
-import Manager.SalesmanList;
 import java.util.ArrayList;
 
 import javax.swing.*;

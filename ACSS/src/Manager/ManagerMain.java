@@ -4,6 +4,8 @@
  */
 package Manager;
 
+import Salesman.SalesmanList;
+
 /**
  *
  * @author hp

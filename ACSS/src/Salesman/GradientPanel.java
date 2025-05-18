@@ -5,7 +5,6 @@
 package Salesman;
 
 import MainProgram.MainMenuGUI;
-import Manager.SalesmanList;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
