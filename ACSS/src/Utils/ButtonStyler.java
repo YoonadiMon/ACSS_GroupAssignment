@@ -44,7 +44,7 @@ public class ButtonStyler {
     public static void stylePrimaryButton(JButton button) {
         Font buttonFont = new Font("Arial", Font.BOLD, 16);
         Color foregroundColor = Color.WHITE;
-        Color backgroundColor = new Color(0, 84, 159);
+        Color backgroundColor = new Color(0, 84, 159); // blue
         Color hoverBackgroundColor = new Color(0, 100, 210); // Darker blue for hover
         Border border = BorderFactory.createEmptyBorder(10, 0, 10, 0);
 

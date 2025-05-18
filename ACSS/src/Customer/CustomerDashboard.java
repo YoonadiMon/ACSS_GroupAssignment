@@ -32,8 +32,8 @@ public class CustomerDashboard implements ActionListener   {
         frame = new JFrame("Customer Dashboard");
         frame.setSize(600, 600);
         frame.setLocationRelativeTo(null);
-        WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
-        // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         // Card layout to switch between login and register pages
         cardLayout = new CardLayout();
@@ -93,7 +93,7 @@ public class CustomerDashboard implements ActionListener   {
         return button;
     }
     
-        private void updateNavButtonsState(int activeIndex) {
+    private void updateNavButtonsState(int activeIndex) {
         for (int i = 0; i < navButtons.length; i++) {
             if (i == activeIndex) {
                 navButtons[i].setBackground(PRIMARY_COLOR);
@@ -110,35 +110,183 @@ public class CustomerDashboard implements ActionListener   {
     }
     
     private void createMainPage() {
-        mainPage = createBasicPagePanel("Home Page");
-        
+        mainPage = createBasicPagePanel("Welcome To ACSS, " + customer.getUsername() + "!");
+
         // Get the content panel (which is at index 1 in BorderLayout.CENTER)
         JPanel contentPanel = (JPanel) ((BorderLayout) mainPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
-        
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+
         // Page-specific content 
-        JLabel contentLabel = new JLabel("Welcome, " + customer.getUsername() + "!");
-        contentLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        contentLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        infoPanel.setBorder(BorderFactory.createTitledBorder("Account Information"));
-        infoPanel.add(new JLabel("Username:"));
-        infoPanel.add(new JLabel(customer.getUsername()));
-        infoPanel.add(new JLabel("Email:"));
-        infoPanel.add(new JLabel(customer.getEmail()));
-        infoPanel.add(new JLabel("Account Status:"));
+        JPanel accountPanel = new JPanel();
+        accountPanel.setLayout(new BorderLayout(10, 10));
+        accountPanel.setMaximumSize(new Dimension(600, 400));
+        accountPanel.setPreferredSize(new Dimension(500, 330));
+        accountPanel.setBackground(new Color(240, 240, 240));
+        accountPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header -> Title + Button
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(accountPanel.getBackground());
+        JLabel accountLabel = new JLabel("Account Information");
+        accountLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        headerPanel.add(accountLabel, BorderLayout.WEST);
+
+        JButton editButton = new JButton("Edit Profile");
+        editButton.setBackground(new Color(0, 84, 159)); 
+        editButton.setForeground(Color.WHITE);
+        editButton.setFocusPainted(false);
+        editButton.setFont(new Font("Arial", Font.BOLD, 14));
+        editButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        headerPanel.add(editButton, BorderLayout.EAST);     
+
+        // Field Section with fixed height rows
+        JPanel fieldsPanel = new JPanel();
+        fieldsPanel.setLayout(new GridLayout(5, 2, 10, 20)); // Added an extra row for consistent spacing
+        fieldsPanel.setBackground(accountPanel.getBackground());
+
+        // Username field
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        JTextField usernameField = new JTextField();
+        usernameField.setText(customer.getUsername());
+        usernameField.setEditable(false);
+
+        // Email field
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        JTextField emailField = new JTextField();
+        emailField.setText(customer.getEmail());
+        emailField.setEditable(false);
+
+        // Password field
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setText("***");
+        passwordField.setEditable(false);
+
+        // Account status
+        JLabel statusLabel = new JLabel("Account Status:");
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
         String status = customer.isApproved() ? "Approved" : "Pending Approval";
-        JLabel statusLabel = new JLabel(status);
-        statusLabel.setForeground(customer.isApproved() ? new Color(0, 128, 0) : new Color(255, 140, 0));
-        infoPanel.add(statusLabel);
-        
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 40)));
-        contentPanel.add(contentLabel);
-        contentPanel.add(infoPanel);   
+        JLabel statusValueLabel = new JLabel(status);
+        statusValueLabel.setForeground(customer.isApproved() ? new Color(0, 128, 0) : new Color(255, 140, 0));
+        statusValueLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        // Save button - Always in the layout but initially hidden
+        JButton saveButton = new JButton("Save");
+        saveButton.setBackground(new Color(0, 84, 159));
+        saveButton.setForeground(Color.WHITE);
+        saveButton.setFocusPainted(false);
+        saveButton.setFont(new Font("Arial", Font.BOLD, 14));
+        saveButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+        saveButton.setVisible(false);
+
+        // Empty placeholder panel for the 5th row's first column
+        JPanel emptyPanel = new JPanel();
+        emptyPanel.setOpaque(false);
+
+        // Add all components to the fields panel
+        fieldsPanel.add(usernameLabel);
+        fieldsPanel.add(usernameField);
+        fieldsPanel.add(emailLabel);
+        fieldsPanel.add(emailField);
+        fieldsPanel.add(passwordLabel);
+        fieldsPanel.add(passwordField);
+        fieldsPanel.add(statusLabel);
+        fieldsPanel.add(statusValueLabel);
+        fieldsPanel.add(emptyPanel);
+        fieldsPanel.add(saveButton);
+
+        accountPanel.add(headerPanel, BorderLayout.NORTH);
+        accountPanel.add(fieldsPanel, BorderLayout.CENTER);
+
+        // Center the account panel in the content panel + Hide extra space 
+        JPanel wrapperPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        wrapperPanel.setOpaque(false);
+        wrapperPanel.add(accountPanel);
+
+        contentPanel.add(wrapperPanel);
+
+        // Add action listeners
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Toggle edit mode
+                boolean editMode = !usernameField.isEditable();
+
+                // Update UI based on edit mode
+                usernameField.setEditable(editMode);
+                emailField.setEditable(editMode);
+                passwordField.setEditable(editMode);
+
+                // If switching to edit mode, clear password field and show actual values
+                if (editMode) {
+                    usernameField.setText(customer.getUsername());
+                    emailField.setText(customer.getEmail());
+                    passwordField.setText("");
+
+                    // Change edit button appearance
+                    editButton.setBackground(new Color(100, 100, 100)); // Gray color
+
+                    // Show the save button
+                    saveButton.setVisible(true);
+                } else {
+                    // Revert to display mode
+                    usernameField.setText(customer.getUsername());
+                    emailField.setText(customer.getEmail());
+                    passwordField.setText("***");
+
+                    editButton.setBackground(new Color(0, 84, 159)); 
+                    saveButton.setVisible(false);
+                }
+            }
+        });
+
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Save the updated information
+                customer.setUsername(usernameField.getText());
+                customer.setEmail(emailField.getText());
+
+                String password = new String(passwordField.getPassword());
+                if (!password.isEmpty()) {
+                    // Update password if changed and valid
+                    if (!CustomerDataValidator.isValidPassword(password)) {
+                        JOptionPane.showMessageDialog(frame, "Email is not valid!", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    else {
+                        customer.setPassword(password);
+                    }
+                }
+                CustomerDataIO.writeCustomer();
+                JOptionPane.showMessageDialog(frame,
+                            "Account Information has been edited!",
+                            "Account edit Successful",
+                            JOptionPane.INFORMATION_MESSAGE);
+                
+                // Return to display mode
+                usernameField.setEditable(false);
+                emailField.setEditable(false);
+                passwordField.setEditable(false);
+
+                usernameField.setText(customer.getUsername());
+                emailField.setText(customer.getEmail());
+                passwordField.setText("***");
+
+                editButton.setBackground(new Color(0, 84, 159)); // Blue color
+                saveButton.setVisible(false);
+
+                // Update page title with new username
+                JLabel titleLabel = (JLabel) ((JPanel) mainPage.getComponent(0)).getComponent(0);
+                titleLabel.setText("Welcome To ACSS, " + customer.getUsername() + "!");
+            }
+        });
     }
     
     
-        private void createPage2() {
+    private void createPage2() {
         page2Panel = createBasicPagePanel("Page 2");
         
         // Get the content panel (which is at index 1 in BorderLayout.CENTER)
@@ -202,10 +350,10 @@ public class CustomerDashboard implements ActionListener   {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
         
-        // Create a top panel for the title
+        // Top panel for the title
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setBorder(new EmptyBorder(30, 40, 30, 40));
+        topPanel.setBorder(new EmptyBorder(30, 40, 10, 40));
         topPanel.setBackground(BACKGROUND_COLOR);
         
         // Title
@@ -214,10 +362,10 @@ public class CustomerDashboard implements ActionListener   {
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         topPanel.add(titleLabel);
         
-        // Create a content panel
+        // Content panel
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setBorder(new EmptyBorder(0, 40, 30, 40));
+        contentPanel.setBorder(new EmptyBorder(0, 40, 0, 40));
         contentPanel.setBackground(BACKGROUND_COLOR);
         
         // Create a logout button panel (fixed at bottom right)
@@ -225,7 +373,10 @@ public class CustomerDashboard implements ActionListener   {
         logoutPanel.setBackground(BACKGROUND_COLOR);
         JButton logoutButton = new JButton("Logout");
         ButtonStyler.styleExitButton(logoutButton);
-        logoutButton.addActionListener(e -> JOptionPane.showMessageDialog(frame, "Logout functionality will be implemented"));
+        logoutButton.addActionListener(e->{
+            frame.dispose();
+            new CustomerLandingGUI();      
+        });
         logoutPanel.add(logoutButton);
         
         // Add components to the panel

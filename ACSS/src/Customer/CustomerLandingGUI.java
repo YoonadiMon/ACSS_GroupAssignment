@@ -3,7 +3,6 @@ package Customer;
 import MainProgram.MainMenuGUI;
 import Utils.ButtonStyler;
 import Utils.WindowNav;
-import Utils.CustomerDataValidator;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
