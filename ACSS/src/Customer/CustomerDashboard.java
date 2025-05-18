@@ -2,8 +2,10 @@ package Customer;
 
 import Car.Car;
 import Car.CarList;
+import Car.CarRequest;
+import Salesman.Salesman;
+import Salesman.SalesmanList;
 import Utils.ButtonStyler;
-import Utils.WindowNav;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -292,6 +294,9 @@ public class CustomerDashboard implements ActionListener   {
 private void createCarPage() {
     CarPage = createBasicPagePanel("Available Cars at ACSS");
     
+    // Load salesman data
+    ArrayList<Salesman> salesmanList = SalesmanList.loadSalesmanDataFromFile();
+    
     // Get the content panel (which is at index 1 in BorderLayout.CENTER)
     JPanel contentPanel = (JPanel) ((BorderLayout) CarPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
     
@@ -334,11 +339,11 @@ private void createCarPage() {
         // Main container for car info
         JPanel carBox = new JPanel();
         carBox.setLayout(new BorderLayout());
-        carBox.setBackground(new Color(240, 240, 240)); // Light gray background
+        carBox.setBackground(new Color(240, 240, 240)); 
         carBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
                 BorderFactory.createEmptyBorder(10, 15, 10, 15)));
-        carBox.setMaximumSize(new Dimension(800, 150)); // Control the height and width
+        carBox.setMaximumSize(new Dimension(800, 150)); 
 
         // Left panel for car details
         JPanel infoPanel = new JPanel();
@@ -356,7 +361,10 @@ private void createCarPage() {
         JLabel priceLabel = new JLabel("Price: $" + String.format("%,.2f", car.getPrice()));
         priceLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        JLabel salesmanLabel = new JLabel("Salesman ID: " + car.getSalesmanId());
+        
+        String salesmanId = car.getSalesmanId();
+        String salesmanName = SalesmanList.getSalesmanNameById(salesmanId);
+        JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName);
         salesmanLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         // Add labels to the info panel
@@ -378,11 +386,83 @@ private void createCarPage() {
         bookButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Add your booking logic here
-                JOptionPane.showMessageDialog(CarPage, 
-                        "Booking car: " + car.getCarId() + " - " + car.getBrand(),
-                        "Booking Confirmation", 
-                        JOptionPane.INFORMATION_MESSAGE);
+                String customerId = customer.getCustomerId(); // Get current logged in customer ID
+
+                int confirm = JOptionPane.showConfirmDialog(
+                    CarPage,  // parent component (your panel or frame)
+                    "Confirm booking for " + car.getBrand() + " (ID: " + car.getCarId() + ")",  // message
+                    "Confirm Booking",  // dialog title
+                    JOptionPane.OK_CANCEL_OPTION,  // options: OK and Cancel buttons
+                    JOptionPane.QUESTION_MESSAGE  // icon type
+                );
+
+                if (confirm == JOptionPane.OK_OPTION) {
+                    try {
+                        // Load existing requests
+                        ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+                        
+                         // Check if this car is already requested
+                        boolean alreadyRequested = false;
+                        boolean rejected = false;
+                        String reason = "";
+                        for (CarRequest req : requests) {
+                            if (req.getCarID().equals(car.getCarId()) && req.getCustomerID().equals(customerId) ) {
+                                alreadyRequested = true;
+                                if ((req.getRequestStatus().equals("rejected"))) {
+                                    rejected = true;
+                                    reason = req.getComment();
+                                }
+                                break;
+                            }
+                        }
+                        if (reason.equals(".") || reason.trim().isEmpty()) {
+                            reason = "Not provided.";
+                        }
+                        if (rejected) {
+                            JOptionPane.showMessageDialog(CarPage,
+                                    "Your previous booking has been rejected by saleman.\nReason: " + reason,
+                                    "Car Not Available",
+                                    JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+                        if (alreadyRequested) {
+                            JOptionPane.showMessageDialog(CarPage,
+                                    "You have already requested for a booking for this car. Please wait for approval.",
+                                    "Car Not Available",
+                                    JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+                    
+                        // Add new request
+                        CarRequest newRequest = new CarRequest(
+                                customerId,
+                                car.getCarId(),
+                                car.getSalesmanId(),
+                                "pending", // Initial status is pending
+                                "."
+                        );
+
+                        requests.add(newRequest);
+                        CarRequest.writeCarRequests(requests);
+
+                        // Show success message
+                        JOptionPane.showMessageDialog(CarPage,
+                                "Car booking request submitted successfully!\n" +
+                                "Car: " + car.getBrand() + " (ID: " + car.getCarId() + ")\n" +
+                                "Status: Pending approval by salesman",
+                                "Booking Submitted",
+                                JOptionPane.INFORMATION_MESSAGE);
+
+                        // Refresh the car list to update availability
+                        //refreshCarPage();
+
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(CarPage,
+                                "Error creating booking: " + ex.getMessage(),
+                                "Booking Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
 
