@@ -1,11 +1,14 @@
 package Customer;
 
+import Car.Car;
+import Car.CarList;
 import Utils.ButtonStyler;
 import Utils.WindowNav;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import javax.swing.border.EmptyBorder;
 
 public class CustomerDashboard implements ActionListener   {
@@ -16,7 +19,7 @@ public class CustomerDashboard implements ActionListener   {
     private Customer customer;
     
     // Pages
-    private JPanel mainPage, page2Panel, page3Panel, page4Panel, page5Panel;
+    private JPanel mainPage, CarPage, page3Panel, page4Panel, page5Panel;
     
     // Navigation buttons
     private JButton[] navButtons;
@@ -41,14 +44,14 @@ public class CustomerDashboard implements ActionListener   {
 
         // Create the pages
         createMainPage();
-        createPage2();
+        createCarPage();
         createPage3();
         createPage4();
         createPage5();
         
         // Add panels to the card layout
-        cards.add(mainPage, "page1");
-        cards.add(page2Panel, "page2");
+        cards.add(mainPage, "Main");
+        cards.add(CarPage, "Cars");
         cards.add(page3Panel, "page3");
         cards.add(page4Panel, "page4");
         cards.add(page5Panel, "page5");
@@ -70,8 +73,8 @@ public class CustomerDashboard implements ActionListener   {
         navPanel.setBackground(BACKGROUND_COLOR);
         
         navButtons = new JButton[5];
-        String[] buttonLabels = {"Page 1", "Page 2", "Page 3", "Page 4", "Page 5"};
-        String[] cardNames = {"page1", "page2", "page3", "page4", "page5"};
+        String[] buttonLabels = {"Main", "Cars", "Page 3", "Page 4", "Page 5"};
+        String[] cardNames = {"Main", "Cars", "page3", "page4", "page5"};
         
         for (int i = 0; i < 5; i++) {
             navButtons[i] = createNavButton(buttonLabels[i], cardNames[i]);
@@ -285,20 +288,111 @@ public class CustomerDashboard implements ActionListener   {
         });
     }
     
+
+private void createCarPage() {
+    CarPage = createBasicPagePanel("Available Cars at ACSS");
     
-    private void createPage2() {
-        page2Panel = createBasicPagePanel("Page 2");
-        
-        // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-        JPanel contentPanel = (JPanel) ((BorderLayout) page2Panel.getLayout()).getLayoutComponent(BorderLayout.CENTER);
-        
-        // Page-specific content 
-        JLabel contentLabel = new JLabel("This is Page 2 content");
-        contentLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        contentLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 40)));
-        contentPanel.add(contentLabel);
+    // Get the content panel (which is at index 1 in BorderLayout.CENTER)
+    JPanel contentPanel = (JPanel) ((BorderLayout) CarPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+    
+    // Set layout for the content panel
+    contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+    
+    // Page-specific content 
+    ArrayList<Car> allCarsList = CarList.loadCarDataFromFile();
+    ArrayList<Car> showCarsList = new ArrayList<>();
+    for (Car car : allCarsList) {
+        if (car.getStatus().equals("available")) {
+            showCarsList.add(car);
+        }
+    }
+    
+    // Add some spacing at the top
+    contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+    
+    // Create a panel to hold car boxes with some margin on the sides
+    JPanel carListContainer = new JPanel();
+    carListContainer.setLayout(new BoxLayout(carListContainer, BoxLayout.Y_AXIS));
+    carListContainer.setBorder(BorderFactory.createEmptyBorder(0, 50, 20, 50));
+    carListContainer.setBackground(Color.WHITE);
+    
+    // Create a box for each car
+    for (Car car : showCarsList) {
+        JPanel carBox = createCarBox(car);
+        carListContainer.add(carBox);
+        carListContainer.add(Box.createRigidArea(new Dimension(0, 15))); // Space between car boxes
+    }
+    
+    // Add the car container to a scroll pane in case there are many cars
+    JScrollPane scrollPane = new JScrollPane(carListContainer);
+    scrollPane.setBorder(BorderFactory.createEmptyBorder());
+    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+    contentPanel.add(scrollPane);
+}
+
+    private JPanel createCarBox(Car car) {
+        // Main container for car info
+        JPanel carBox = new JPanel();
+        carBox.setLayout(new BorderLayout());
+        carBox.setBackground(new Color(240, 240, 240)); // Light gray background
+        carBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)));
+        carBox.setMaximumSize(new Dimension(800, 150)); // Control the height and width
+
+        // Left panel for car details
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new GridLayout(4, 1));
+        infoPanel.setBackground(new Color(240, 240, 240));
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+
+        // Create and style the information labels
+        JLabel carIdLabel = new JLabel("Car ID: " + car.getCarId());
+        carIdLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        JLabel brandLabel = new JLabel("Brand: " + car.getBrand());
+        brandLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        JLabel priceLabel = new JLabel("Price: $" + String.format("%,.2f", car.getPrice()));
+        priceLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        JLabel salesmanLabel = new JLabel("Salesman ID: " + car.getSalesmanId());
+        salesmanLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        // Add labels to the info panel
+        infoPanel.add(carIdLabel);
+        infoPanel.add(brandLabel);
+        infoPanel.add(priceLabel);
+        infoPanel.add(salesmanLabel);
+
+        // Right panel for the Book button
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(new Color(240, 240, 240));
+
+        // Create and style the Book button
+        JButton bookButton = new JButton("Book");
+        ButtonStyler.stylePrimaryButton(bookButton);
+        bookButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+
+        // Add action listener to the button
+        bookButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Add your booking logic here
+                JOptionPane.showMessageDialog(CarPage, 
+                        "Booking car: " + car.getCarId() + " - " + car.getBrand(),
+                        "Booking Confirmation", 
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        buttonPanel.add(bookButton);
+
+        // Add components to the main car box
+        carBox.add(infoPanel, BorderLayout.CENTER);
+        carBox.add(buttonPanel, BorderLayout.EAST);
+
+        return carBox;
     }
     
     private void createPage3() {
@@ -353,7 +447,7 @@ public class CustomerDashboard implements ActionListener   {
         // Top panel for the title
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setBorder(new EmptyBorder(30, 40, 10, 40));
+        topPanel.setBorder(new EmptyBorder(10, 40, 20, 40));
         topPanel.setBackground(BACKGROUND_COLOR);
         
         // Title
