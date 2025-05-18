@@ -5,10 +5,8 @@
         <group>
             <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/MainProgram/MainProgram.java</file>
             <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Customer/CustomerLandingGUI.java</file>
-            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/MainProgram/MainMenuGUI.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Utils/ButtonStyler.java</file>
             <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Customer/CustomerDashboard.java</file>
-            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Salesman/SalesmanDashboard.java</file>
-            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Customer/CustomerDataIO.java</file>
             <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/CustomersList.txt</file>
         </group>
     </open-files>

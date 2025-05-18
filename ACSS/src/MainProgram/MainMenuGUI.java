@@ -54,8 +54,9 @@ public class MainMenuGUI implements ActionListener {
         // Create a JPanel for the top buttons using FlowLayout
         JPanel centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 30));
         centerPanel.add(customerButton);
-        centerPanel.add(managerButton);
         centerPanel.add(salesmanButton);
+        centerPanel.add(managerButton);
+        
 
         x.add(welcomeTxt);
         x.add(roleTxt);
