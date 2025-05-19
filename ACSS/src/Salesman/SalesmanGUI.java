@@ -5,6 +5,7 @@
 package Salesman;
 
 import MainProgram.MainMenuGUI;
+import Salesman.SalesmanList;
 import Salesman.SalesmanDashboard;
 import Utils.ButtonStyler;
 import Utils.WindowNav;
@@ -55,7 +56,6 @@ public class SalesmanGUI implements ActionListener {
 
         frame.setVisible(true);
     }
-    
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -70,85 +70,6 @@ public class SalesmanGUI implements ActionListener {
 
     }
 
-//    private void loginPage() {
-//        FlowLayout layout = new FlowLayout(FlowLayout.CENTER);
-//        JFrame loginPageFrame = new JFrame("Edit Profile");
-//        loginPageFrame.setSize(400, 350);
-//        loginPageFrame.setLocationRelativeTo(null);
-//        loginPageFrame.setLayout(null);
-//
-//        // Title label
-//        JLabel title = new JLabel("--- Login Salesman Profile ---");
-//        title.setBounds(100, 20, 200, 30);
-//        loginPageFrame.add(title);
-//
-//        // ID field
-//        JLabel IDLabel = new JLabel("ID:");
-//        IDLabel.setBounds(50, 70, 80, 20);
-//        JTextField IDField = new JTextField(20);
-//        IDField.setBounds(150, 70, 150, 20);
-//
-//        // Password field
-//        JLabel passwordLabel = new JLabel("Password:");
-//        passwordLabel.setBounds(50, 100, 80, 20);
-//        JPasswordField passwordField = new JPasswordField(20);
-//        passwordField.setBounds(150, 100, 150, 20);
-//
-//        // Show password checkbox
-//        JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
-//        showPasswordCheckbox.setBounds(150, 130, 150, 20);
-//        showPasswordCheckbox.addActionListener(e -> {
-//            if (showPasswordCheckbox.isSelected()) {
-//                passwordField.setEchoChar((char) 0);
-//            } else {
-//                passwordField.setEchoChar('*');
-//            }
-//        });
-//
-//        // Login button
-//        
-//        JButton loginButton = new JButton("Login");
-//        loginButton.setBounds(110, 160, 100, 30);
-//        loginButton.addActionListener(e -> {
-//            String enteredID = IDField.getText();
-//            String enteredPassword = String.valueOf(passwordField.getPassword());
-//
-//            Salesman loggedInSalesman = null;
-//            ArrayList<Salesman> salesmanList = SalesmanList.loadSalesmanDataFromFile();
-//
-//            for (Salesman salesman : salesmanList) {
-//                if (salesman.getID().equals(enteredID) && salesman.getPassword().equals(enteredPassword)) {
-//                    loggedInSalesman = salesman;
-//                    break;
-//                }
-//            }
-//
-//            if (loggedInSalesman != null) {
-//                JOptionPane.showMessageDialog(loginPageFrame, "Login Successful!");
-//                loginPageFrame.dispose();
-//                new SalesmanDashboard(loggedInSalesman); // Pass salesman to dashboard
-//            } else {
-//                JOptionPane.showMessageDialog(loginPageFrame, "Invalid ID or Password. Please try again.");
-//            }
-//        });
-//
-//        // Add components
-//        loginPageFrame.add(IDLabel);
-//        loginPageFrame.add(IDField);
-//        loginPageFrame.add(passwordLabel);
-//        loginPageFrame.add(passwordField);
-//        loginPageFrame.add(showPasswordCheckbox);
-//        loginPageFrame.add(loginButton);
-//
-////       close button
-//        
-//        JButton closeButton = new JButton("Go Back");
-//        closeButton.setBounds(230, 160, 100, 30);
-//        closeButton.addActionListener(e ->{ loginPageFrame.dispose(); new MainMenuGUI();});
-//        loginPageFrame.add(closeButton);
-//
-//        loginPageFrame.setVisible(true);
-//    }
     private void loginPage() {
         JFrame loginPageFrame = new JFrame("Salesman Login");
         loginPageFrame.setSize(450, 600);
@@ -174,12 +95,6 @@ public class SalesmanGUI implements ActionListener {
         brandLabel.setBounds(0, 20, 350, 30);
         formPanel.add(brandLabel);
 
-//        // Avatar icon
-//        ImageIcon avatarIcon = new ImageIcon("avatar.png"); // Make sure avatar.png exists
-//        Image avatarImage = avatarIcon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-//        JLabel avatarLabel = new JLabel(new ImageIcon(avatarImage));
-//        avatarLabel.setBounds(135, 60, 80, 80);
-//        formPanel.add(avatarLabel);
         // ID Label
         JLabel IDLabel = new JLabel("Salesman ID");
         IDLabel.setBounds(40, 160, 300, 20);
@@ -210,7 +125,7 @@ public class SalesmanGUI implements ActionListener {
         JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
         showPasswordCheckbox.setBounds(40, 295, 150, 20);
         showPasswordCheckbox.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        showPasswordCheckbox.setBackground(new Color(255, 255, 255, 0));
+        showPasswordCheckbox.setOpaque(false);
         showPasswordCheckbox.addActionListener(e -> {
             passwordField.setEchoChar(showPasswordCheckbox.isSelected() ? (char) 0 : '*');
         });
