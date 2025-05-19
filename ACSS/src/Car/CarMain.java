@@ -17,7 +17,7 @@ public class CarMain {
         CarList.initializeCars();
         CarList.saveInitializedCarListToFile();
 
-        CarRequest.saveInitialCarRequestsToFile();
+        //CarRequest.saveInitialCarRequestsToFile();
 
     }
 
