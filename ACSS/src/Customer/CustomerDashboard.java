@@ -12,6 +12,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 
 /// DELETE THE ON CLOSE FUNC 
@@ -24,7 +27,7 @@ public class CustomerDashboard implements ActionListener   {
     private Customer customer;
     
     // Pages
-    private JPanel mainPage, CarPage, page3Panel, page4Panel, page5Panel;
+    private JPanel mainPage, CarPage, page3Panel, carHistoryPage, page5Panel;
     
     // Navigation buttons
     private JButton[] navButtons;
@@ -38,7 +41,7 @@ public class CustomerDashboard implements ActionListener   {
         this.customer = customer;
 
         frame = new JFrame("Customer Dashboard");
-        frame.setSize(600, 600);
+        frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         //WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -51,14 +54,14 @@ public class CustomerDashboard implements ActionListener   {
         createMainPage();
         createCarPage();
         createPage3();
-        createPage4();
+        createCarHistoryPage();
         createPage5();
         
         // Add panels to the card layout
         cards.add(mainPage, "Main");
         cards.add(CarPage, "Cars");
         cards.add(page3Panel, "page3");
-        cards.add(page4Panel, "page4");
+        cards.add(carHistoryPage, "CarHistory");
         cards.add(page5Panel, "page5");
         
         // Create navigation panel
@@ -78,8 +81,8 @@ public class CustomerDashboard implements ActionListener   {
         navPanel.setBackground(BACKGROUND_COLOR);
         
         navButtons = new JButton[5];
-        String[] buttonLabels = {"Main", "Cars", "Page 3", "Page 4", "Page 5"};
-        String[] cardNames = {"Main", "Cars", "page3", "page4", "page5"};
+        String[] buttonLabels = {"Main", "Cars", "Page 3", "Cars History", "Page 5"};
+        String[] cardNames = {"Main", "Cars", "page3", "CarHistory", "page5"};
         
         for (int i = 0; i < 5; i++) {
             navButtons[i] = createNavButton(buttonLabels[i], cardNames[i]);
@@ -358,50 +361,49 @@ public class CustomerDashboard implements ActionListener   {
         });
     }
     
+    private void createCarPage() {
+        CarPage = createBasicPagePanel("Available Cars at ACSS");
 
-private void createCarPage() {
-    CarPage = createBasicPagePanel("Available Cars at ACSS");
-    
-    // Load salesman data
-    ArrayList<Salesman> salesmanList = SalesmanList.loadSalesmanDataFromFile();
-    
-    // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-    JPanel contentPanel = (JPanel) ((BorderLayout) CarPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
-    
-    // Set layout for the content panel
-    contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-    
-    // Page-specific content 
-    ArrayList<Car> allCarsList = CarList.loadCarDataFromFile();
-    ArrayList<Car> showCarsList = new ArrayList<>();
-    for (Car car : allCarsList) {
-        if (car.getStatus().equals("available")) {
-            showCarsList.add(car);
+        // Load salesman data
+        ArrayList<Salesman> salesmanList = SalesmanList.loadSalesmanDataFromFile();
+
+        // Get the content panel (which is at index 1 in BorderLayout.CENTER)
+        JPanel contentPanel = (JPanel) ((BorderLayout) CarPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+
+        // Set layout for the content panel
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+
+        // Page-specific content 
+        ArrayList<Car> allCarsList = CarList.loadCarDataFromFile();
+        ArrayList<Car> showCarsList = new ArrayList<>();
+        for (Car car : allCarsList) {
+            if (car.getStatus().equals("available")) {
+                showCarsList.add(car);
+            }
         }
+
+        // Add some spacing at the top
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // Create a panel to hold car boxes with some margin on the sides
+        JPanel carListContainer = new JPanel();
+        carListContainer.setLayout(new BoxLayout(carListContainer, BoxLayout.Y_AXIS));
+        carListContainer.setBorder(BorderFactory.createEmptyBorder(0, 50, 20, 50));
+        carListContainer.setBackground(Color.WHITE);
+
+        // Create a box for each car
+        for (Car car : showCarsList) {
+            JPanel carBox = createCarBox(car);
+            carListContainer.add(carBox);
+            carListContainer.add(Box.createRigidArea(new Dimension(0, 15))); // Space between car boxes
+        }
+
+        // Add the car container to a scroll pane in case there are many cars
+        JScrollPane scrollPane = new JScrollPane(carListContainer);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        contentPanel.add(scrollPane);
     }
-    
-    // Add some spacing at the top
-    contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-    
-    // Create a panel to hold car boxes with some margin on the sides
-    JPanel carListContainer = new JPanel();
-    carListContainer.setLayout(new BoxLayout(carListContainer, BoxLayout.Y_AXIS));
-    carListContainer.setBorder(BorderFactory.createEmptyBorder(0, 50, 20, 50));
-    carListContainer.setBackground(Color.WHITE);
-    
-    // Create a box for each car
-    for (Car car : showCarsList) {
-        JPanel carBox = createCarBox(car);
-        carListContainer.add(carBox);
-        carListContainer.add(Box.createRigidArea(new Dimension(0, 15))); // Space between car boxes
-    }
-    
-    // Add the car container to a scroll pane in case there are many cars
-    JScrollPane scrollPane = new JScrollPane(carListContainer);
-    scrollPane.setBorder(BorderFactory.createEmptyBorder());
-    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-    contentPanel.add(scrollPane);
-}
 
     private JPanel createCarBox(Car car) {
         // Main container for car info
@@ -558,19 +560,272 @@ private void createCarPage() {
         contentPanel.add(contentLabel);
     }
     
-    private void createPage4() {
-        page4Panel = createBasicPagePanel("Page 4");
-        
-        // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-        JPanel contentPanel = (JPanel) ((BorderLayout) page4Panel.getLayout()).getLayoutComponent(BorderLayout.CENTER);
-        
-        // Page-specific content 
-        JLabel contentLabel = new JLabel("This is Page 4 content");
-        contentLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        contentLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 40)));
-        contentPanel.add(contentLabel);
+    private void createCarHistoryPage() {
+        carHistoryPage = createBasicPagePanel("Booking & Purchase History");
+
+        JPanel contentPanel, bookingPanel, purchasePanel, headerPanel;
+        JLabel title1, title2, noBookingLabel, purchasePlaceholder, headerLabel;
+        JScrollPane scrollPane;
+        JTable bookingTable;
+        DefaultTableModel tableModel;
+        ArrayList<CarRequest> bookings;
+
+        // Get the content panel
+        contentPanel = (JPanel) ((BorderLayout) carHistoryPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+        contentPanel.removeAll();
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.setBackground(new Color(248, 249, 250));
+
+        // Create main container with proper margins
+        JPanel mainContainer = new JPanel();
+        mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
+        mainContainer.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainContainer.setBackground(new Color(248, 249, 250));
+
+        // --- Header Panel ---
+        headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        headerPanel.setBackground(new Color(248, 249, 250));
+        headerLabel = new JLabel("Your Transaction History");
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        headerLabel.setForeground(new Color(52, 58, 64));
+        headerPanel.add(headerLabel);
+        mainContainer.add(headerPanel);
+        mainContainer.add(Box.createVerticalStrut(10));
+
+        // --- Booking Panel ---
+        bookingPanel = new JPanel();
+        bookingPanel.setLayout(new BorderLayout());
+        bookingPanel.setBackground(Color.WHITE);
+        bookingPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(222, 226, 230), 1),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+
+        // Booking header
+        JPanel bookingHeaderPanel = new JPanel(new BorderLayout());
+        bookingHeaderPanel.setBackground(Color.WHITE);
+        title1 = new JLabel("Booking History");
+        title1.setFont(new Font("Arial", Font.BOLD, 18));
+        title1.setForeground(new Color(52, 58, 64));
+        bookingHeaderPanel.add(title1, BorderLayout.WEST);
+
+        // Add booking count badge
+        bookings = CarRequest.getRequestsByCustomerID(customer.getCustomerId());
+        JLabel bookingCountLabel = new JLabel(bookings.size() + " booking(s)");
+        bookingCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        bookingCountLabel.setForeground(new Color(108, 117, 125));
+        bookingCountLabel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(222, 226, 230), 1),
+            BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
+        bookingCountLabel.setBackground(new Color(248, 249, 250));
+        bookingCountLabel.setOpaque(true);
+        bookingHeaderPanel.add(bookingCountLabel, BorderLayout.EAST);
+
+        bookingPanel.add(bookingHeaderPanel, BorderLayout.NORTH);
+        bookingPanel.add(Box.createVerticalStrut(15), BorderLayout.CENTER);
+
+        // Booking content
+        JPanel bookingContentPanel = new JPanel(new BorderLayout());
+        bookingContentPanel.setBackground(Color.WHITE);
+
+        if (bookings.isEmpty()) {
+            JPanel emptyStatePanel = createEmptyStatePanel(
+                "No Booking History", 
+                "You haven't made any car booking requests yet.",
+                "📋"
+            );
+            bookingContentPanel.add(emptyStatePanel, BorderLayout.CENTER);
+        } else {
+            String[] columns = {"Car ID", "Salesman ID", "Status", "Comment"};
+            tableModel = new DefaultTableModel(columns, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false; // Make table non-editable
+                }
+            };
+
+            for (CarRequest booking : bookings) {
+                Object[] rowData = {
+                    booking.getCarID(),
+                    booking.getSalesmanID(),
+                    booking.getRequestStatus(),
+                    booking.getComment() != null ? booking.getComment() : "No comment"
+                };
+                tableModel.addRow(rowData);
+            }
+
+            bookingTable = new JTable(tableModel);
+            styleTable(bookingTable);
+
+            scrollPane = new JScrollPane(bookingTable);
+            scrollPane.setBorder(BorderFactory.createLineBorder(new Color(222, 226, 230), 1));
+            scrollPane.setBackground(Color.WHITE);
+            scrollPane.getViewport().setBackground(Color.WHITE);
+
+            // Set preferred height based on content
+            int rowHeight = bookingTable.getRowHeight();
+            int headerHeight = bookingTable.getTableHeader().getPreferredSize().height;
+            int maxVisibleRows = Math.min(bookings.size(), 6); // Show max 6 rows
+            int preferredHeight = headerHeight + (rowHeight * maxVisibleRows) + 10;
+            scrollPane.setPreferredSize(new Dimension(scrollPane.getPreferredSize().width, preferredHeight));
+
+            bookingContentPanel.add(scrollPane, BorderLayout.CENTER);
+        }
+
+        bookingPanel.add(bookingContentPanel, BorderLayout.SOUTH);
+
+        // --- Purchase Panel ---
+        purchasePanel = new JPanel();
+        purchasePanel.setLayout(new BorderLayout());
+        purchasePanel.setBackground(Color.WHITE);
+        purchasePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(222, 226, 230), 1),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+
+        // Purchase header
+        JPanel purchaseHeaderPanel = new JPanel(new BorderLayout());
+        purchaseHeaderPanel.setBackground(Color.WHITE);
+        title2 = new JLabel("Purchase History");
+        title2.setFont(new Font("Arial", Font.BOLD, 18));
+        title2.setForeground(new Color(52, 58, 64));
+        purchaseHeaderPanel.add(title2, BorderLayout.WEST);
+
+        JLabel purchaseCountLabel = new JLabel("0 purchase(s)");
+        purchaseCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        purchaseCountLabel.setForeground(new Color(108, 117, 125));
+        purchaseCountLabel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(222, 226, 230), 1),
+            BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
+        purchaseCountLabel.setBackground(new Color(248, 249, 250));
+        purchaseCountLabel.setOpaque(true);
+        purchaseHeaderPanel.add(purchaseCountLabel, BorderLayout.EAST);
+
+        purchasePanel.add(purchaseHeaderPanel, BorderLayout.NORTH);
+        purchasePanel.add(Box.createVerticalStrut(15), BorderLayout.CENTER);
+
+        // Purchase content
+        JPanel purchaseContentPanel = createEmptyStatePanel(
+            "No Purchase History", 
+            "Purchase history functionality will be available soon.",
+            "🛒"
+        );
+        purchasePanel.add(purchaseContentPanel, BorderLayout.SOUTH);
+
+        // Add panels to main container
+        mainContainer.add(bookingPanel);
+        mainContainer.add(Box.createVerticalStrut(20));
+        mainContainer.add(purchasePanel);
+
+        // Add main container to content panel with scrolling capability
+        JScrollPane mainScrollPane = new JScrollPane(mainContainer);
+        mainScrollPane.setBorder(null);
+        mainScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        mainScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        mainScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        contentPanel.add(mainScrollPane, BorderLayout.CENTER);
+    }
+
+    private void styleTable(JTable table) {
+        // Header styling
+        JTableHeader header = table.getTableHeader();
+        header.setFont(new Font("Arial", Font.BOLD, 12));
+        header.setBackground(new Color(248, 249, 250));
+        header.setForeground(new Color(52, 58, 64));
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(222, 226, 230)));
+        header.setReorderingAllowed(false);
+
+        // Table styling
+        table.setFont(new Font("Arial", Font.PLAIN, 12));
+        table.setRowHeight(35);
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 0));
+        table.setSelectionBackground(new Color(240, 248, 255));
+        table.setSelectionForeground(new Color(52, 58, 64));
+        table.setFillsViewportHeight(true);
+
+        // Set column widths
+        if (table.getColumnCount() == 4) {
+            table.getColumnModel().getColumn(0).setPreferredWidth(80);   // Car ID
+            table.getColumnModel().getColumn(1).setPreferredWidth(100);  // Salesman ID
+            table.getColumnModel().getColumn(2).setPreferredWidth(80);   // Status
+            table.getColumnModel().getColumn(3).setPreferredWidth(200);  // Comment
+        }
+
+        // Custom cell renderer for better visual appearance
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (!isSelected) {
+                    if (row % 2 == 0) {
+                        c.setBackground(Color.WHITE);
+                    } else {
+                        c.setBackground(new Color(248, 249, 250));
+                    }
+                }
+
+                // Status column styling
+                if (column == 2 && value != null) {
+                    String status = value.toString().toLowerCase();
+                    switch (status) {
+                        case "pending":
+                            setForeground(new Color(255, 140, 0)); // Orange
+                            break;
+                        case "approved":
+                            setForeground(new Color(40, 167, 69)); // Green
+                            break;
+                        case "rejected":
+                            setForeground(new Color(220, 53, 69)); // Red
+                            break;
+                        default:
+                            setForeground(new Color(52, 58, 64)); // Default
+                    }
+                } else {
+                    setForeground(new Color(52, 58, 64));
+                }
+
+                setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+                return c;
+            }
+        });
+    }
+
+    private JPanel createEmptyStatePanel(String title, String message, String emoji) {
+        JPanel emptyPanel = new JPanel();
+        emptyPanel.setLayout(new BoxLayout(emptyPanel, BoxLayout.Y_AXIS));
+        emptyPanel.setBackground(Color.WHITE);
+        emptyPanel.setBorder(BorderFactory.createEmptyBorder(40, 20, 40, 20));
+
+        // Emoji
+        JLabel emojiLabel = new JLabel(emoji);
+        emojiLabel.setFont(new Font("Arial", Font.PLAIN, 48));
+        emojiLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Title
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setForeground(new Color(52, 58, 64));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Message
+        JLabel messageLabel = new JLabel(message);
+        messageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        messageLabel.setForeground(new Color(108, 117, 125));
+        messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        emptyPanel.add(emojiLabel);
+        emptyPanel.add(Box.createVerticalStrut(15));
+        emptyPanel.add(titleLabel);
+        emptyPanel.add(Box.createVerticalStrut(8));
+        emptyPanel.add(messageLabel);
+
+        return emptyPanel;
     }
     
     private void createPage5() {

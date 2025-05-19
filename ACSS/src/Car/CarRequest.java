@@ -130,4 +130,15 @@ public class CarRequest {
         }
         return false;
     }
+    
+    public static ArrayList<CarRequest> getRequestsByCustomerID(String customerID) {
+        ArrayList<CarRequest> allRequests = loadCarRequestDataFromFile();
+        ArrayList<CarRequest> filteredRequests = new ArrayList<>();
+        for (CarRequest req : allRequests) {
+            if (req.getCustomerID().equalsIgnoreCase(customerID)) {
+                filteredRequests.add(req);
+            }
+        }
+        return filteredRequests;
+    }
 }
