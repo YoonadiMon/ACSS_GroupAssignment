@@ -237,8 +237,9 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                 }
 
                 if (userAnswer.trim().equalsIgnoreCase(savedAnswer.trim())) {
-                    JOptionPane.showMessageDialog(frame, "Security answer verified. You may now reset your password.");
-                    // TODO: Implement password reset dialog or flow here
+                    JOptionPane.showMessageDialog(frame, "Security answer verified! You may now reset your password.");
+                    frame.dispose();
+                    new CustomerDashboard(customer);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Incorrect answer. Please contact admin for assistance.");
                 }
