@@ -11,6 +11,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class CustomerLandingGUI implements ActionListener, KeyListener {
     private JFrame frame;
@@ -162,17 +165,87 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
 
         // Add action listeners
         switchToRegisterBtn.addActionListener(this);
+        
+        
         registerNowLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 cardLayout.show(cards, "register");
             }
         });
+        
+        
         forgotPasswordLbl.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                // Implement forgot password functionality
-                JOptionPane.showMessageDialog(frame, "Forgot password functionality will be implemented soon.");
+                String userOrEmail = loginUserOrEmailTF.getText().trim();
+
+                if (userOrEmail.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Please enter your username or email first.");
+                    return;
+                }
+
+                Customer customer = CustomerDataIO.getIDfromUsernameorEmail(userOrEmail);
+
+                if (customer == null) {
+                    JOptionPane.showMessageDialog(frame, "User not found. Please check your username or email.");
+                    return;
+                }
+
+                String customerId = customer.getCustomerId();
+
+                if (customerId.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Customer ID is empty. Please contact admin.");
+                    return;
+                }
+
+                if (!CustomersForgetPwd.customerExists(customerId)) {
+                    JOptionPane.showMessageDialog(frame, "No security question set for this Customer ID. Please contact admin.");
+                    return;
+                }
+
+                // Load saved question and answer
+                String savedQuestion = null;
+                String savedAnswer = null;
+
+                try (BufferedReader reader = new BufferedReader(new FileReader("data/CustomersForgetPwd.txt"))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.startsWith(customerId + ",")) {
+                            String[] parts = line.split(",", 3);
+                            if (parts.length == 3) {
+                                savedQuestion = parts[1];
+                                savedAnswer = parts[2];
+                            }
+                            break;
+                        }
+                    }
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(frame, "Error reading security questions. Please contact admin.");
+                    return;
+                }
+
+                if (savedQuestion == null) {
+                    JOptionPane.showMessageDialog(frame, "Security question not found. Please contact admin.");
+                    return;
+                }
+
+                String userAnswer = JOptionPane.showInputDialog(frame, "Security Question:\n" + savedQuestion);
+
+                if (userAnswer == null) {
+                    // User cancelled
+                    return;
+                }
+
+                if (userAnswer.trim().equalsIgnoreCase(savedAnswer.trim())) {
+                    JOptionPane.showMessageDialog(frame, "Security answer verified. You may now reset your password.");
+                    // TODO: Implement password reset dialog or flow here
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Incorrect answer. Please contact admin for assistance.");
+                }
             }
         });
+
+
 
         // Add components to panel with spacing
         loginPanel.add(titleLabel);

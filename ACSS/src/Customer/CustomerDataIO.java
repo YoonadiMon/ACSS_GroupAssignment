@@ -9,6 +9,7 @@ import java.util.UUID;
 public class CustomerDataIO {
     public static ArrayList<Customer> allCustomers = new ArrayList<Customer>();
     private static final String FILE_NAME = "data/CustomersList.txt";
+    
 
     public static void writeCustomer() {
         try (PrintWriter writer = new PrintWriter(FILE_NAME)) {
@@ -55,7 +56,7 @@ public class CustomerDataIO {
             }
         }
     }
-
+    
     public static Customer searchId(String customerId) {
         for(Customer customer : allCustomers) {
             if(customerId.equals(customer.getCustomerId())) {
@@ -98,6 +99,17 @@ public class CustomerDataIO {
         }
 
         return null;
+    }
+    
+    public static Customer getIDfromUsernameorEmail(String usernameOrEmail) {
+        // First try to find the customer by username
+        Customer customer = searchName(usernameOrEmail);
+
+        // If not found by username, try by email
+        if (customer == null) {
+            customer = searchEmail(usernameOrEmail);
+        }
+        return customer;
     }
 
     // Method to find customer and check if approved

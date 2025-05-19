@@ -118,14 +118,19 @@ public class CustomerDashboard implements ActionListener   {
     }
     
     private void createMainPage() {
+        JPanel accountPanel, headerPanel, contentPanel, fieldsPanel, emptyPanel, wrapperPanel;
+        JLabel accountLabel, usernameLabel, emailLabel, passwordLabel, statusLabel, forgotPasswordLbl;
+        JButton editButton, saveButton;
+        JTextField usernameField, emailField;
+        
         mainPage = createBasicPagePanel("Welcome To ACSS, " + customer.getUsername() + "!");
 
         // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-        JPanel contentPanel = (JPanel) ((BorderLayout) mainPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+        contentPanel = (JPanel) ((BorderLayout) mainPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
         // Page-specific content 
-        JPanel accountPanel = new JPanel();
+        accountPanel = new JPanel();
         accountPanel.setLayout(new BorderLayout(10, 10));
         accountPanel.setMaximumSize(new Dimension(600, 400));
         accountPanel.setPreferredSize(new Dimension(500, 330));
@@ -133,13 +138,13 @@ public class CustomerDashboard implements ActionListener   {
         accountPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Header -> Title + Button
-        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(accountPanel.getBackground());
-        JLabel accountLabel = new JLabel("Account Information");
+        accountLabel = new JLabel("Account Information");
         accountLabel.setFont(new Font("Arial", Font.BOLD, 18));
         headerPanel.add(accountLabel, BorderLayout.WEST);
 
-        JButton editButton = new JButton("Edit Profile");
+        editButton = new JButton("Edit Profile");
         editButton.setBackground(new Color(0, 84, 159)); 
         editButton.setForeground(Color.WHITE);
         editButton.setFocusPainted(false);
@@ -148,33 +153,33 @@ public class CustomerDashboard implements ActionListener   {
         headerPanel.add(editButton, BorderLayout.EAST);     
 
         // Field Section with fixed height rows
-        JPanel fieldsPanel = new JPanel();
+        fieldsPanel = new JPanel();
         fieldsPanel.setLayout(new GridLayout(5, 2, 10, 20)); // Added an extra row for consistent spacing
         fieldsPanel.setBackground(accountPanel.getBackground());
 
         // Username field
-        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel = new JLabel("Username:");
         usernameLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        JTextField usernameField = new JTextField();
+        usernameField = new JTextField();
         usernameField.setText(customer.getUsername());
         usernameField.setEditable(false);
 
         // Email field
-        JLabel emailLabel = new JLabel("Email:");
+        emailLabel = new JLabel("Email:");
         emailLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        JTextField emailField = new JTextField();
+        emailField = new JTextField();
         emailField.setText(customer.getEmail());
         emailField.setEditable(false);
 
         // Password field
-        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel = new JLabel("Password:");
         passwordLabel.setFont(new Font("Arial", Font.BOLD, 14));
         JPasswordField passwordField = new JPasswordField();
         passwordField.setText("***");
         passwordField.setEditable(false);
-
+        
         // Account status
-        JLabel statusLabel = new JLabel("Account Status:");
+        statusLabel = new JLabel("Account Status:");
         statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
         String status = customer.isApproved() ? "Approved" : "Pending Approval";
         JLabel statusValueLabel = new JLabel(status);
@@ -182,7 +187,7 @@ public class CustomerDashboard implements ActionListener   {
         statusValueLabel.setFont(new Font("Arial", Font.PLAIN, 14));
 
         // Save button - Always in the layout but initially hidden
-        JButton saveButton = new JButton("Save");
+        saveButton = new JButton("Save");
         saveButton.setBackground(new Color(0, 84, 159));
         saveButton.setForeground(Color.WHITE);
         saveButton.setFocusPainted(false);
@@ -191,7 +196,7 @@ public class CustomerDashboard implements ActionListener   {
         saveButton.setVisible(false);
 
         // Empty placeholder panel for the 5th row's first column
-        JPanel emptyPanel = new JPanel();
+        emptyPanel = new JPanel();
         emptyPanel.setOpaque(false);
 
         // Add all components to the fields panel
@@ -210,9 +215,21 @@ public class CustomerDashboard implements ActionListener   {
         accountPanel.add(fieldsPanel, BorderLayout.CENTER);
 
         // Center the account panel in the content panel + Hide extra space 
-        JPanel wrapperPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        wrapperPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         wrapperPanel.setOpaque(false);
         wrapperPanel.add(accountPanel);
+        
+        
+        //
+        forgotPasswordLbl = new JLabel("Add secuity question in case of forgotten password?");
+        forgotPasswordLbl.setFont(new Font("Arial", Font.BOLD, 14));
+        forgotPasswordLbl.setForeground(LIGHT_TEXT_COLOR);
+        forgotPasswordLbl.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        forgotPasswordLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        forgotPasswordLbl.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+
+        
+        wrapperPanel.add(forgotPasswordLbl);
 
         contentPanel.add(wrapperPanel);
 
@@ -289,6 +306,54 @@ public class CustomerDashboard implements ActionListener   {
                 // Update page title with new username
                 JLabel titleLabel = (JLabel) ((JPanel) mainPage.getComponent(0)).getComponent(0);
                 titleLabel.setText("Welcome To ACSS, " + customer.getUsername() + "!");
+            }
+        });
+        
+        forgotPasswordLbl.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                String customerId = customer.getCustomerId(); 
+
+                String question = JOptionPane.showInputDialog(frame, "Enter your security question:");
+                if (question == null || question.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Security question cannot be empty.");
+                    return;
+                }
+
+                String answer = JOptionPane.showInputDialog(frame, "Enter your answer:");
+                if (answer == null || answer.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Answer cannot be empty.");
+                    return;
+                }
+
+                CustomersForgetPwd customerForgetPwd = new CustomersForgetPwd(customerId, question, answer);
+                if (CustomersForgetPwd.customerExists(customerId)) {
+                    int option = JOptionPane.showConfirmDialog(frame,
+                        "You already have a saved security question. Do you want to override it?",
+                        "Confirm Override",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+
+                    if (option == JOptionPane.YES_OPTION) {
+                        // User chose to override
+                        boolean success = customerForgetPwd.overrideSecurityQuestion();
+                        if (success) {
+                            JOptionPane.showMessageDialog(frame, "Security question updated successfully.");
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "Error updating security question.");
+                        }
+                    } else {
+                        // User chose NO or closed the dialog
+                        JOptionPane.showMessageDialog(frame, "Security question not changed.");
+                    }
+                } else {
+                    // Customer ID does not exist, save new question
+                    boolean success = customerForgetPwd.saveSecurityQuestion();
+                    if (success) {
+                        JOptionPane.showMessageDialog(frame, "Security question saved.");
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Error saving security question.");
+                    }
+                }
             }
         });
     }
