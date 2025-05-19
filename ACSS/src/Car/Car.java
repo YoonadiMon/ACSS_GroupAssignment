@@ -18,7 +18,7 @@ public class Car {
     private String status; // available / booked / paid / cancel
     private String salesmanId; // the ID of the salesman responsible for this car
 
-    public Car(String carId, String brand, double price, String status, String salesmanId) {
+    public Car(String carId, String brand, int price, String status, String salesmanId) {
         this.carId = carId;
         this.brand = brand;
         this.price = price;
@@ -34,8 +34,8 @@ public class Car {
         return brand;
     }
 
-    public double getPrice() {
-        return price;
+    public int getPrice() {
+        return (int) price;
     }
 
     public String getStatus() {

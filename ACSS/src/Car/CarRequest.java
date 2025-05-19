@@ -104,7 +104,7 @@ public class CarRequest {
         return loadedRequestList;
     }
 
-    public static boolean updateRequestStatusWithComment(String carID, String salesmanID, String newStatus, String comment) {
+    public static boolean updateRequestStatusWithComment(String carID, String salesmanID, String newStatus, String comment, String finalComment) {
         ArrayList<CarRequest> requests = loadCarRequestDataFromFile();
         boolean found = false;
 
