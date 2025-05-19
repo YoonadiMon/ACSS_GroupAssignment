@@ -17,6 +17,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 
+
 /// DELETE THE ON CLOSE FUNC 
 
 public class CustomerDashboard implements ActionListener   {
@@ -582,16 +583,6 @@ public class CustomerDashboard implements ActionListener   {
         mainContainer.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainContainer.setBackground(new Color(248, 249, 250));
 
-        // --- Header Panel ---
-        headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        headerPanel.setBackground(new Color(248, 249, 250));
-        headerLabel = new JLabel("Your Transaction History");
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        headerLabel.setForeground(new Color(52, 58, 64));
-        headerPanel.add(headerLabel);
-        mainContainer.add(headerPanel);
-        mainContainer.add(Box.createVerticalStrut(10));
-
         // --- Booking Panel ---
         bookingPanel = new JPanel();
         bookingPanel.setLayout(new BorderLayout());
@@ -607,9 +598,14 @@ public class CustomerDashboard implements ActionListener   {
         title1 = new JLabel("Booking History");
         title1.setFont(new Font("Arial", Font.BOLD, 18));
         title1.setForeground(new Color(52, 58, 64));
+        title1.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         bookingHeaderPanel.add(title1, BorderLayout.WEST);
 
-        // Add booking count badge
+        // Create a panel for count and refresh button
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        rightPanel.setBackground(Color.WHITE);
+
+        // Booking count badge
         bookings = CarRequest.getRequestsByCustomerID(customer.getCustomerId());
         JLabel bookingCountLabel = new JLabel(bookings.size() + " booking(s)");
         bookingCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -620,10 +616,22 @@ public class CustomerDashboard implements ActionListener   {
         ));
         bookingCountLabel.setBackground(new Color(248, 249, 250));
         bookingCountLabel.setOpaque(true);
-        bookingHeaderPanel.add(bookingCountLabel, BorderLayout.EAST);
 
-        bookingPanel.add(bookingHeaderPanel, BorderLayout.NORTH);
-        bookingPanel.add(Box.createVerticalStrut(15), BorderLayout.CENTER);
+        // Refresh button
+        JButton refreshButton = new JButton("Refresh");
+        refreshButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        refreshButton.setBackground(PRIMARY_COLOR);
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFocusPainted(false);
+        refreshButton.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
+        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Add action listener for refresh
+        refreshButton.addActionListener(e -> refreshCarBookingHistoryPage());
+
+        rightPanel.add(bookingCountLabel);
+        rightPanel.add(refreshButton);
+        bookingHeaderPanel.add(rightPanel, BorderLayout.EAST);
 
         // Booking content
         JPanel bookingContentPanel = new JPanel(new BorderLayout());
@@ -673,6 +681,7 @@ public class CustomerDashboard implements ActionListener   {
             bookingContentPanel.add(scrollPane, BorderLayout.CENTER);
         }
 
+        bookingPanel.add(bookingHeaderPanel, BorderLayout.NORTH);
         bookingPanel.add(bookingContentPanel, BorderLayout.SOUTH);
 
         // --- Purchase Panel ---
@@ -690,9 +699,17 @@ public class CustomerDashboard implements ActionListener   {
         title2 = new JLabel("Purchase History");
         title2.setFont(new Font("Arial", Font.BOLD, 18));
         title2.setForeground(new Color(52, 58, 64));
+        title2.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         purchaseHeaderPanel.add(title2, BorderLayout.WEST);
 
-        JLabel purchaseCountLabel = new JLabel("0 purchase(s)");
+        // Create a panel for count and refresh button
+        JPanel purchaseRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        purchaseRightPanel.setBackground(Color.WHITE);
+
+        //ArrayList<Purchase> purchases = new ArrayList<>(); 
+
+        // Purchase count badge
+        JLabel purchaseCountLabel = new JLabel(bookings.size() + " purchase(s)");
         purchaseCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         purchaseCountLabel.setForeground(new Color(108, 117, 125));
         purchaseCountLabel.setBorder(BorderFactory.createCompoundBorder(
@@ -701,18 +718,83 @@ public class CustomerDashboard implements ActionListener   {
         ));
         purchaseCountLabel.setBackground(new Color(248, 249, 250));
         purchaseCountLabel.setOpaque(true);
-        purchaseHeaderPanel.add(purchaseCountLabel, BorderLayout.EAST);
 
-        purchasePanel.add(purchaseHeaderPanel, BorderLayout.NORTH);
-        purchasePanel.add(Box.createVerticalStrut(15), BorderLayout.CENTER);
+        // Refresh button for purchases
+        JButton purchaseRefreshButton = new JButton("Refresh");
+        purchaseRefreshButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        purchaseRefreshButton.setBackground(PRIMARY_COLOR);
+        purchaseRefreshButton.setForeground(Color.WHITE);
+        purchaseRefreshButton.setFocusPainted(false);
+        purchaseRefreshButton.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
+        purchaseRefreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Add action listener for purchase refresh
+        purchaseRefreshButton.addActionListener(e -> refreshCarPurchaseHistoryPage());
+
+        purchaseRightPanel.add(purchaseCountLabel);
+        purchaseRightPanel.add(purchaseRefreshButton);
+        purchaseHeaderPanel.add(purchaseRightPanel, BorderLayout.EAST);
 
         // Purchase content
-        JPanel purchaseContentPanel = createEmptyStatePanel(
-            "No Purchase History", 
-            "Purchase history functionality will be available soon.",
-            "🛒"
-        );
-        purchasePanel.add(purchaseContentPanel, BorderLayout.SOUTH);
+        JPanel purchaseContentPanel = new JPanel(new BorderLayout());
+        purchaseContentPanel.setBackground(Color.WHITE);
+
+        if (bookings.isEmpty()) {
+            JPanel emptyStatePanel = createEmptyStatePanel(
+                "No Purchase History", 
+                "You haven't made any car purchases yet.",
+                "🛒"
+            );
+            purchaseContentPanel.add(emptyStatePanel, BorderLayout.CENTER);
+        } else {
+            // Define columns for purchase table (adjust based on your Purchase class structure)
+            String[] purchaseColumns = {"Car ID", "Purchase Date", "Amount", "Status"};
+            DefaultTableModel purchaseTableModel = new DefaultTableModel(purchaseColumns, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false; // Make table non-editable
+                }
+            };
+
+            // Populate table with purchase data
+            for (CarRequest booking : bookings) {
+                Object[] rowData = {
+                    booking.getCarID(),
+                    booking.getSalesmanID(),
+                    booking.getRequestStatus(),
+                    booking.getComment() != null ? booking.getComment() : "No comment"
+                };
+                purchaseTableModel.addRow(rowData);
+            }
+
+            JTable purchaseTable = new JTable(purchaseTableModel);
+            styleTable(purchaseTable); // Reuse the same styling method
+
+            // Adjust column widths for purchase table
+            if (purchaseTable.getColumnCount() == 4) {
+                purchaseTable.getColumnModel().getColumn(0).setPreferredWidth(80);   // Car ID
+                purchaseTable.getColumnModel().getColumn(1).setPreferredWidth(120);  // Purchase Date
+                purchaseTable.getColumnModel().getColumn(2).setPreferredWidth(100);  // Amount
+                purchaseTable.getColumnModel().getColumn(3).setPreferredWidth(100);  // Status
+            }
+
+            JScrollPane purchaseScrollPane = new JScrollPane(purchaseTable);
+            purchaseScrollPane.setBorder(BorderFactory.createLineBorder(new Color(222, 226, 230), 1));
+            purchaseScrollPane.setBackground(Color.WHITE);
+            purchaseScrollPane.getViewport().setBackground(Color.WHITE);
+
+            // Set preferred height based on content
+            int rowHeight = purchaseTable.getRowHeight();
+            int headerHeight = purchaseTable.getTableHeader().getPreferredSize().height;
+            int maxVisibleRows = Math.min(bookings.size(), 6); // Show max 6 rows
+            int preferredHeight = headerHeight + (rowHeight * maxVisibleRows) + 10;
+            purchaseScrollPane.setPreferredSize(new Dimension(purchaseScrollPane.getPreferredSize().width, preferredHeight));
+
+            purchaseContentPanel.add(purchaseScrollPane, BorderLayout.CENTER);
+        }
+
+        purchasePanel.add(purchaseHeaderPanel, BorderLayout.NORTH);
+        purchasePanel.add(purchaseContentPanel, BorderLayout.CENTER); 
 
         // Add panels to main container
         mainContainer.add(bookingPanel);
@@ -728,7 +810,72 @@ public class CustomerDashboard implements ActionListener   {
 
         contentPanel.add(mainScrollPane, BorderLayout.CENTER);
     }
+    
+    private void refreshCarBookingHistoryPage() {
+        frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
+        try {
+            cards.remove(carHistoryPage);
+            createCarHistoryPage();
+            cards.add(carHistoryPage, "CarHistory");
+            cardLayout.show(cards, "CarHistory");
+
+            for (int i = 0; i < navButtons.length; i++) {
+                if (navButtons[i].getActionCommand().equals("CarHistory")) {
+                    updateNavButtonsState(i);
+                    break;
+                }
+            }
+
+            // Revalidate and repaint to ensure UI updates
+            cards.revalidate();
+            cards.repaint();
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, 
+                "Error refreshing data: " + ex.getMessage(), 
+                "Refresh Error", 
+                JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace(); // For debugging
+        } finally {
+            // Reset cursor
+            frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
+
+    private void refreshCarPurchaseHistoryPage() {
+        frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+
+        try {
+            // Remove and recreate the entire car history page to refresh both booking and purchase data
+            cards.remove(carHistoryPage);
+            createCarHistoryPage();
+            cards.add(carHistoryPage, "CarHistory");
+            cardLayout.show(cards, "CarHistory");
+
+            for (int i = 0; i < navButtons.length; i++) {
+                if (navButtons[i].getActionCommand().equals("CarHistory")) {
+                    updateNavButtonsState(i);
+                    break;
+                }
+            }
+
+            // Revalidate and repaint to ensure UI updates
+            cards.revalidate();
+            cards.repaint();
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, 
+                "Error refreshing purchase data: " + ex.getMessage(), 
+                "Refresh Error", 
+                JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace(); // For debugging
+        } finally {
+            // Reset cursor
+            frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
+    
     private void styleTable(JTable table) {
         // Header styling
         JTableHeader header = table.getTableHeader();
