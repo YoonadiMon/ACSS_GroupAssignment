@@ -48,7 +48,7 @@ public class CustomerDashboard implements ActionListener   {
         this.customer = customer;
 
         frame = new JFrame("Customer Dashboard");
-        frame.setSize(800, 600);
+        frame.setSize(820, 600);
         frame.setLocationRelativeTo(null);
         //WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -586,33 +586,40 @@ public class CustomerDashboard implements ActionListener   {
 
         feedbackPanel = createBasicPagePanel("Thank You for Your Feedback");
 
-        // Create main content panel
-        JPanel contentPanel = new JPanel(new BorderLayout());
+        // Create main content panel with consistent padding
+        JPanel contentPanel = new JPanel(new BorderLayout(15, 15));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Create salesmen panel
+        // Create salesmen panel with consistent alignment
         JPanel salesmanPanel = new JPanel();
         salesmanPanel.setLayout(new BoxLayout(salesmanPanel, BoxLayout.Y_AXIS));
-        salesmanPanel.setBorder(BorderFactory.createTitledBorder("Salesmen"));
+        salesmanPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(0, 0, 128), 1), "Salesmen"),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
 
         // Get all unique salesmen from both bookings and purchases
         Set<String> allSalesmenIDs = new HashSet<>();
         allSalesmenIDs.addAll(bookedCarSalesmanMap.values());
         allSalesmenIDs.addAll(purchasedCarSalesmanMap.values());
 
-        // Add salesmen to panel
+        // Add salesmen to panel with consistent style
         for (String salesmanID : allSalesmenIDs) {
             // Get salesman name instead of just showing ID
             String salesmanName = SalesmanList.getSalesmanNameById(salesmanID);
 
-            // Create a panel for each salesman (allows horizontal layout)
-            JPanel salesmanItemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            // Create a panel for each salesman with better alignment
+            JPanel salesmanItemPanel = new JPanel();
+            salesmanItemPanel.setLayout(new BoxLayout(salesmanItemPanel, BoxLayout.X_AXIS));
             salesmanItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            salesmanItemPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 
             JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName);
-            salesmanItemPanel.add(salesmanLabel);
+            salesmanLabel.setPreferredSize(new Dimension(150, 25));
 
-            // Add feedback button
+            // Add feedback button with consistent size
             JButton feedbackBtn = new JButton("Give Feedback");
+            feedbackBtn.setPreferredSize(new Dimension(130, 25));
             feedbackBtn.addActionListener(e -> {
                 showSimpleFeedbackDialog(
                         "Salesman: " + salesmanName,
@@ -620,33 +627,43 @@ public class CustomerDashboard implements ActionListener   {
                         salesmanID);
             });
 
+            salesmanItemPanel.add(salesmanLabel);
+            salesmanItemPanel.add(Box.createHorizontalStrut(10)); // Add consistent spacing
             salesmanItemPanel.add(feedbackBtn);
+            salesmanItemPanel.add(Box.createHorizontalGlue()); // Push components to the left
             salesmanPanel.add(salesmanItemPanel);
-            salesmanPanel.add(Box.createVerticalStrut(5)); // Add spacing
+            salesmanPanel.add(Box.createVerticalStrut(10)); // Consistent vertical spacing
         }
 
-        // Create cars panel
+        // Create cars panel with matching style
         JPanel carPanel = new JPanel();
         carPanel.setLayout(new BoxLayout(carPanel, BoxLayout.Y_AXIS));
-        carPanel.setBorder(BorderFactory.createTitledBorder("Cars"));
+        carPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(BorderFactory.createLineBorder(new Color(0, 0, 128), 1), "Cars"),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
 
-        // Add purchased cars (labeled as "Purchased")
+        // Add purchased cars (labeled as "Purchased") with consistent styling
         if (!purchasedCarIDs.isEmpty()) {
             JLabel purchasedHeader = new JLabel("Purchased Cars:");
             purchasedHeader.setFont(purchasedHeader.getFont().deriveFont(Font.BOLD));
+            purchasedHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
             carPanel.add(purchasedHeader);
-            carPanel.add(Box.createVerticalStrut(5));
+            carPanel.add(Box.createVerticalStrut(8));
 
             for (String carID : purchasedCarIDs) {
-                JPanel carItemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JPanel carItemPanel = new JPanel();
+                carItemPanel.setLayout(new BoxLayout(carItemPanel, BoxLayout.X_AXIS));
                 carItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                carItemPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 
-                JLabel carLabel = new JLabel("  • Car ID: " + carID + " (Purchased)");
+                JLabel carLabel = new JLabel("• Car ID: " + carID + " (Purchased)");
                 carLabel.setForeground(new Color(0, 128, 0)); // Green color for purchased
-                carItemPanel.add(carLabel);
+                carLabel.setPreferredSize(new Dimension(200, 25));
 
-                // Add feedback button
+                // Add feedback button with consistent size
                 JButton feedbackBtn = new JButton("Give Feedback");
+                feedbackBtn.setPreferredSize(new Dimension(130, 25));
                 feedbackBtn.addActionListener(e -> {
                     showSimpleFeedbackDialog(
                             "Purchased Car: " + carID,
@@ -654,30 +671,37 @@ public class CustomerDashboard implements ActionListener   {
                             carID);
                 });
 
+                carItemPanel.add(carLabel);
+                carItemPanel.add(Box.createHorizontalStrut(10)); // Consistent spacing
                 carItemPanel.add(feedbackBtn);
+                carItemPanel.add(Box.createHorizontalGlue()); // Push components to the left
                 carPanel.add(carItemPanel);
-                carPanel.add(Box.createVerticalStrut(2));
+                carPanel.add(Box.createVerticalStrut(5));
             }
             carPanel.add(Box.createVerticalStrut(10));
         }
 
-        // Add viewed cars (only booked, not purchased)
+        // Add viewed cars (only booked, not purchased) with matching styling
         if (!onlyBookedCarIDs.isEmpty()) {
             JLabel viewedHeader = new JLabel("Viewed Cars:");
             viewedHeader.setFont(viewedHeader.getFont().deriveFont(Font.BOLD));
+            viewedHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
             carPanel.add(viewedHeader);
-            carPanel.add(Box.createVerticalStrut(5));
+            carPanel.add(Box.createVerticalStrut(8));
 
             for (String carID : onlyBookedCarIDs) {
-                JPanel carItemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JPanel carItemPanel = new JPanel();
+                carItemPanel.setLayout(new BoxLayout(carItemPanel, BoxLayout.X_AXIS));
                 carItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                carItemPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 
-                JLabel carLabel = new JLabel("  • Car ID: " + carID + " (Viewed)");
+                JLabel carLabel = new JLabel("• Car ID: " + carID + " (Viewed)");
                 carLabel.setForeground(new Color(128, 128, 128)); // Gray color for viewed only
-                carItemPanel.add(carLabel);
+                carLabel.setPreferredSize(new Dimension(200, 25));
 
-                // Add feedback button
+                // Add feedback button with consistent size
                 JButton feedbackBtn = new JButton("Give Feedback");
+                feedbackBtn.setPreferredSize(new Dimension(130, 25));
                 feedbackBtn.addActionListener(e -> {
                     showSimpleFeedbackDialog(
                             "Viewed Car: " + carID,
@@ -685,9 +709,12 @@ public class CustomerDashboard implements ActionListener   {
                             carID);
                 });
 
+                carItemPanel.add(carLabel);
+                carItemPanel.add(Box.createHorizontalStrut(10)); // Consistent spacing
                 carItemPanel.add(feedbackBtn);
+                carItemPanel.add(Box.createHorizontalGlue()); // Push components to the left
                 carPanel.add(carItemPanel);
-                carPanel.add(Box.createVerticalStrut(2));
+                carPanel.add(Box.createVerticalStrut(5));
             }
         }
 
@@ -695,13 +722,24 @@ public class CustomerDashboard implements ActionListener   {
         if (purchasedCarIDs.isEmpty() && onlyBookedCarIDs.isEmpty()) {
             JLabel noInteractionLabel = new JLabel("No car interactions found.");
             noInteractionLabel.setForeground(Color.GRAY);
+            noInteractionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
             carPanel.add(noInteractionLabel);
         }
 
-        // Create a panel to hold both salesman and car panels side by side
-        JPanel infoPanel = new JPanel(new GridLayout(1, 2, 10, 0));
-        infoPanel.add(new JScrollPane(salesmanPanel));
-        infoPanel.add(new JScrollPane(carPanel));
+        // Create a panel to hold both salesman and car panels side by side with better spacing
+        JPanel infoPanel = new JPanel(new GridLayout(1, 2, 20, 0)); // Increased horizontal gap
+
+        // Use scroll panes with consistent behavior
+        JScrollPane salesmanScrollPane = new JScrollPane(salesmanPanel);
+        salesmanScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        salesmanScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        JScrollPane carScrollPane = new JScrollPane(carPanel);
+        carScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        carScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        infoPanel.add(salesmanScrollPane);
+        infoPanel.add(carScrollPane);
 
         // Add the info panel to content panel
         contentPanel.add(infoPanel, BorderLayout.CENTER);
@@ -709,12 +747,7 @@ public class CustomerDashboard implements ActionListener   {
         feedbackPanel.add(contentPanel, BorderLayout.CENTER);
     }
 
-    /**
-     * Shows a simple dialog to collect user feedback
-     * @param itemName display name for the item being rated
-     * @param feedbackType type of feedback (SALESMAN, CAR_VIEWED, CAR_PURCHASED)
-     * @param itemId ID of the item being rated (salesmanID or carID)
-     */
+
     private void showSimpleFeedbackDialog(String itemName, String feedbackType, String itemId) {
         // Show simple rating dialog
         String ratingInput = JOptionPane.showInputDialog(
