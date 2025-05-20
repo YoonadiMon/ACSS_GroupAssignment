@@ -6,7 +6,9 @@
             <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/MainProgram/MainProgram.java</file>
             <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Car/CarRequest.java</file>
             <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Customer/CustomerDashboard.java</file>
-            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/carList.txt</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/soldCars.txt</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/CarRequest.txt</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/CustomersList.txt</file>
         </group>
     </open-files>
 </project-private>

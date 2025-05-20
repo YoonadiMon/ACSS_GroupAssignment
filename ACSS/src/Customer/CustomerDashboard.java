@@ -556,7 +556,7 @@ public class CustomerDashboard implements ActionListener   {
         // Get customer's bookings and purchases
         ArrayList<CarRequest> bookings = CarRequest.getRequestsByCustomerID(customer.getCustomerId());
         List<SoldCarRecord> purchases = SoldCarRecord.findByCustomerID(customer.getCustomerId());
-    
+
         // Extract booking information (cars they looked at but haven't purchased)
         List<String> bookedCarIDs = new ArrayList<>();
         Map<String, String> bookedCarSalesmanMap = new HashMap<>(); // Maps carID to salesmanID
@@ -580,12 +580,12 @@ public class CustomerDashboard implements ActionListener   {
             purchasedCarIDs.add(carID);
             purchasedCarSalesmanMap.put(carID, salesmanID);
         }
-        
+
         List<String> onlyBookedCarIDs = new ArrayList<>(bookedCarIDs);
         onlyBookedCarIDs.removeAll(purchasedCarIDs);
-        
+
         feedbackPanel = createBasicPagePanel("Thank You for Your Feedback");
-        
+
         // Create main content panel
         JPanel contentPanel = new JPanel(new BorderLayout());
 
@@ -601,10 +601,27 @@ public class CustomerDashboard implements ActionListener   {
 
         // Add salesmen to panel
         for (String salesmanID : allSalesmenIDs) {
-            // You might want to get salesman details from a Salesman class
-            // For now, just displaying the ID
-            JLabel salesmanLabel = new JLabel("Salesman ID: " + salesmanID);
-            salesmanPanel.add(salesmanLabel);
+            // Get salesman name instead of just showing ID
+            String salesmanName = SalesmanList.getSalesmanNameById(salesmanID);
+
+            // Create a panel for each salesman (allows horizontal layout)
+            JPanel salesmanItemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            salesmanItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName);
+            salesmanItemPanel.add(salesmanLabel);
+
+            // Add feedback button
+            JButton feedbackBtn = new JButton("Give Feedback");
+            feedbackBtn.addActionListener(e -> {
+                showSimpleFeedbackDialog(
+                        "Salesman: " + salesmanName,
+                        CustomerFeedbacks.TYPE_SALESMAN, 
+                        salesmanID);
+            });
+
+            salesmanItemPanel.add(feedbackBtn);
+            salesmanPanel.add(salesmanItemPanel);
             salesmanPanel.add(Box.createVerticalStrut(5)); // Add spacing
         }
 
@@ -621,9 +638,24 @@ public class CustomerDashboard implements ActionListener   {
             carPanel.add(Box.createVerticalStrut(5));
 
             for (String carID : purchasedCarIDs) {
+                JPanel carItemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                carItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
                 JLabel carLabel = new JLabel("  • Car ID: " + carID + " (Purchased)");
                 carLabel.setForeground(new Color(0, 128, 0)); // Green color for purchased
-                carPanel.add(carLabel);
+                carItemPanel.add(carLabel);
+
+                // Add feedback button
+                JButton feedbackBtn = new JButton("Give Feedback");
+                feedbackBtn.addActionListener(e -> {
+                    showSimpleFeedbackDialog(
+                            "Purchased Car: " + carID,
+                            CustomerFeedbacks.TYPE_CAR_PURCHASED, 
+                            carID);
+                });
+
+                carItemPanel.add(feedbackBtn);
+                carPanel.add(carItemPanel);
                 carPanel.add(Box.createVerticalStrut(2));
             }
             carPanel.add(Box.createVerticalStrut(10));
@@ -637,9 +669,24 @@ public class CustomerDashboard implements ActionListener   {
             carPanel.add(Box.createVerticalStrut(5));
 
             for (String carID : onlyBookedCarIDs) {
+                JPanel carItemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                carItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
                 JLabel carLabel = new JLabel("  • Car ID: " + carID + " (Viewed)");
                 carLabel.setForeground(new Color(128, 128, 128)); // Gray color for viewed only
-                carPanel.add(carLabel);
+                carItemPanel.add(carLabel);
+
+                // Add feedback button
+                JButton feedbackBtn = new JButton("Give Feedback");
+                feedbackBtn.addActionListener(e -> {
+                    showSimpleFeedbackDialog(
+                            "Viewed Car: " + carID,
+                            CustomerFeedbacks.TYPE_CAR_VIEWED, 
+                            carID);
+                });
+
+                carItemPanel.add(feedbackBtn);
+                carPanel.add(carItemPanel);
                 carPanel.add(Box.createVerticalStrut(2));
             }
         }
@@ -658,8 +705,86 @@ public class CustomerDashboard implements ActionListener   {
 
         // Add the info panel to content panel
         contentPanel.add(infoPanel, BorderLayout.CENTER);
-        
+
         feedbackPanel.add(contentPanel, BorderLayout.CENTER);
+    }
+
+    /**
+     * Shows a simple dialog to collect user feedback
+     * @param itemName display name for the item being rated
+     * @param feedbackType type of feedback (SALESMAN, CAR_VIEWED, CAR_PURCHASED)
+     * @param itemId ID of the item being rated (salesmanID or carID)
+     */
+    private void showSimpleFeedbackDialog(String itemName, String feedbackType, String itemId) {
+        // Show simple rating dialog
+        String ratingInput = JOptionPane.showInputDialog(
+                feedbackPanel,
+                "Please rate " + itemName + " (1-5 stars):",
+                "Rating",
+                JOptionPane.QUESTION_MESSAGE);
+
+        // Check if user canceled the rating dialog
+        if (ratingInput == null || ratingInput.trim().isEmpty()) {
+            return;
+        }
+
+        // Parse rating
+        int rating;
+        try {
+            rating = Integer.parseInt(ratingInput.trim());
+            if (rating < 1 || rating > 5) {
+                JOptionPane.showMessageDialog(
+                    feedbackPanel,
+                    "Please enter a rating between 1 and 5.",
+                    "Invalid Rating",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(
+                feedbackPanel,
+                "Please enter a valid number between 1 and 5.",
+                "Invalid Rating",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Show review dialog
+        String review = JOptionPane.showInputDialog(
+                feedbackPanel,
+                "Please share your feedback about " + itemName + ":",
+                "Feedback",
+                JOptionPane.PLAIN_MESSAGE);
+
+        // If user cancels review, use empty string
+        if (review == null) {
+            review = "";
+        }
+
+        // Save feedback
+        CustomerFeedbacks feedback = new CustomerFeedbacks(
+                customer.getCustomerId(),
+                itemId,
+                feedbackType,
+                rating,
+                review
+        );
+
+        boolean success = feedback.saveFeedback();
+
+        if (success) {
+            JOptionPane.showMessageDialog(
+                    feedbackPanel,
+                    "Thank you for your feedback!",
+                    "Feedback Submitted",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(
+                    feedbackPanel,
+                    "There was an error saving your feedback. Please try again.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     private void createCarHistoryPage() {
