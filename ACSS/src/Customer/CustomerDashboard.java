@@ -862,20 +862,63 @@ public class CustomerDashboard implements ActionListener   {
     
     private void createFeedbackHistoryPage() {
         feedbackHistoryPanel = createBasicPagePanel("Feedback History");
-        
+
         // Get the content panel (which is at index 1 in BorderLayout.CENTER)
         JPanel contentPanel = (JPanel) ((BorderLayout) feedbackHistoryPanel.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+
+        // Create refresh button without an icon
+        JButton refreshButton = new JButton("Refresh");
+        ButtonStyler.stylePrimaryButton(refreshButton);
+
+        // Add action listener to refresh button
+        refreshButton.addActionListener(e -> {
+            refreshFeedbackHistory();
+        });
         
         // Page-specific content 
         contentPanel.setLayout(new BorderLayout(10, 10));
-    
+
         // Create tabs for different feedback types
         JTabbedPane feedbackTabs = new JTabbedPane();
         feedbackTabs.addTab("Salesman Feedback", createFeedbackList(CustomerFeedbacks.TYPE_SALESMAN));
-        feedbackTabs.addTab("Car Feedback", createFeedbackList(null)); // Both car types
+        feedbackTabs.addTab("Car Feedback", createFeedbackList(null)); 
 
         // Add tabs to the content panel
+        contentPanel.add(refreshButton, BorderLayout.NORTH);
         contentPanel.add(feedbackTabs, BorderLayout.CENTER);
+    }
+    
+    private void refreshFeedbackHistory() {
+        frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+
+        try {
+            // Remove and recreate the entire car history page to refresh both booking and purchase data
+            cards.remove(feedbackHistoryPanel);
+            createFeedbackHistoryPage();
+            cards.add(feedbackHistoryPanel, "FeedbacksHistory");
+            cardLayout.show(cards, "FeedbacksHistory");
+
+            for (int i = 0; i < navButtons.length; i++) {
+                if (navButtons[i].getActionCommand().equals("FeedbacksHistory")) {
+                    updateNavButtonsState(i);
+                    break;
+                }
+            }
+
+            // Revalidate and repaint to ensure UI updates
+            cards.revalidate();
+            cards.repaint();
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, 
+                "Error refreshing purchase data: " + ex.getMessage(), 
+                "Refresh Error", 
+                JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace(); // For debugging
+        } finally {
+            // Reset cursor
+            frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
     }
     
     private JScrollPane createFeedbackList(String feedbackType) {
