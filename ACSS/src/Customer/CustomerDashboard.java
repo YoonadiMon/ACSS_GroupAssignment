@@ -28,7 +28,7 @@ public class CustomerDashboard implements ActionListener   {
     private Customer customer;
     
     // Pages
-    private JPanel mainPage, CarPage, page3Panel, carHistoryPage, page5Panel;
+    private JPanel mainPage, CarPage, feedbackPanel, carHistoryPage, page5Panel;
     
     // Navigation buttons
     private JButton[] navButtons;
@@ -54,14 +54,14 @@ public class CustomerDashboard implements ActionListener   {
         // Create the pages
         createMainPage();
         createCarPage();
-        createPage3();
+        createFeedbackPage();
         createCarHistoryPage();
         createPage5();
         
         // Add panels to the card layout
         cards.add(mainPage, "Main");
         cards.add(CarPage, "Cars");
-        cards.add(page3Panel, "page3");
+        cards.add(feedbackPanel, "Feedbacks");
         cards.add(carHistoryPage, "CarHistory");
         cards.add(page5Panel, "page5");
         
@@ -82,8 +82,8 @@ public class CustomerDashboard implements ActionListener   {
         navPanel.setBackground(BACKGROUND_COLOR);
         
         navButtons = new JButton[5];
-        String[] buttonLabels = {"Main", "Cars", "Page 3", "Cars History", "Page 5"};
-        String[] cardNames = {"Main", "Cars", "page3", "CarHistory", "page5"};
+        String[] buttonLabels = {"Main", "Cars", "Feedbacks", "Cars History", "Page 5"};
+        String[] cardNames = {"Main", "Cars", "Feedbacks", "CarHistory", "page5"};
         
         for (int i = 0; i < 5; i++) {
             navButtons[i] = createNavButton(buttonLabels[i], cardNames[i]);
@@ -429,7 +429,7 @@ public class CustomerDashboard implements ActionListener   {
         JLabel brandLabel = new JLabel("Brand: " + car.getBrand());
         brandLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        JLabel priceLabel = new JLabel("Price: $" + String.format("%,.2f", car.getPrice()));
+        JLabel priceLabel = new JLabel("Price: $" + String.format("%,.2f", (double) car.getPrice()));
         priceLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         
@@ -546,11 +546,11 @@ public class CustomerDashboard implements ActionListener   {
         return carBox;
     }
     
-    private void createPage3() {
-        page3Panel = createBasicPagePanel("Page 3");
+    private void createFeedbackPage() {
+        feedbackPanel = createBasicPagePanel("Page 3");
         
         // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-        JPanel contentPanel = (JPanel) ((BorderLayout) page3Panel.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+        JPanel contentPanel = (JPanel) ((BorderLayout) feedbackPanel.getLayout()).getLayoutComponent(BorderLayout.CENTER);
         
         // Page-specific content 
         JLabel contentLabel = new JLabel("This is Page 3 content");
