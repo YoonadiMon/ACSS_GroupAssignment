@@ -743,11 +743,54 @@ public class CustomerDashboard implements ActionListener   {
 
         // Add the info panel to content panel
         contentPanel.add(infoPanel, BorderLayout.CENTER);
+        
+        // Create a refresh button panel
+        JPanel refreshPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton refreshButton = new JButton("Refresh Data");
+        ButtonStyler.stylePrimaryButton(refreshButton);
+        refreshButton.setPreferredSize(new Dimension(120, 30));
+        // No icon - removed to fix NullPointerException
+        refreshButton.addActionListener(e -> refreshFeedbackPage());
+        refreshPanel.add(refreshButton);
+        
+        // Add the refresh panel to the top of the content panel
+        contentPanel.add(refreshPanel, BorderLayout.NORTH);
 
         feedbackPanel.add(contentPanel, BorderLayout.CENTER);
     }
 
+    private void refreshFeedbackPage() {
+        frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+        try {
+            // Remove and recreate the feedback page
+            cards.remove(feedbackPanel);
+            createFeedbackPage();
+            cards.add(feedbackPanel, "Feedbacks");  // Match the original identifier "Feedbacks"
+            cardLayout.show(cards, "Feedbacks");   // Match the original identifier "Feedbacks"
 
+            // Update navigation button state
+            for (int i = 0; i < navButtons.length; i++) {
+                if (navButtons[i].getActionCommand().equals("Feedbacks")) {  // Match the original identifier "Feedbacks"
+                    updateNavButtonsState(i);
+                    break;
+                }
+            }
+
+            // Revalidate and repaint to ensure UI updates
+            cards.revalidate();
+            cards.repaint();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(frame, 
+                "Error refreshing feedback data: " + ex.getMessage(), 
+                "Refresh Error", 
+                JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace(); // For debugging
+        } finally {
+            // Reset cursor
+            frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
+    
     private void showSimpleFeedbackDialog(String itemName, String feedbackType, String itemId) {
         // Show simple rating dialog
         String ratingInput = JOptionPane.showInputDialog(
