@@ -22,8 +22,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-
-
 /// DELETE THE ON CLOSE FUNC 
 
 public class CustomerDashboard implements ActionListener   {
@@ -34,7 +32,7 @@ public class CustomerDashboard implements ActionListener   {
     private Customer customer;
     
     // Pages
-    private JPanel mainPage, CarPage, feedbackPanel, carHistoryPage, page5Panel;
+    private JPanel mainPage, carPage, feedbackPage, carHistoryPage, feedbackHistoryPanel;
     
     // Navigation buttons
     private JButton[] navButtons;
@@ -56,20 +54,22 @@ public class CustomerDashboard implements ActionListener   {
         // Card layout to switch between login and register pages
         cardLayout = new CardLayout();
         cards = new JPanel(cardLayout);
-
+        
+        createPages();
+        
         // Create the pages
-        createMainPage();
-        createCarPage();
+        //createMainPage();
+        //createCarPage();
         createFeedbackPage();
         createCarHistoryPage();
-        createPage5();
+        createFeedbackHistoryPage();
         
         // Add panels to the card layout
         cards.add(mainPage, "Main");
-        cards.add(CarPage, "Cars");
-        cards.add(feedbackPanel, "Feedbacks");
+        cards.add(carPage, "Cars");
+        cards.add(feedbackPage, "Feedbacks");
         cards.add(carHistoryPage, "CarHistory");
-        cards.add(page5Panel, "page5");
+        cards.add(feedbackHistoryPanel, "FeedbacksHistory");
         
         // Create navigation panel
         JPanel navigationPanel = createNavigationPanel();
@@ -82,14 +82,28 @@ public class CustomerDashboard implements ActionListener   {
         frame.setVisible(true);
     }
     
+    private void createPages() {
+        // Create instances of page classes
+        MainPage mainPageCreator = new MainPage();
+        CarPage carPageCreator = new CarPage();
+        //FeedbackPage feedbackPageCreator = new FeedbackPage();
+        
+        // Create pages using the page creator instances
+        
+        mainPage = mainPageCreator.createPage(customer, frame);
+        carPage = carPageCreator.createPage(customer, frame);
+        //feedbackPage = feedbackPageCreator.createPage(customer, frame);
+        
+    }
+    
     private JPanel createNavigationPanel() {
         JPanel navPanel = new JPanel(new GridLayout(1, 5, 5, 0));
         navPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         navPanel.setBackground(BACKGROUND_COLOR);
         
         navButtons = new JButton[5];
-        String[] buttonLabels = {"Main", "Cars", "Feedbacks", "Cars History", "Page 5"};
-        String[] cardNames = {"Main", "Cars", "Feedbacks", "CarHistory", "page5"};
+        String[] buttonLabels = {"Main", "Cars", "Feedbacks", "Cars History", "Feedbacks History"};
+        String[] cardNames = {"Main", "Cars", "Feedbacks", "CarHistory", "FeedbacksHistory"};
         
         for (int i = 0; i < 5; i++) {
             navButtons[i] = createNavButton(buttonLabels[i], cardNames[i]);
@@ -127,431 +141,6 @@ public class CustomerDashboard implements ActionListener   {
         }
     }
     
-    private void createMainPage() {
-        JPanel accountPanel, headerPanel, contentPanel, fieldsPanel, emptyPanel, wrapperPanel;
-        JLabel accountLabel, usernameLabel, emailLabel, passwordLabel, statusLabel, forgotPasswordLbl;
-        JButton editButton, saveButton;
-        JTextField usernameField, emailField;
-        
-        mainPage = createBasicPagePanel("Welcome To ACSS, " + customer.getUsername() + "!");
-
-        // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-        contentPanel = (JPanel) ((BorderLayout) mainPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-
-        // Page-specific content 
-        accountPanel = new JPanel();
-        accountPanel.setLayout(new BorderLayout(10, 10));
-        accountPanel.setMaximumSize(new Dimension(600, 400));
-        accountPanel.setPreferredSize(new Dimension(500, 330));
-        accountPanel.setBackground(new Color(240, 240, 240));
-        accountPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        // Header -> Title + Button
-        headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(accountPanel.getBackground());
-        accountLabel = new JLabel("Account Information");
-        accountLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        headerPanel.add(accountLabel, BorderLayout.WEST);
-
-        editButton = new JButton("Edit Profile");
-        editButton.setBackground(new Color(0, 84, 159)); 
-        editButton.setForeground(Color.WHITE);
-        editButton.setFocusPainted(false);
-        editButton.setFont(new Font("Arial", Font.BOLD, 14));
-        editButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        headerPanel.add(editButton, BorderLayout.EAST);     
-
-        // Field Section with fixed height rows
-        fieldsPanel = new JPanel();
-        fieldsPanel.setLayout(new GridLayout(5, 2, 10, 20)); // Added an extra row for consistent spacing
-        fieldsPanel.setBackground(accountPanel.getBackground());
-
-        // Username field
-        usernameLabel = new JLabel("Username:");
-        usernameLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        usernameField = new JTextField();
-        usernameField.setText(customer.getUsername());
-        usernameField.setEditable(false);
-
-        // Email field
-        emailLabel = new JLabel("Email:");
-        emailLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        emailField = new JTextField();
-        emailField.setText(customer.getEmail());
-        emailField.setEditable(false);
-
-        // Password field
-        passwordLabel = new JLabel("Password:");
-        passwordLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        JPasswordField passwordField = new JPasswordField();
-        passwordField.setText("***");
-        passwordField.setEditable(false);
-        
-        // Account status
-        statusLabel = new JLabel("Account Status:");
-        statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        String status = customer.isApproved() ? "Approved" : "Pending Approval";
-        JLabel statusValueLabel = new JLabel(status);
-        statusValueLabel.setForeground(customer.isApproved() ? new Color(0, 128, 0) : new Color(255, 140, 0));
-        statusValueLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        // Save button - Always in the layout but initially hidden
-        saveButton = new JButton("Save");
-        saveButton.setBackground(new Color(0, 84, 159));
-        saveButton.setForeground(Color.WHITE);
-        saveButton.setFocusPainted(false);
-        saveButton.setFont(new Font("Arial", Font.BOLD, 14));
-        saveButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
-        saveButton.setVisible(false);
-
-        // Empty placeholder panel for the 5th row's first column
-        emptyPanel = new JPanel();
-        emptyPanel.setOpaque(false);
-
-        // Add all components to the fields panel
-        fieldsPanel.add(usernameLabel);
-        fieldsPanel.add(usernameField);
-        fieldsPanel.add(emailLabel);
-        fieldsPanel.add(emailField);
-        fieldsPanel.add(passwordLabel);
-        fieldsPanel.add(passwordField);
-        fieldsPanel.add(statusLabel);
-        fieldsPanel.add(statusValueLabel);
-        fieldsPanel.add(emptyPanel);
-        fieldsPanel.add(saveButton);
-
-        accountPanel.add(headerPanel, BorderLayout.NORTH);
-        accountPanel.add(fieldsPanel, BorderLayout.CENTER);
-
-        // Center the account panel in the content panel + Hide extra space 
-        wrapperPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        wrapperPanel.setOpaque(false);
-        wrapperPanel.add(accountPanel);
-        
-        
-        //
-        forgotPasswordLbl = new JLabel("Add secuity question in case of forgotten password?");
-        forgotPasswordLbl.setFont(new Font("Arial", Font.BOLD, 14));
-        forgotPasswordLbl.setForeground(LIGHT_TEXT_COLOR);
-        forgotPasswordLbl.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        forgotPasswordLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-        forgotPasswordLbl.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
-
-        
-        wrapperPanel.add(forgotPasswordLbl);
-
-        contentPanel.add(wrapperPanel);
-
-        // Add action listeners
-        editButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Toggle edit mode
-                boolean editMode = !usernameField.isEditable();
-
-                // Update UI based on edit mode
-                usernameField.setEditable(editMode);
-                emailField.setEditable(editMode);
-                passwordField.setEditable(editMode);
-
-                // If switching to edit mode, clear password field and show actual values
-                if (editMode) {
-                    usernameField.setText(customer.getUsername());
-                    emailField.setText(customer.getEmail());
-                    passwordField.setText("");
-
-                    // Change edit button appearance
-                    editButton.setBackground(new Color(100, 100, 100)); // Gray color
-
-                    // Show the save button
-                    saveButton.setVisible(true);
-                } else {
-                    // Revert to display mode
-                    usernameField.setText(customer.getUsername());
-                    emailField.setText(customer.getEmail());
-                    passwordField.setText("***");
-
-                    editButton.setBackground(new Color(0, 84, 159)); 
-                    saveButton.setVisible(false);
-                }
-            }
-        });
-
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Save the updated information
-                customer.setUsername(usernameField.getText());
-                customer.setEmail(emailField.getText());
-
-                String password = new String(passwordField.getPassword());
-                if (!password.isEmpty()) {
-                    // Update password if changed and valid
-                    if (!CustomerDataValidator.isValidPassword(password)) {
-                        JOptionPane.showMessageDialog(frame, "Email is not valid!", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                    else {
-                        customer.setPassword(password);
-                    }
-                }
-                CustomerDataIO.writeCustomer();
-                JOptionPane.showMessageDialog(frame,
-                            "Account Information has been edited!",
-                            "Account edit Successful",
-                            JOptionPane.INFORMATION_MESSAGE);
-                
-                // Return to display mode
-                usernameField.setEditable(false);
-                emailField.setEditable(false);
-                passwordField.setEditable(false);
-
-                usernameField.setText(customer.getUsername());
-                emailField.setText(customer.getEmail());
-                passwordField.setText("***");
-
-                editButton.setBackground(new Color(0, 84, 159)); // Blue color
-                saveButton.setVisible(false);
-
-                // Update page title with new username
-                JLabel titleLabel = (JLabel) ((JPanel) mainPage.getComponent(0)).getComponent(0);
-                titleLabel.setText("Welcome To ACSS, " + customer.getUsername() + "!");
-            }
-        });
-        
-        forgotPasswordLbl.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                String customerId = customer.getCustomerId(); 
-
-                String question = JOptionPane.showInputDialog(frame, "Enter your security question:");
-                if (question == null || question.trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Security question cannot be empty.");
-                    return;
-                }
-
-                String answer = JOptionPane.showInputDialog(frame, "Enter your answer:");
-                if (answer == null || answer.trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Answer cannot be empty.");
-                    return;
-                }
-
-                CustomersForgetPwd customerForgetPwd = new CustomersForgetPwd(customerId, question, answer);
-                if (CustomersForgetPwd.customerExists(customerId)) {
-                    int option = JOptionPane.showConfirmDialog(frame,
-                        "You already have a saved security question. Do you want to override it?",
-                        "Confirm Override",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE);
-
-                    if (option == JOptionPane.YES_OPTION) {
-                        // User chose to override
-                        boolean success = customerForgetPwd.overrideSecurityQuestion();
-                        if (success) {
-                            JOptionPane.showMessageDialog(frame, "Security question updated successfully.");
-                        } else {
-                            JOptionPane.showMessageDialog(frame, "Error updating security question.");
-                        }
-                    } else {
-                        // User chose NO or closed the dialog
-                        JOptionPane.showMessageDialog(frame, "Security question not changed.");
-                    }
-                } else {
-                    // Customer ID does not exist, save new question
-                    boolean success = customerForgetPwd.saveSecurityQuestion();
-                    if (success) {
-                        JOptionPane.showMessageDialog(frame, "Security question saved.");
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "Error saving security question.");
-                    }
-                }
-            }
-        });
-    }
-    
-    private void createCarPage() {
-        CarPage = createBasicPagePanel("Available Cars at ACSS");
-
-        // Load salesman data
-        ArrayList<Salesman> salesmanList = SalesmanList.loadSalesmanDataFromFile();
-
-        // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-        JPanel contentPanel = (JPanel) ((BorderLayout) CarPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
-
-        // Set layout for the content panel
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-
-        // Page-specific content 
-        ArrayList<Car> allCarsList = CarList.loadCarDataFromFile();
-        ArrayList<Car> showCarsList = new ArrayList<>();
-        for (Car car : allCarsList) {
-            if (car.getStatus().equals("available")) {
-                showCarsList.add(car);
-            }
-        }
-
-        // Add some spacing at the top
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-        // Create a panel to hold car boxes with some margin on the sides
-        JPanel carListContainer = new JPanel();
-        carListContainer.setLayout(new BoxLayout(carListContainer, BoxLayout.Y_AXIS));
-        carListContainer.setBorder(BorderFactory.createEmptyBorder(0, 50, 20, 50));
-        carListContainer.setBackground(Color.WHITE);
-
-        // Create a box for each car
-        for (Car car : showCarsList) {
-            JPanel carBox = createCarBox(car);
-            carListContainer.add(carBox);
-            carListContainer.add(Box.createRigidArea(new Dimension(0, 15))); // Space between car boxes
-        }
-
-        // Add the car container to a scroll pane in case there are many cars
-        JScrollPane scrollPane = new JScrollPane(carListContainer);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        contentPanel.add(scrollPane);
-    }
-
-    private JPanel createCarBox(Car car) {
-        // Main container for car info
-        JPanel carBox = new JPanel();
-        carBox.setLayout(new BorderLayout());
-        carBox.setBackground(new Color(240, 240, 240)); 
-        carBox.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                BorderFactory.createEmptyBorder(10, 15, 10, 15)));
-        carBox.setMaximumSize(new Dimension(800, 150)); 
-
-        // Left panel for car details
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new GridLayout(4, 1));
-        infoPanel.setBackground(new Color(240, 240, 240));
-        infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-
-        // Create and style the information labels
-        JLabel carIdLabel = new JLabel("Car ID: " + car.getCarId());
-        carIdLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
-
-        JLabel brandLabel = new JLabel("Brand: " + car.getBrand());
-        brandLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-
-        JLabel priceLabel = new JLabel("Price: $" + String.format("%,.2f", (double) car.getPrice()));
-        priceLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-
-        
-        String salesmanId = car.getSalesmanId();
-        String salesmanName = SalesmanList.getSalesmanNameById(salesmanId);
-        JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName);
-        salesmanLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-
-        // Add labels to the info panel
-        infoPanel.add(carIdLabel);
-        infoPanel.add(brandLabel);
-        infoPanel.add(priceLabel);
-        infoPanel.add(salesmanLabel);
-
-        // Right panel for the Book button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.setBackground(new Color(240, 240, 240));
-
-        // Create and style the Book button
-        JButton bookButton = new JButton("Book");
-        ButtonStyler.stylePrimaryButton(bookButton);
-        bookButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
-
-        // Add action listener to the button
-        bookButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String customerId = customer.getCustomerId(); // Get current logged in customer ID
-
-                int confirm = JOptionPane.showConfirmDialog(
-                    CarPage,  // parent component (your panel or frame)
-                    "Confirm booking for " + car.getBrand() + " (ID: " + car.getCarId() + ")",  // message
-                    "Confirm Booking",  // dialog title
-                    JOptionPane.OK_CANCEL_OPTION,  // options: OK and Cancel buttons
-                    JOptionPane.QUESTION_MESSAGE  // icon type
-                );
-
-                if (confirm == JOptionPane.OK_OPTION) {
-                    try {
-                        // Load existing requests
-                        ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
-                        
-                         // Check if this car is already requested
-                        boolean alreadyRequested = false;
-                        boolean rejected = false;
-                        String reason = "";
-                        for (CarRequest req : requests) {
-                            if (req.getCarID().equals(car.getCarId()) && req.getCustomerID().equals(customerId) ) {
-                                alreadyRequested = true;
-                                if ((req.getRequestStatus().equals("rejected"))) {
-                                    rejected = true;
-                                    reason = req.getComment();
-                                }
-                                break;
-                            }
-                        }
-                        if (reason.equals(".") || reason.trim().isEmpty()) {
-                            reason = "Not provided.";
-                        }
-                        if (rejected) {
-                            JOptionPane.showMessageDialog(CarPage,
-                                    "Your previous booking has been rejected by saleman.\nReason: " + reason,
-                                    "Car Not Available",
-                                    JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-                        if (alreadyRequested) {
-                            JOptionPane.showMessageDialog(CarPage,
-                                    "You have already requested for a booking for this car. Please wait for approval.",
-                                    "Car Not Available",
-                                    JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-                    
-                        // Add new request
-                        CarRequest newRequest = new CarRequest(
-                                customerId,
-                                car.getCarId(),
-                                car.getSalesmanId(),
-                                "pending", // Initial status is pending
-                                "."
-                        );
-
-                        requests.add(newRequest);
-                        CarRequest.writeCarRequests(requests);
-
-                        // Show success message
-                        JOptionPane.showMessageDialog(CarPage,
-                                "Car booking request submitted successfully!\n" +
-                                "Car: " + car.getBrand() + " (ID: " + car.getCarId() + ")\n" +
-                                "Status: Pending approval by salesman",
-                                "Booking Submitted",
-                                JOptionPane.INFORMATION_MESSAGE);
-
-                        // Refresh the car list to update availability
-                        //refreshCarPage();
-
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(CarPage,
-                                "Error creating booking: " + ex.getMessage(),
-                                "Booking Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        });
-
-        buttonPanel.add(bookButton);
-
-        // Add components to the main car box
-        carBox.add(infoPanel, BorderLayout.CENTER);
-        carBox.add(buttonPanel, BorderLayout.EAST);
-
-        return carBox;
-    }
-    
     private void createFeedbackPage() {
         // Get customer's bookings and purchases
         ArrayList<CarRequest> bookings = CarRequest.getRequestsByCustomerID(customer.getCustomerId());
@@ -584,7 +173,7 @@ public class CustomerDashboard implements ActionListener   {
         List<String> onlyBookedCarIDs = new ArrayList<>(bookedCarIDs);
         onlyBookedCarIDs.removeAll(purchasedCarIDs);
 
-        feedbackPanel = createBasicPagePanel("Thank You for Your Feedback");
+        feedbackPage = createBasicPagePanel("Thank You for Your Feedback");
 
         // Create main content panel with consistent padding
         JPanel contentPanel = new JPanel(new BorderLayout(15, 15));
@@ -756,16 +345,16 @@ public class CustomerDashboard implements ActionListener   {
         // Add the refresh panel to the top of the content panel
         contentPanel.add(refreshPanel, BorderLayout.NORTH);
 
-        feedbackPanel.add(contentPanel, BorderLayout.CENTER);
+        feedbackPage.add(contentPanel, BorderLayout.CENTER);
     }
 
     private void refreshFeedbackPage() {
         frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
         try {
             // Remove and recreate the feedback page
-            cards.remove(feedbackPanel);
+            cards.remove(feedbackPage);
             createFeedbackPage();
-            cards.add(feedbackPanel, "Feedbacks");  // Match the original identifier "Feedbacks"
+            cards.add(feedbackPage, "Feedbacks");  // Match the original identifier "Feedbacks"
             cardLayout.show(cards, "Feedbacks");   // Match the original identifier "Feedbacks"
 
             // Update navigation button state
@@ -794,7 +383,7 @@ public class CustomerDashboard implements ActionListener   {
     private void showSimpleFeedbackDialog(String itemName, String feedbackType, String itemId) {
         // Show simple rating dialog
         String ratingInput = JOptionPane.showInputDialog(
-                feedbackPanel,
+                feedbackPage,
                 "Please rate " + itemName + " (1-5 stars):",
                 "Rating",
                 JOptionPane.QUESTION_MESSAGE);
@@ -810,7 +399,7 @@ public class CustomerDashboard implements ActionListener   {
             rating = Integer.parseInt(ratingInput.trim());
             if (rating < 1 || rating > 5) {
                 JOptionPane.showMessageDialog(
-                    feedbackPanel,
+                    feedbackPage,
                     "Please enter a rating between 1 and 5.",
                     "Invalid Rating",
                     JOptionPane.ERROR_MESSAGE);
@@ -818,7 +407,7 @@ public class CustomerDashboard implements ActionListener   {
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(
-                feedbackPanel,
+                feedbackPage,
                 "Please enter a valid number between 1 and 5.",
                 "Invalid Rating",
                 JOptionPane.ERROR_MESSAGE);
@@ -827,7 +416,7 @@ public class CustomerDashboard implements ActionListener   {
 
         // Show review dialog
         String review = JOptionPane.showInputDialog(
-                feedbackPanel,
+                feedbackPage,
                 "Please share your feedback about " + itemName + ":",
                 "Feedback",
                 JOptionPane.PLAIN_MESSAGE);
@@ -850,13 +439,13 @@ public class CustomerDashboard implements ActionListener   {
 
         if (success) {
             JOptionPane.showMessageDialog(
-                    feedbackPanel,
+                    feedbackPage,
                     "Thank you for your feedback!",
                     "Feedback Submitted",
                     JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(
-                    feedbackPanel,
+                    feedbackPage,
                     "There was an error saving your feedback. Please try again.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -1271,19 +860,116 @@ public class CustomerDashboard implements ActionListener   {
         return emptyPanel;
     }
     
-    private void createPage5() {
-        page5Panel = createBasicPagePanel("Page 5");
+    private void createFeedbackHistoryPage() {
+        feedbackHistoryPanel = createBasicPagePanel("Feedback History");
         
         // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-        JPanel contentPanel = (JPanel) ((BorderLayout) page5Panel.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+        JPanel contentPanel = (JPanel) ((BorderLayout) feedbackHistoryPanel.getLayout()).getLayoutComponent(BorderLayout.CENTER);
         
         // Page-specific content 
-        JLabel contentLabel = new JLabel("This is Page 5 content");
-        contentLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        contentLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 40)));
-        contentPanel.add(contentLabel);
+        contentPanel.setLayout(new BorderLayout(10, 10));
+    
+        // Create tabs for different feedback types
+        JTabbedPane feedbackTabs = new JTabbedPane();
+        feedbackTabs.addTab("Salesman Feedback", createFeedbackList(CustomerFeedbacks.TYPE_SALESMAN));
+        feedbackTabs.addTab("Car Feedback", createFeedbackList(null)); // Both car types
+
+        // Add tabs to the content panel
+        contentPanel.add(feedbackTabs, BorderLayout.CENTER);
+    }
+    
+    private JScrollPane createFeedbackList(String feedbackType) {
+        List<CustomerFeedbacks> allFeedbacks = CustomerFeedbacks.getAllFeedbacks();
+        List<CustomerFeedbacks> filteredFeedbacks = new ArrayList<>();
+
+        for (CustomerFeedbacks feedback : allFeedbacks) {
+            if (feedbackType == null) {
+                // For car feedbacks tab, include both car viewed and purchased
+                if (feedback.getFeedbackType().equals(CustomerFeedbacks.TYPE_CAR_VIEWED) || 
+                    feedback.getFeedbackType().equals(CustomerFeedbacks.TYPE_CAR_PURCHASED)) {
+                    filteredFeedbacks.add(feedback);
+                }
+            } else if (feedback.getFeedbackType().equals(feedbackType)) {
+                filteredFeedbacks.add(feedback);
+            }
+        }
+
+        // Create a panel to hold all feedback items
+        JPanel feedbackListPanel = new JPanel();
+        feedbackListPanel.setLayout(new BoxLayout(feedbackListPanel, BoxLayout.Y_AXIS));
+
+        // Add each feedback to the panel
+        for (CustomerFeedbacks feedback : filteredFeedbacks) {
+            JPanel feedbackPanel = createFeedbackPanel(feedback, 
+                feedback.getCustomerId().equals(customer.getCustomerId()));
+            feedbackListPanel.add(feedbackPanel);
+            feedbackListPanel.add(Box.createVerticalStrut(10));
+        }
+
+        // Add some padding at the bottom
+        feedbackListPanel.add(Box.createVerticalGlue());
+
+        // Create a scroll pane for the feedback list
+        JScrollPane scrollPane = new JScrollPane(feedbackListPanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        return scrollPane;
+    }
+
+    private JPanel createFeedbackPanel(CustomerFeedbacks feedback, boolean isCurrentUser) {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+
+        // User and rating panel
+        JPanel topPanel = new JPanel(new BorderLayout());
+
+        // User label (show "YOU" for the current user)
+        String userLabel = isCurrentUser ? "YOU" : "Customer " + feedback.getCustomerId();
+        JLabel userInfo = new JLabel(userLabel);
+        userInfo.setFont(new Font("Arial", Font.BOLD, 14));
+        if (isCurrentUser) {
+            userInfo.setForeground(new Color(0, 102, 204));
+        }
+        topPanel.add(userInfo, BorderLayout.WEST);
+
+        // Rating stars
+        JPanel ratingPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        for (int i = 1; i <= 5; i++) {
+            JLabel star = new JLabel(i <= feedback.getRating() ? "★" : "☆");
+            star.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 24));
+            star.setForeground(i <= feedback.getRating() ? new Color(255, 204, 0) : Color.GRAY);
+            ratingPanel.add(star);
+        }
+        topPanel.add(ratingPanel, BorderLayout.EAST);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        // Feedback content
+        JTextArea reviewText = new JTextArea(feedback.getReview());
+        reviewText.setWrapStyleWord(true);
+        reviewText.setLineWrap(true);
+        reviewText.setEditable(false);
+        reviewText.setBackground(panel.getBackground());
+        panel.add(reviewText, BorderLayout.CENTER);
+
+        // Item info (car or salesman)
+        JLabel itemLabel = new JLabel(getItemInfo(feedback));
+        itemLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+        panel.add(itemLabel, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private String getItemInfo(CustomerFeedbacks feedback) {
+        if (feedback.getFeedbackType().equals(CustomerFeedbacks.TYPE_SALESMAN)) {
+            return "Salesman ID: " + feedback.getItemId();
+        } else if (feedback.getFeedbackType().equals(CustomerFeedbacks.TYPE_CAR_VIEWED)) {
+            return "Car Viewed - ID: " + feedback.getItemId();
+        } else {
+            return "Car Purchased - ID: " + feedback.getItemId();
+        }
     }
     
     private JPanel createBasicPagePanel(String title) {

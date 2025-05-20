@@ -119,5 +119,30 @@ public class CustomerFeedbacks {
         return false;
     }
     
-    
+    public static List<CustomerFeedbacks> getAllFeedbacks() {
+        List<CustomerFeedbacks> feedbacks = new ArrayList<>();
+
+        try {
+            if (!Files.exists(Paths.get(CustomerFeedbacks.FEEDBACK_FILE_PATH))) {
+                return feedbacks;
+            }
+
+            List<String> lines = Files.readAllLines(Paths.get(CustomerFeedbacks.FEEDBACK_FILE_PATH));
+
+            for (String line : lines) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5) {
+                    CustomerFeedbacks feedback = new CustomerFeedbacks(
+                        parts[0], parts[1], parts[2], 
+                        Integer.parseInt(parts[3]), parts[4]
+                    );
+                    feedbacks.add(feedback);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading feedbacks: " + e.getMessage());
+        }
+
+        return feedbacks;
+    }
 }
