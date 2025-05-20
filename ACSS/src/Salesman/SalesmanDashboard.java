@@ -27,12 +27,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 //public class SalesmanDashboard implements ActionListener {
 //
@@ -1407,21 +1410,11 @@ public class SalesmanDashboard implements ActionListener {
                     }
 
                     if (carUpdated) {
-                        // Reject all other pending requests for this car
-                        for (CarRequest req : requests) {
-                            if (req.getCarID().equalsIgnoreCase(carID)
-                                    && !req.getCustomerID().equalsIgnoreCase(customerID)
-                                    && req.getRequestStatus().equalsIgnoreCase("pending")) {
-                                CarRequest.updateRequestStatusWithComment(
-                                        req.getCarID(), req.getCustomerID(), req.getSalesmanID(), "rejected",
-                                        "Automatically rejected - car booked by another customer");
-                            }
-                        }
-
+                        // Don't auto-reject other requests - keep them pending
                         CarList.saveUpdatedCarToFile(allCars);
                         JOptionPane.showMessageDialog(updateFrame,
-                                "Request approved and car status updated\n"
-                                + "All other pending requests for this car have been automatically rejected",
+                                "Request approved and car status updated to 'booked'\n"
+                                + "Other requests for this car remain pending",
                                 "Booking Successful", JOptionPane.INFORMATION_MESSAGE);
                         loadAllRequests.run();
                         customerIDField.setText("");
@@ -1432,6 +1425,7 @@ public class SalesmanDashboard implements ActionListener {
                                 "Car not found in inventory",
                                 "Error", JOptionPane.ERROR_MESSAGE);
                     }
+
                 } else {
                     JOptionPane.showMessageDialog(updateFrame,
                             "Failed to update request",
@@ -1442,11 +1436,13 @@ public class SalesmanDashboard implements ActionListener {
                         "Please enter both Customer ID and Car ID",
                         "Input Error", JOptionPane.ERROR_MESSAGE);
             }
-        });
+        }
+        );
 
         // Similar changes for rejectBtn and cancelBtn action listeners
         // (Add customer ID validation and field clearing)
-        rejectBtn.addActionListener(e -> {
+        rejectBtn.addActionListener(e
+                -> {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
             String comment = commentField.getText().trim();
@@ -1505,9 +1501,11 @@ public class SalesmanDashboard implements ActionListener {
                         "Please enter both Customer ID and Car ID",
                         "Input Error", JOptionPane.ERROR_MESSAGE);
             }
-        });
+        }
+        );
 
-        cancelBtn.addActionListener(e -> {
+        cancelBtn.addActionListener(e
+                -> {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
             String comment = commentField.getText().trim();
@@ -1569,19 +1567,23 @@ public class SalesmanDashboard implements ActionListener {
                         "Please enter both Customer ID and Car ID",
                         "Input Error", JOptionPane.ERROR_MESSAGE);
             }
-        });
+        }
+        );
 
-        closeButton.addActionListener(e -> {
+        closeButton.addActionListener(e
+                -> {
             updateFrame.dispose();
             new SalesmanDashboard(currentSalesman);
-        });
+        }
+        );
 
-        updateFrame.setVisible(true);
+        updateFrame.setVisible(
+                true);
     }
 
     public void markCarAsPaidWindow() {
         JFrame frame = new JFrame("Mark Car as Paid");
-        frame.setSize(600, 550);
+        frame.setSize(600, 650);  // Increased height to accommodate date field
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout(10, 10));
 
@@ -1598,9 +1600,10 @@ public class SalesmanDashboard implements ActionListener {
         filterPanel.add(brandFilterField);
         frame.add(filterPanel, BorderLayout.PAGE_START);
 
-        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Price", "Status"}, 0);
+        // Table with customer ID column
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Price", "Status", "Customer ID"}, 0);
         JTable carTable = new JTable(tableModel);
-        carTable.setEnabled(false);
+        carTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(carTable);
         frame.add(scrollPane, BorderLayout.CENTER);
 
@@ -1610,39 +1613,81 @@ public class SalesmanDashboard implements ActionListener {
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JTextField carIDField = new JTextField(15);
+        JTextField customerIDField = new JTextField(15);
         JTextField commentField = new JTextField(15);
+        JTextField dateField = new JTextField(new SimpleDateFormat("yyyy-MM-dd").format(new Date()), 15);
         JButton paidButton = new JButton("Paid");
         JButton backButton = new JButton("Go Back");
+
+        // Add selection listener to auto-fill fields
+        carTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = carTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    carIDField.setText(carTable.getValueAt(selectedRow, 0).toString());
+                    customerIDField.setText(carTable.getValueAt(selectedRow, 4).toString());
+                    dateField.setText(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                    commentField.setText("");
+                }
+            }
+        });
 
         JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
         row1.add(new JLabel("Car ID:"));
         row1.add(carIDField);
 
         JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        row2.add(new JLabel("Comment (optional):"));
-        row2.add(commentField);
+        row2.add(new JLabel("Customer ID:"));
+        row2.add(customerIDField);
 
-        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        row3.add(paidButton);
-        row3.add(backButton);
+        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        row3.add(new JLabel("Date:"));
+        row3.add(dateField);
+
+        JPanel row4 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        row4.add(new JLabel("Comment (optional):"));
+        row4.add(commentField);
+
+        JPanel row5 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        row5.add(paidButton);
+        row5.add(backButton);
 
         inputPanel.add(row1);
         inputPanel.add(row2);
         inputPanel.add(row3);
+        inputPanel.add(row4);
+        inputPanel.add(row5);
         frame.add(inputPanel, BorderLayout.SOUTH);
 
-        // Load booked cars by this salesman with optional brand filter
+        // Load booked cars by this salesman with customer ID and optional brand filter
         Runnable loadBookedCars = () -> {
             String brandFilter = brandFilterField.getText().trim().toLowerCase();
             tableModel.setRowCount(0);
             ArrayList<Car> cars = CarList.loadCarDataFromFile();
+            ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+
             for (Car car : cars) {
                 boolean matchesBrand = brandFilter.isEmpty() || car.getBrand().toLowerCase().contains(brandFilter);
                 if (car.getSalesmanId().equals(currentSalesman.ID)
                         && car.getStatus().equalsIgnoreCase("booked")
                         && matchesBrand) {
+
+                    // Find the customer who booked this car
+                    String customerID = "";
+                    for (CarRequest req : requests) {
+                        if (req.getCarID().equalsIgnoreCase(car.getCarId())
+                                && req.getRequestStatus().equalsIgnoreCase("booked")) {
+                            customerID = req.getCustomerID();
+                            break;
+                        }
+                    }
+
                     tableModel.addRow(new Object[]{
-                        car.getCarId(), car.getBrand(), car.getPrice(), car.getStatus()
+                        car.getCarId(),
+                        car.getBrand(),
+                        car.getPrice(),
+                        car.getStatus(),
+                        customerID
                     });
                 }
             }
@@ -1650,157 +1695,170 @@ public class SalesmanDashboard implements ActionListener {
         loadBookedCars.run();
 
         // Update table when brand filter changes
-        brandFilterField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+        brandFilterField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
                 loadBookedCars.run();
             }
 
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            public void removeUpdate(DocumentEvent e) {
                 loadBookedCars.run();
             }
 
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            public void changedUpdate(DocumentEvent e) {
                 loadBookedCars.run();
             }
         });
 
-        paidButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String carID = carIDField.getText().trim();
-                String comment = commentField.getText().trim();
-                if (carID.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Please enter Car ID.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+        paidButton.addActionListener(e -> {
+            String carID = carIDField.getText().trim();
+            String customerID = customerIDField.getText().trim();
+            String comment = commentField.getText().trim();
+            String date = dateField.getText().trim();
 
-                ArrayList<Car> carList = CarList.loadCarDataFromFile();
-                ArrayList<CarRequest> carRequests = CarRequest.loadCarRequestDataFromFile();
-                boolean carFound = false;
+            if (carID.isEmpty() || customerID.isEmpty()) {
+                JOptionPane.showMessageDialog(frame,
+                        "Please enter both Car ID and Customer ID.",
+                        "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-                for (Car car : carList) {
-                    if (car.getCarId().equalsIgnoreCase(carID)
-                            && car.getSalesmanId().equals(currentSalesman.ID)) {
+            // Validate date format
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                sdf.setLenient(false);
+                sdf.parse(date);
+            } catch (ParseException ex) {
+                JOptionPane.showMessageDialog(frame,
+                        "Please enter a valid date in YYYY-MM-DD format.",
+                        "Invalid Date", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-                        // Check if already paid
-                        if (car.getStatus().equalsIgnoreCase("paid")) {
-                            JOptionPane.showMessageDialog(frame,
-                                    "This car has already been marked as paid.",
-                                    "Error", JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
+            ArrayList<Car> carList = CarList.loadCarDataFromFile();
+            ArrayList<CarRequest> carRequests = CarRequest.loadCarRequestDataFromFile();
+            boolean carFound = false;
 
-                        // Only proceed if status is booked
-                        if (!car.getStatus().equalsIgnoreCase("booked")) {
-                            JOptionPane.showMessageDialog(frame,
-                                    "Only 'booked' cars can be marked as paid.",
-                                    "Invalid Operation", JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
+            for (Car car : carList) {
+                if (car.getCarId().equalsIgnoreCase(carID)
+                        && car.getSalesmanId().equals(currentSalesman.ID)) {
 
-                        car.setStatus("paid");
-                        carFound = true;
-
-// Update all requests for this car
-                        String payingCustomerID = null;
-                        ArrayList<CarRequest> updatedRequests = new ArrayList<>();
-
-                        for (CarRequest req : carRequests) {
-                            if (req.getCarID().equalsIgnoreCase(carID)) {
-                                if (req.getRequestStatus().equalsIgnoreCase("booked")) {
-                                    // Create new paid request (since we can't modify existing one)
-                                    CarRequest paidRequest = new CarRequest(
-                                            req.getCustomerID(),
-                                            req.getCarID(),
-                                            req.getSalesmanID(),
-                                            "paid",
-                                            comment.isEmpty() ? "No comments" : comment
-                                    );
-                                    updatedRequests.add(paidRequest);
-                                    payingCustomerID = req.getCustomerID();
-                                } else if (req.getRequestStatus().equalsIgnoreCase("pending")) {
-                                    // Create new rejected request
-                                    CarRequest rejectedRequest = new CarRequest(
-                                            req.getCustomerID(),
-                                            req.getCarID(),
-                                            req.getSalesmanID(),
-                                            "rejected",
-                                            "This car has been sold - payment completed"
-                                    );
-                                    updatedRequests.add(rejectedRequest);
-                                }
-                            } else {
-                                // Keep other requests unchanged
-                                updatedRequests.add(req);
-                            }
-                        }
-
-                        if (payingCustomerID == null) {
-                            payingCustomerID = getCustomerIDFromRequest(carID);
-                            if (payingCustomerID == null) {
-                                JOptionPane.showMessageDialog(frame,
-                                        "Could not determine customer for this booking.",
-                                        "Error", JOptionPane.ERROR_MESSAGE);
-                                return;
-                            }
-                        }
-
-// Save changes
-                        CarList.saveUpdatedCarToFile(carList);
-
-// Update the car status to "paid" in the car list
-                        for (Car c : carList) {
-                            if (car.getCarId().equalsIgnoreCase(carID)) {
-                                car.setStatus("paid");
-                                break;
-                            }
-                        }
-
-// Write the updated requests
-                        CarRequest.writeCarRequests(updatedRequests);
-
-// Create sales record
-                        SalesRecords sale = new SalesRecords(
-                                payingCustomerID,
-                                car.getCarId(),
-                                currentSalesman.ID,
-                                car.getPrice(),
-                                "paid",
-                                comment.isEmpty() ? "No comments" : comment
-                        );
-
-                        SalesRecords.saveSalesRecord(sale);
-
-                        // Add to sold cars file
-                        String currentDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-                        SoldCarRecord.saveSoldCarRecord(
-                                car.getCarId(),
-                                String.valueOf(car.getPrice()),
-                                payingCustomerID,
-                                currentSalesman.ID,
-                                currentDate,
-                                comment.isEmpty() ? "No comments" : comment
-                        );
-
+                    // Check if already paid
+                    if (car.getStatus().equalsIgnoreCase("paid")) {
                         JOptionPane.showMessageDialog(frame,
-                                "Car successfully marked as paid.\n"
-                                + "• Car status updated to 'paid'\n"
-                                + "• Booking request marked as 'paid'\n"
-                                + "• All other requests for this car rejected",
-                                "Payment Processed", JOptionPane.INFORMATION_MESSAGE);
-
-                        loadBookedCars.run();
-                        carIDField.setText("");
-                        commentField.setText("");
-                        break;
+                                "This car has already been marked as paid.",
+                                "Error", JOptionPane.WARNING_MESSAGE);
+                        return;
                     }
-                }
 
-                if (!carFound) {
+                    // Verify the customer ID matches the booking
+                    boolean validCustomer = false;
+                    for (CarRequest req : carRequests) {
+                        if (req.getCarID().equalsIgnoreCase(carID)
+                                && req.getCustomerID().equalsIgnoreCase(customerID)
+                                && req.getRequestStatus().equalsIgnoreCase("booked")) {
+                            validCustomer = true;
+                            break;
+                        }
+                    }
+
+                    if (!validCustomer) {
+                        JOptionPane.showMessageDialog(frame,
+                                "No matching booked request found for this Car ID and Customer ID.",
+                                "Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    // Only proceed if status is booked
+                    if (!car.getStatus().equalsIgnoreCase("booked")) {
+                        JOptionPane.showMessageDialog(frame,
+                                "Only 'booked' cars can be marked as paid.",
+                                "Invalid Operation", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    car.setStatus("paid");
+                    carFound = true;
+
+                    // Update all requests for this car
+                    ArrayList<CarRequest> updatedRequests = new ArrayList<>();
+
+                    for (CarRequest req : carRequests) {
+                        if (req.getCarID().equalsIgnoreCase(carID)) {
+                            if (req.getCustomerID().equalsIgnoreCase(customerID)
+                                    && req.getRequestStatus().equalsIgnoreCase("booked")) {
+                                // Update the booked request to paid
+                                CarRequest paidRequest = new CarRequest(
+                                        req.getCustomerID(),
+                                        req.getCarID(),
+                                        req.getSalesmanID(),
+                                        "paid",
+                                        comment.isEmpty() ? "Payment completed" : comment
+                                );
+                                updatedRequests.add(paidRequest);
+                            } else if (req.getRequestStatus().equalsIgnoreCase("pending")) {
+                                // Reject other pending requests
+                                CarRequest rejectedRequest = new CarRequest(
+                                        req.getCustomerID(),
+                                        req.getCarID(),
+                                        req.getSalesmanID(),
+                                        "rejected",
+                                        "This car has been sold - payment completed"
+                                );
+                                updatedRequests.add(rejectedRequest);
+                            }
+                        } else {
+                            // Keep other requests unchanged
+                            updatedRequests.add(req);
+                        }
+                    }
+
+                    // Save changes
+                    CarList.saveUpdatedCarToFile(carList);
+                    CarRequest.writeCarRequests(updatedRequests);
+
+                    // Create sales record
+                    SalesRecords sale = new SalesRecords(
+                            customerID,
+                            car.getCarId(),
+                            currentSalesman.ID,
+                            car.getPrice(),
+                            "paid",
+                            comment.isEmpty() ? "No comments" : comment,
+                            date // Add date to the sales record
+                    );
+                    SalesRecords.saveSalesRecord(sale);
+
+                    // Add to sold cars file
+                    SoldCarRecord.saveSoldCarRecord(
+                            car.getCarId(),
+                            String.valueOf(car.getPrice()),
+                            customerID,
+                            currentSalesman.ID,
+                            date, // Use the selected date
+                            comment.isEmpty() ? "No comments" : comment
+                    );
+
                     JOptionPane.showMessageDialog(frame,
-                            "No booked car found with ID: " + carID,
-                            "Not Found", JOptionPane.WARNING_MESSAGE);
+                            "Payment processed successfully!\n"
+                            + "• Car status updated to 'paid'\n"
+                            + "• Booking request marked as 'paid'\n"
+                            + "• All other requests for this car rejected\n"
+                            + "• Sales record created",
+                            "Payment Completed", JOptionPane.INFORMATION_MESSAGE);
+
+                    loadBookedCars.run();
+                    carIDField.setText("");
+                    customerIDField.setText("");
+                    commentField.setText("");
+                    dateField.setText(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                    break;
                 }
+            }
+
+            if (!carFound) {
+                JOptionPane.showMessageDialog(frame,
+                        "No booked car found with ID: " + carID,
+                        "Not Found", JOptionPane.WARNING_MESSAGE);
             }
         });
 
@@ -1938,85 +1996,130 @@ public class SalesmanDashboard implements ActionListener {
 //    }
     public void viewSalesHistoryWindow() {
         JFrame frame = new JFrame("Sales History");
-        frame.setSize(900, 700);
+        frame.setSize(900, 600);  // Reduced height since we removed some components
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout(10, 10));
 
-        // Top panel with title and search
+        // Top panel with title and filters
         JPanel topPanel = new JPanel(new BorderLayout());
         JLabel titleLabel = new JLabel("Your Sales History", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        // Search panel
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        // Filter panel
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+
+        // Search field
         JTextField searchField = new JTextField(20);
         JButton searchButton = new JButton("Search");
-        JButton resetButton = new JButton("Reset");
 
-        searchPanel.add(new JLabel("Search by Car ID or Customer ID:"));
-        searchPanel.add(searchField);
-        searchPanel.add(searchButton);
-        searchPanel.add(resetButton);
+        // Sort options
+        JComboBox<String> sortCombo = new JComboBox<>(new String[]{"Newest First", "Oldest First"});
+        JButton applySortButton = new JButton("Apply Sort");
+
+        filterPanel.add(new JLabel("Search:"));
+        filterPanel.add(searchField);
+        filterPanel.add(searchButton);
+        filterPanel.add(new JLabel("Sort by:"));
+        filterPanel.add(sortCombo);
+        filterPanel.add(applySortButton);
 
         topPanel.add(titleLabel, BorderLayout.NORTH);
-        topPanel.add(searchPanel, BorderLayout.SOUTH);
+        topPanel.add(filterPanel, BorderLayout.CENTER);
         frame.add(topPanel, BorderLayout.NORTH);
 
-        // Main content panel
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-
-        // Table setup
+        // Main table
         DefaultTableModel tableModel = new DefaultTableModel(
-                new Object[]{"Customer ID", "Car ID", "Price", "Status", "Comment"}, 0);
+                new Object[]{"Date", "Customer ID", "Car ID", "Price", "Status"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make table non-editable
+            }
+        };
+
         JTable table = new JTable(tableModel);
+        table.setAutoCreateRowSorter(true);
         JScrollPane scrollPane = new JScrollPane(table);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        frame.add(scrollPane, BorderLayout.CENTER);
 
-        // Stats panel
-        JPanel statsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
-        statsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Summary panel at bottom
+        JPanel summaryPanel = new JPanel(new GridLayout(1, 3, 10, 10));
+        summaryPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Popular cars stats panel
-        JPanel popularCarsPanel = createStatsPanel("Most Sold Cars");
-        statsPanel.add(popularCarsPanel);
+        // Total sales count
+        JPanel salesCountPanel = new JPanel(new BorderLayout());
+        salesCountPanel.setBorder(BorderFactory.createTitledBorder("Total Sales"));
+        JLabel salesCountLabel = new JLabel("0", JLabel.CENTER);
+        salesCountLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        salesCountPanel.add(salesCountLabel, BorderLayout.CENTER);
 
-        // Earnings stats panel
-        JPanel earningsPanel = createStatsPanel("Total Earnings");
-        statsPanel.add(earningsPanel);
+        // Total earnings
+        JPanel earningsPanel = new JPanel(new BorderLayout());
+        earningsPanel.setBorder(BorderFactory.createTitledBorder("Total Earnings"));
+        JLabel earningsLabel = new JLabel("RM 0.00", JLabel.CENTER);
+        earningsLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        earningsPanel.add(earningsLabel, BorderLayout.CENTER);
 
-        mainPanel.add(statsPanel, BorderLayout.SOUTH);
-        frame.add(mainPanel, BorderLayout.CENTER);
-
-        // Bottom panel with back button
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Back button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton backButton = new JButton("Back");
-        backButton.addActionListener(e -> {
-            frame.dispose();
-            new SalesmanDashboard(currentSalesman);
-        });
-        bottomPanel.add(backButton);
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 20));
-        frame.add(bottomPanel, BorderLayout.SOUTH);
+        buttonPanel.add(backButton);
 
-        // Method to load all sales for current salesman
-        Runnable loadSalesData = () -> loadSalesData(tableModel, popularCarsPanel, earningsPanel);
+        summaryPanel.add(salesCountPanel);
+        summaryPanel.add(earningsPanel);
+        summaryPanel.add(buttonPanel);
+        frame.add(summaryPanel, BorderLayout.SOUTH);
 
-        // Search button action
+        // Load data method
+        Runnable loadData = () -> {
+            ArrayList<SalesRecords> records = SalesRecords.loadSalesRecords();
+            tableModel.setRowCount(0);
+
+            double totalEarnings = 0;
+            int totalSales = 0;
+
+            // Filter for current salesman and sort
+            records.removeIf(record -> !record.getSalesmanID().equals(currentSalesman.ID));
+
+            // Apply sorting
+            if (sortCombo.getSelectedItem().equals("Newest First")) {
+                records.sort((r1, r2) -> r2.getDate().compareTo(r1.getDate()));
+            } else {
+                records.sort((r1, r2) -> r1.getDate().compareTo(r2.getDate()));
+            }
+
+            // Add to table and calculate totals
+            for (SalesRecords record : records) {
+                tableModel.addRow(new Object[]{
+                    record.getDate(),
+                    record.getCustomerID(),
+                    record.getCarID(),
+                    String.format("RM %.2f", record.getPrice()),
+                    record.getStatus()
+                });
+
+                totalEarnings += record.getPrice();
+                totalSales++;
+            }
+
+            // Update summary
+            salesCountLabel.setText(String.valueOf(totalSales));
+            earningsLabel.setText(String.format("RM %.2f", totalEarnings));
+        };
+
+        // Search function
         searchButton.addActionListener(e -> {
             String keyword = searchField.getText().trim().toLowerCase();
             if (keyword.isEmpty()) {
-                JOptionPane.showMessageDialog(frame,
-                        "Please enter a Car ID or Customer ID to search.",
-                        "Input Error", JOptionPane.ERROR_MESSAGE);
+                loadData.run();
                 return;
             }
 
             ArrayList<SalesRecords> allRecords = SalesRecords.loadSalesRecords();
             tableModel.setRowCount(0);
-            Map<String, Integer> carSalesCount = new HashMap<>();
+
             double totalEarnings = 0;
-            boolean found = false;
+            int totalSales = 0;
 
             for (SalesRecords record : allRecords) {
                 if (record.getSalesmanID().equals(currentSalesman.ID)
@@ -2024,49 +2127,33 @@ public class SalesmanDashboard implements ActionListener {
                         || record.getCustomerID().toLowerCase().contains(keyword))) {
 
                     tableModel.addRow(new Object[]{
+                        record.getDate(),
                         record.getCustomerID(),
                         record.getCarID(),
-                        record.getPrice(),
-                        record.getStatus(),
-                        record.getComment()
+                        String.format("RM %.2f", record.getPrice()),
+                        record.getStatus()
                     });
 
-                    String carID = record.getCarID();
-                    if (carSalesCount.containsKey(carID)) {
-                        carSalesCount.put(carID, carSalesCount.get(carID) + 1);
-                    } else {
-                        carSalesCount.put(carID, 1);
-                    }
-
-//                    try {
-//                        String priceText = record.getPrice().replaceAll("[^\\d.]", "");
-//                        totalEarnings += Double.parseDouble(priceText);
-//                    } catch (NumberFormatException ex) {
-//                        System.err.println("Invalid price: " + record.getPrice());
-//                    }
-                    found = true;
+                    totalEarnings += record.getPrice();
+                    totalSales++;
                 }
             }
 
-            updatePopularCarsPanel(popularCarsPanel, carSalesCount);
-            updateEarningsPanel(earningsPanel, totalEarnings);
-
-            if (!found) {
-                JOptionPane.showMessageDialog(frame,
-                        "No records found for '" + keyword + "'. Showing all sales again.");
-                loadSalesData.run();
-            }
+            salesCountLabel.setText(String.valueOf(totalSales));
+            earningsLabel.setText(String.format("RM %.2f", totalEarnings));
         });
 
-        // Reset button action
-        resetButton.addActionListener(e -> {
-            searchField.setText("");
-            loadSalesData.run();
+        // Sort button
+        applySortButton.addActionListener(e -> loadData.run());
+
+        // Back button
+        backButton.addActionListener(e -> {
+            frame.dispose();
+            new SalesmanDashboard(currentSalesman);
         });
 
-        // Load all sales data on start
-        loadSalesData.run();
-
+        // Initial load
+        loadData.run();
         frame.setVisible(true);
     }
 

@@ -77,12 +77,10 @@ public class CarRequest {
     //    carRequestsList.add(new CarRequest("f1363ffa", "C002", "S001", "pending", "."));
     //    carRequestsList.add(new CarRequest("e292d371", "C003", "S002", "pending", "."));
     //}
-
     //public static void saveInitialCarRequestsToFile() {
     //    initializeCarRequests();
     //    writeCarRequests(carRequestsList);
     //}
-
     public static ArrayList<CarRequest> loadCarRequestDataFromFile() {
         ArrayList<CarRequest> loadedRequestList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("data/CarRequest.txt"))) {
@@ -104,13 +102,15 @@ public class CarRequest {
         return loadedRequestList;
     }
 
-    public static boolean updateRequestStatusWithComment(String carID, String salesmanID, String newStatus, String comment, String finalComment) {
+    public static boolean updateRequestStatusWithComment(String carID, String customerID, String salesmanID, String newStatus, String comment) {
         ArrayList<CarRequest> requests = loadCarRequestDataFromFile();
         boolean found = false;
 
         for (int i = 0; i < requests.size(); i++) {
             CarRequest req = requests.get(i);
-            if (req.getCarID().equalsIgnoreCase(carID) && req.getSalesmanID().equals(salesmanID)) {
+            if (req.getCarID().equalsIgnoreCase(carID)
+                    && req.getCustomerID().equalsIgnoreCase(customerID)
+                    && req.getSalesmanID().equalsIgnoreCase(salesmanID)) {
                 CarRequest updatedRequest = new CarRequest(
                         req.getCustomerID(),
                         req.getCarID(),
@@ -130,7 +130,7 @@ public class CarRequest {
         }
         return false;
     }
-    
+
     public static ArrayList<CarRequest> getRequestsByCustomerID(String customerID) {
         ArrayList<CarRequest> allRequests = loadCarRequestDataFromFile();
         ArrayList<CarRequest> filteredRequests = new ArrayList<>();
