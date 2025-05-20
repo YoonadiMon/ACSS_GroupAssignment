@@ -46,7 +46,7 @@ public class CustomerDashboard implements ActionListener   {
         this.customer = customer;
 
         frame = new JFrame("Customer Dashboard");
-        frame.setSize(860, 600);
+        frame.setSize(860, 620);
         frame.setLocationRelativeTo(null);
         //WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
