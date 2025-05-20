@@ -422,6 +422,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
 
                 if (customer != null) {
                     // Check if customer is approved
+                    System.out.print(customer.isApproved());
                     if (customer.isApproved()) {
                         JOptionPane.showMessageDialog(frame, "Login successful!");
                         frame.dispose();
