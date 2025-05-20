@@ -312,6 +312,7 @@ public class SalesmanDashboard implements ActionListener {
 
             JOptionPane.showMessageDialog(editProfileFrame, "Changes Saved!");
             editProfileFrame.dispose();
+            new SalesmanDashboard(currentSalesman);
         });
 
         // Add the save button
@@ -1322,122 +1323,188 @@ public class SalesmanDashboard implements ActionListener {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
             String comment = commentField.getText().trim();
-            String finalComment = comment.isEmpty() ? "." : comment;
+            //String finalComment = comment.isEmpty() ? "." : comment;
+            String finalComment = comment.isEmpty() ? "Approved by salesman" : comment;
 
-            if (!carID.isEmpty() && !customerID.isEmpty()) {
-                ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
-                ArrayList<Car> allCars = CarList.loadCarDataFromFile();
-                boolean isRejected = false;
-                boolean requestFound = false;
-                boolean carAlreadyBooked = false;
+            // Validate inputs
+            if (carID.isEmpty() || customerID.isEmpty()) {
+                JOptionPane.showMessageDialog(updateFrame,
+                        "Please enter both Customer ID and Car ID",
+                        "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-                // Check if car is already booked by someone else
-                for (Car car : allCars) {
-                    if (car.getCarId().equalsIgnoreCase(carID) && car.getStatus().equalsIgnoreCase("booked")) {
-                        carAlreadyBooked = true;
-                        break;
-                    }
+            // Load all data
+            ArrayList<Car> allCars = CarList.loadCarDataFromFile();
+            ArrayList<CarRequest> allRequests = CarRequest.loadCarRequestDataFromFile();
+
+            // Find the car
+            Car targetCar = null;
+            for (Car car : allCars) {
+                if (car.getCarId().equalsIgnoreCase(carID)) {
+                    targetCar = car;
+                    break;
                 }
+            }
 
-//                if (carAlreadyBooked) {
-//                    JOptionPane.showMessageDialog(updateFrame,
-//                            "This car is already booked by another customer and cannot be booked again.",
-//                            "Car Already Booked", JOptionPane.WARNING_MESSAGE);
-//                    return;
-//                }
-                if (carAlreadyBooked) {
-                    // Check if it's booked by this same customer (allow re-approval)
-                    boolean bookedBySameCustomer = false;
-                    for (CarRequest req : requests) {
-                        if (req.getCarID().equalsIgnoreCase(carID)
-                                && req.getCustomerID().equalsIgnoreCase(customerID)
-                                && req.getRequestStatus().equalsIgnoreCase("booked")) {
-                            bookedBySameCustomer = true;
-                            break;
-                        }
-                    }
+            if (targetCar == null) {
+                JOptionPane.showMessageDialog(updateFrame,
+                        "Car not found in inventory",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-                    if (!bookedBySameCustomer) {
+            // Check for paid status
+            if (targetCar.getStatus().equalsIgnoreCase("paid")) {
+                JOptionPane.showMessageDialog(updateFrame,
+                        "This car has already been paid for and cannot be modified.",
+                        "Action Blocked", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Find all requests for this car+customer
+            ArrayList<CarRequest> customerRequests = new ArrayList<>();
+            for (CarRequest req : allRequests) {
+                if (req.getCarID().equalsIgnoreCase(carID)
+                        && req.getCustomerID().equalsIgnoreCase(customerID)
+                        && req.getSalesmanID().equals(currentSalesman.ID)) {
+                    customerRequests.add(req);
+                }
+            }
+
+            // Check if there's any cancelled request
+            boolean hasCancelledRequest = false;
+            for (CarRequest req : customerRequests) {
+                if (req.getRequestStatus().equalsIgnoreCase("cancelled")) {
+                    hasCancelledRequest = true;
+                    break;
+                }
+            }
+
+            // Check if there's a pending request
+            boolean hasPendingRequest = false;
+            for (CarRequest req : customerRequests) {
+                if (req.getRequestStatus().equalsIgnoreCase("pending")) {
+                    hasPendingRequest = true;
+                    break;
+                }
+            }
+
+            // Rule: If cancelled exists but no pending, block action
+            if (hasCancelledRequest && !hasPendingRequest) {
+                JOptionPane.showMessageDialog(updateFrame,
+                        "This booking was previously cancelled.\n"
+                        + "Cannot approve/reject unless a new request is made.",
+                        "Cancelled Booking", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Find the most recent pending request (if exists)
+            CarRequest targetRequest = null;
+            for (CarRequest req : customerRequests) {
+                if (req.getRequestStatus().equalsIgnoreCase("pending")) {
+                    targetRequest = req;
+                    break;
+                }
+            }
+
+            if (targetRequest == null) {
+                // Check if request already exists in any status
+                if (!customerRequests.isEmpty()) {
+                    CarRequest existingRequest = customerRequests.get(0);
+                    if (existingRequest.getRequestStatus().equalsIgnoreCase("rejected")) {
                         JOptionPane.showMessageDialog(updateFrame,
-                                "This car is already booked by another customer and cannot be booked again.",
-                                "Car Already Booked", JOptionPane.WARNING_MESSAGE);
+                                "This request has already been rejected and cannot be approved.",
+                                "Invalid Operation", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                    if (existingRequest.getRequestStatus().equalsIgnoreCase("booked")) {
+                        JOptionPane.showMessageDialog(updateFrame,
+                                "This request is already approved.",
+                                "Information", JOptionPane.INFORMATION_MESSAGE);
                         return;
                     }
                 }
 
-                for (CarRequest req : requests) {
-                    if (req.getCarID().equalsIgnoreCase(carID)
-                            && req.getCustomerID().equalsIgnoreCase(customerID)
-                            && req.getSalesmanID().equals(currentSalesman.ID)) {
-                        requestFound = true;
-                        if (req.getRequestStatus().equalsIgnoreCase("rejected")) {
-                            isRejected = true;
-                            break;
+                JOptionPane.showMessageDialog(updateFrame,
+                        "No pending request found for this customer and car",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Check if car is already booked (by others)
+            if (targetCar.getStatus().equalsIgnoreCase("booked")) {
+                boolean bookedByThisCustomer = false;
+                boolean otherPendingRequestsExist = false;
+
+                // Check all requests for this car (not just from this customer)
+                for (CarRequest req : allRequests) {
+                    if (req.getCarID().equalsIgnoreCase(carID)) {
+                        if (req.getCustomerID().equalsIgnoreCase(customerID)
+                                && req.getRequestStatus().equalsIgnoreCase("booked")) {
+                            bookedByThisCustomer = true;
+                        } else if (!req.getCustomerID().equalsIgnoreCase(customerID)
+                                && req.getRequestStatus().equalsIgnoreCase("pending")) {
+                            otherPendingRequestsExist = true;
                         }
                     }
                 }
 
-                if (!requestFound) {
-                    JOptionPane.showMessageDialog(updateFrame,
-                            "No matching request found for the given Customer ID and Car ID",
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+                if (!bookedByThisCustomer) {
+                    int option = JOptionPane.showConfirmDialog(updateFrame,
+                            "This car is already booked by another customer.\n"
+                            + "Do you want to cancel the existing booking and approve this request?",
+                            "Car Already Booked", JOptionPane.YES_NO_OPTION);
 
-                if (isRejected) {
-                    JOptionPane.showMessageDialog(updateFrame,
-                            "This request has already been rejected. You cannot approve it.",
-                            "Invalid Operation", JOptionPane.WARNING_MESSAGE);
-                    loadAllRequests.run();
-                    customerIDField.setText("");
-                    carIDField.setText("");
-                    commentField.setText("");
-                    return;
-                }
+                    if (option == JOptionPane.YES_OPTION) {
+                        // Cancel the existing booking first
+                        for (CarRequest req : allRequests) {
+                            if (req.getCarID().equalsIgnoreCase(carID)
+                                    && req.getRequestStatus().equalsIgnoreCase("booked")) {
+                                // Update the existing booked request to cancelled
+                                CarRequest.updateRequestStatusWithComment(
+                                        req.getCarID(), req.getCustomerID(), req.getSalesmanID(),
+                                        "cancelled", "Cancelled to approve new request for customer " + customerID);
 
-                boolean requestUpdated = CarRequest.updateRequestStatusWithComment(
-                        carID, customerID, currentSalesman.ID, "booked", finalComment);
-
-                if (requestUpdated) {
-                    boolean carUpdated = false;
-
-                    for (Car car : allCars) {
-                        if (car.getCarId().equalsIgnoreCase(carID)) {
-                            car.setStatus("booked");
-                            carUpdated = true;
-                            break;
+                                // Set car status back to available temporarily
+                                targetCar.setStatus("available");
+                                CarList.saveUpdatedCarToFile(allCars);
+                                break;
+                            }
                         }
-                    }
-
-                    if (carUpdated) {
-                        // Don't auto-reject other requests - keep them pending
-                        CarList.saveUpdatedCarToFile(allCars);
-                        JOptionPane.showMessageDialog(updateFrame,
-                                "Request approved and car status updated to 'booked'\n"
-                                + "Other requests for this car remain pending",
-                                "Booking Successful", JOptionPane.INFORMATION_MESSAGE);
-                        loadAllRequests.run();
-                        customerIDField.setText("");
-                        carIDField.setText("");
-                        commentField.setText("");
                     } else {
-                        JOptionPane.showMessageDialog(updateFrame,
-                                "Car not found in inventory",
-                                "Error", JOptionPane.ERROR_MESSAGE);
+                        return; // User chose not to proceed
                     }
-
-                } else {
-                    JOptionPane.showMessageDialog(updateFrame,
-                            "Failed to update request",
-                            "Error", JOptionPane.ERROR_MESSAGE);
                 }
+            }
+
+            // Process approval
+            boolean requestUpdated = CarRequest.updateRequestStatusWithComment(
+                    carID, customerID, currentSalesman.ID, "booked", finalComment);
+
+            if (requestUpdated) {
+                // Update car status
+                targetCar.setStatus("booked");
+                CarList.saveUpdatedCarToFile(allCars);
+
+                JOptionPane.showMessageDialog(updateFrame,
+                        "Request approved successfully!\n"
+                        + "Car: " + carID + "\n"
+                        + "Customer: " + customerID + "\n"
+                        + "Status: Booked",
+                        "Approval Successful", JOptionPane.INFORMATION_MESSAGE);
+
+                // Refresh UI
+                loadAllRequests.run();
+                customerIDField.setText("");
+                carIDField.setText("");
+                commentField.setText("");
             } else {
                 JOptionPane.showMessageDialog(updateFrame,
-                        "Please enter both Customer ID and Car ID",
-                        "Input Error", JOptionPane.ERROR_MESSAGE);
+                        "Failed to update request status",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
-        }
-        );
+        });
 
         // Similar changes for rejectBtn and cancelBtn action listeners
         // (Add customer ID validation and field clearing)
@@ -1449,6 +1516,14 @@ public class SalesmanDashboard implements ActionListener {
             String finalComment = comment.isEmpty() ? "." : comment;
 
             if (!carID.isEmpty() && !customerID.isEmpty()) {
+
+                if (isCarPaid(carID)) {
+                    JOptionPane.showMessageDialog(updateFrame,
+                            "This car has already been paid for and cannot be modified.",
+                            "Action Blocked", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
                 boolean requestFound = false;
 
@@ -1512,6 +1587,15 @@ public class SalesmanDashboard implements ActionListener {
             String finalComment = comment.isEmpty() ? "." : comment;
 
             if (!carID.isEmpty() && !customerID.isEmpty()) {
+
+                // Block if car is paid
+                if (isCarPaid(carID)) {
+                    JOptionPane.showMessageDialog(updateFrame,
+                            "This car has already been paid for and cannot be cancelled.",
+                            "Action Blocked", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
                 ArrayList<Car> allCars = CarList.loadCarDataFromFile();
                 boolean requestFound = false;
@@ -1579,6 +1663,16 @@ public class SalesmanDashboard implements ActionListener {
 
         updateFrame.setVisible(
                 true);
+    }
+
+    private boolean isCarPaid(String carID) {
+        ArrayList<Car> allCars = CarList.loadCarDataFromFile();
+        for (Car car : allCars) {
+            if (car.getCarId().equalsIgnoreCase(carID) && car.getStatus().equalsIgnoreCase("paid")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void markCarAsPaidWindow() {
