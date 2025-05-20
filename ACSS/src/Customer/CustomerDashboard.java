@@ -3,6 +3,7 @@ package Customer;
 import Car.Car;
 import Car.CarList;
 import Car.CarRequest;
+import Car.SoldCarRecord;
 import Salesman.Salesman;
 import Salesman.SalesmanList;
 import Utils.ButtonStyler;
@@ -10,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.ArrayList;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -584,6 +586,7 @@ public class CustomerDashboard implements ActionListener   {
         mainContainer.setBackground(new Color(248, 249, 250));
 
         // --- Booking Panel ---
+        bookings = CarRequest.getRequestsByCustomerID(customer.getCustomerId());
         bookingPanel = new JPanel();
         bookingPanel.setLayout(new BorderLayout());
         bookingPanel.setBackground(Color.WHITE);
@@ -606,7 +609,6 @@ public class CustomerDashboard implements ActionListener   {
         rightPanel.setBackground(Color.WHITE);
 
         // Booking count badge
-        bookings = CarRequest.getRequestsByCustomerID(customer.getCustomerId());
         JLabel bookingCountLabel = new JLabel(bookings.size() + " booking(s)");
         bookingCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         bookingCountLabel.setForeground(new Color(108, 117, 125));
@@ -685,6 +687,7 @@ public class CustomerDashboard implements ActionListener   {
         bookingPanel.add(bookingContentPanel, BorderLayout.SOUTH);
 
         // --- Purchase Panel ---
+        List<SoldCarRecord> purchases = SoldCarRecord.findByCustomerID(customer.getCustomerId());
         purchasePanel = new JPanel();
         purchasePanel.setLayout(new BorderLayout());
         purchasePanel.setBackground(Color.WHITE);
@@ -706,10 +709,8 @@ public class CustomerDashboard implements ActionListener   {
         JPanel purchaseRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         purchaseRightPanel.setBackground(Color.WHITE);
 
-        //ArrayList<Purchase> purchases = new ArrayList<>(); 
-
         // Purchase count badge
-        JLabel purchaseCountLabel = new JLabel(bookings.size() + " purchase(s)");
+        JLabel purchaseCountLabel = new JLabel(purchases.size() + " purchase(s)");
         purchaseCountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         purchaseCountLabel.setForeground(new Color(108, 117, 125));
         purchaseCountLabel.setBorder(BorderFactory.createCompoundBorder(
@@ -739,7 +740,7 @@ public class CustomerDashboard implements ActionListener   {
         JPanel purchaseContentPanel = new JPanel(new BorderLayout());
         purchaseContentPanel.setBackground(Color.WHITE);
 
-        if (bookings.isEmpty()) {
+        if (purchases.isEmpty()) {
             JPanel emptyStatePanel = createEmptyStatePanel(
                 "No Purchase History", 
                 "You haven't made any car purchases yet.",
@@ -747,8 +748,8 @@ public class CustomerDashboard implements ActionListener   {
             );
             purchaseContentPanel.add(emptyStatePanel, BorderLayout.CENTER);
         } else {
-            // Define columns for purchase table (adjust based on your Purchase class structure)
-            String[] purchaseColumns = {"Car ID", "Purchase Date", "Amount", "Status"};
+            // Define columns for purchase table
+            String[] purchaseColumns = {"Car ID", "Purchase Date", "Amount", "Salesman ID", "Comment"};
             DefaultTableModel purchaseTableModel = new DefaultTableModel(purchaseColumns, 0) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
@@ -757,40 +758,24 @@ public class CustomerDashboard implements ActionListener   {
             };
 
             // Populate table with purchase data
-            for (CarRequest booking : bookings) {
+            for (SoldCarRecord purchase : purchases) {
                 Object[] rowData = {
-                    booking.getCarID(),
-                    booking.getSalesmanID(),
-                    booking.getRequestStatus(),
-                    booking.getComment() != null ? booking.getComment() : "No comment"
+                    purchase.getCarID(),
+                    purchase.getBuyingDate(),
+                    purchase.getCarPrice(),
+                    purchase.getSalesmanID(),
+                    purchase.getComment() != null ? purchase.getComment() : "No comment"
                 };
                 purchaseTableModel.addRow(rowData);
             }
 
+            // Create table and add to panel
             JTable purchaseTable = new JTable(purchaseTableModel);
-            styleTable(purchaseTable); // Reuse the same styling method
+            purchaseTable.setRowHeight(30);
 
-            // Adjust column widths for purchase table
-            if (purchaseTable.getColumnCount() == 4) {
-                purchaseTable.getColumnModel().getColumn(0).setPreferredWidth(80);   // Car ID
-                purchaseTable.getColumnModel().getColumn(1).setPreferredWidth(120);  // Purchase Date
-                purchaseTable.getColumnModel().getColumn(2).setPreferredWidth(100);  // Amount
-                purchaseTable.getColumnModel().getColumn(3).setPreferredWidth(100);  // Status
-            }
-
-            JScrollPane purchaseScrollPane = new JScrollPane(purchaseTable);
-            purchaseScrollPane.setBorder(BorderFactory.createLineBorder(new Color(222, 226, 230), 1));
-            purchaseScrollPane.setBackground(Color.WHITE);
-            purchaseScrollPane.getViewport().setBackground(Color.WHITE);
-
-            // Set preferred height based on content
-            int rowHeight = purchaseTable.getRowHeight();
-            int headerHeight = purchaseTable.getTableHeader().getPreferredSize().height;
-            int maxVisibleRows = Math.min(bookings.size(), 6); // Show max 6 rows
-            int preferredHeight = headerHeight + (rowHeight * maxVisibleRows) + 10;
-            purchaseScrollPane.setPreferredSize(new Dimension(purchaseScrollPane.getPreferredSize().width, preferredHeight));
-
-            purchaseContentPanel.add(purchaseScrollPane, BorderLayout.CENTER);
+            // Add table to scroll pane and add to content panel
+            JScrollPane scrollPane2 = new JScrollPane(purchaseTable);
+            purchaseContentPanel.add(scrollPane2, BorderLayout.CENTER);
         }
 
         purchasePanel.add(purchaseHeaderPanel, BorderLayout.NORTH);
