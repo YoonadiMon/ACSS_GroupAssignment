@@ -1,79 +1,50 @@
 package Customer;
 
-public class Customer {
-    private String customerId;
-    private String username;
-    private String email;
-    private String password;
+public class Customer extends User {
     private boolean isApproved;
-
+    
     // Constructor for creating a new customer (generates a new ID)
     public Customer(String name, String email, String password) {
-        this.customerId = CustomerDataIO.generateCustomerId();
-        this.username = name;
-        this.email = email;
-        this.password = password;
+        super(CustomerDataIO.generateCustomerId(), name, email, password);
         this.isApproved = false;  // Default to not approved
     }
-
-    public String getCustomerId() {
-        return customerId;
-    }
-
+    
+    // Constructor with approval status
     public Customer(String name, String email, String password, boolean isApproved) {
-        this.customerId = CustomerDataIO.generateCustomerId();
-        this.username = name;
-        this.email = email;
-        this.password = password;
+        super(CustomerDataIO.generateCustomerId(), name, email, password);
         this.isApproved = isApproved;
     }
-
+    
     // Constructor for loading an existing customer from file (with known ID)
     public Customer(String customerId, String name, String email, String password, boolean isApproved) {
-        this.customerId = customerId;
-        this.username = name;
-        this.email = email;
-        this.password = password;
+        // Call parent constructor
+        super(customerId, name, email, password);
         this.isApproved = isApproved;
     }
-
+    
+    // Constructor with customerId
     public Customer(String customerId, String name, String email, String password) {
-        this.customerId = customerId;
-        this.username = name;
-        this.email = email;
-        this.password = password;
+        super(customerId, name, email, password);
         this.isApproved = false; // Default to not approved
     }
-
-    public String getUsername() {
-        return username;
+    
+    // Implementation of the abstract method from User class
+    @Override
+    public String getUserType() {
+        return "Customer";
     }
-
-    public void setUsername(String username) {
-        this.username = username;
+    
+    // Getter for customerId (convenience method that calls parent's getUserId)
+    public String getCustomerId() {
+        return getUserId();
     }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setApproved(boolean approved) {
-        isApproved = approved;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
+    
+    // Getter and setter for isApproved
     public boolean isApproved() {
         return isApproved;
+    }
+    
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
 }
