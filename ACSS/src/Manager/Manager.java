@@ -2,11 +2,7 @@ package Manager;
 
 import java.util.Scanner;
 
-public class ManagerFeatures {
-
-    static Scanner scanner = new Scanner(System.in);
-
-public class ManagerFeatures {
+public class Manager {
 
     static Scanner scanner = new Scanner(System.in);
 
@@ -74,5 +70,4 @@ public class ManagerFeatures {
         managerFeatures();
     }
 }
-anager {
-}
+
