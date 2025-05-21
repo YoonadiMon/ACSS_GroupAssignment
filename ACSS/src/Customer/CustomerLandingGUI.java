@@ -27,6 +27,8 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
     private JPasswordField loginPasswordTF, registerPasswordTF, confirmPasswordTF;
     private JButton loginBtn, switchToRegisterBtn, backToMainBtn, registerBtn, switchToLoginBtn, backToMainFromRegisterBtn;
     private JLabel forgotPasswordLbl;
+    // Guest login button
+    private JButton guestLoginBtn;
 
     // Colors
     private final Color PRIMARY_COLOR = new Color(0, 84, 159);
@@ -161,7 +163,17 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
             }
         });
 
-
+        // Guest login button
+        guestLoginBtn = new JButton("Continue as Guest");
+        guestLoginBtn.setFont(new Font("Arial", Font.PLAIN, 14));
+        guestLoginBtn.setForeground(new Color(0, 84, 159));
+        guestLoginBtn.setBackground(Color.WHITE);
+        guestLoginBtn.setBorder(BorderFactory.createLineBorder(new Color(0, 84, 159), 1));
+        guestLoginBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        guestLoginBtn.setFocusPainted(false);
+        guestLoginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        guestLoginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        guestLoginBtn.addActionListener(this);
 
         // Add action listeners
         switchToRegisterBtn.addActionListener(this);
@@ -268,6 +280,9 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
         loginPanel.add(showPasswordCheckBox);
         loginPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         loginPanel.add(bottomPanel);
+        // Add guest login button with spacing
+        loginPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        loginPanel.add(guestLoginBtn);
     }
 
     private void createRegisterPanel() {
@@ -422,7 +437,6 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
 
                 if (customer != null) {
                     // Check if customer is approved
-                    System.out.print(customer.isApproved());
                     if (customer.isApproved()) {
                         JOptionPane.showMessageDialog(frame, "Login successful!");
                         frame.dispose();
@@ -438,6 +452,16 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Login error: " + ex.getMessage());
+            }
+        } else if (e.getSource() == guestLoginBtn) {
+            // Create a guest customer with limited access
+            try {
+                GuestCustomer guestCustomer = new GuestCustomer();
+                JOptionPane.showMessageDialog(frame, "Continuing as guest...");
+                frame.dispose();
+                new CustomerDashboardGuest(guestCustomer);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error accessing guest mode: " + ex.getMessage());
             }
         } else if (e.getSource() == registerBtn) {
             try {

@@ -1,12 +1,10 @@
 package Customer;
 
-import Car.Car;
-import Car.CarList;
 import Car.CarRequest;
 import Car.SoldCarRecord;
-import Salesman.Salesman;
 import Salesman.SalesmanList;
 import Utils.ButtonStyler;
+import Utils.WindowNav;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -22,7 +20,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-/// DELETE THE ON CLOSE FUNC 
 
 public class CustomerDashboard implements ActionListener   {
     
@@ -48,8 +45,8 @@ public class CustomerDashboard implements ActionListener   {
         frame = new JFrame("Customer Dashboard");
         frame.setSize(860, 620);
         frame.setLocationRelativeTo(null);
-        //WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
+        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         // Card layout to switch between login and register pages
         cardLayout = new CardLayout();
@@ -57,9 +54,6 @@ public class CustomerDashboard implements ActionListener   {
         
         createPages();
         
-        // Create the pages
-        //createMainPage();
-        //createCarPage();
         createFeedbackPage();
         createCarHistoryPage();
         createFeedbackHistoryPage();

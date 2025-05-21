@@ -63,7 +63,7 @@ public class GuestCustomer extends User  {
         return sb.toString();
     }
     
-    // Convert to a regular customer (if needed)
+    // Convert to a regular customer (extra in case it is needed not in used for now)
     public Customer convertToCustomer(String name, String email, String password) {
         return new Customer(getUserId(), name, email, password);
     }
