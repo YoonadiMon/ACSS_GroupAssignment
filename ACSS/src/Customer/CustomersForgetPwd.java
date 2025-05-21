@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  *
- * @author DELL
+ * @author YOON
  */
 public class CustomersForgetPwd {
     private String customerId;
@@ -29,18 +29,11 @@ public class CustomersForgetPwd {
         this.question = question;
         this.answer = answer;
     }
-
-    public String getCustomerId() {
-        return customerId;
-    }
-
-    public String getQuestion() {
-        return question;
-    }
-
-    public String getAnswer() {
-        return answer;
-    }
+    
+    // Getters
+    public String getCustomerId() { return customerId; }
+    public String getQuestion() { return question; }
+    public String getAnswer() { return answer; }
     
     // Check if customerId already exists in the file
     public static boolean customerExists(String customerId) {

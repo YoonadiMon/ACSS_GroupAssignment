@@ -9,10 +9,9 @@ import java.awt.event.ActionListener;
  * @author DELL
  */
 public class MainPage implements DashboardPage {
-    // Store the frame as an instance variable
     private static JFrame mainFrame;
     
-    // Implementation moved to a separate method
+    @Override
     public JPanel createPage(Customer customer, JFrame frame) {
         JPanel mainPage = DashboardUIUtils.createBasicPagePanel("Welcome To ACSS, " + customer.getUsername() + "!", frame);
         JPanel contentPanel, accountPanel, headerPanel, fieldsPanel, emptyPanel, wrapperPanel;

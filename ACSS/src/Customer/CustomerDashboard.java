@@ -1067,18 +1067,18 @@ public class CustomerDashboard implements ActionListener   {
         }
     }
     
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            CustomerDataIO.readCustomer();
-            Customer customer = CustomerDataIO.searchName("Yoon");
-            //Customer.Customer@1e9b5f31 14cb8731,Yoon,yoon@email.com,1234567A,true
-            if (customer != null) {
-                new CustomerDashboard(customer);
-            }
-            else {
-                System.out.println("error: "+customer);
-            }
-        });
-    }
+    //public static void main(String[] args) {
+    //    SwingUtilities.invokeLater(() -> {
+    //        CustomerDataIO.readCustomer();
+    //        Customer customer = CustomerDataIO.searchName("Yoon");
+    //        //Customer.Customer@1e9b5f31 14cb8731,Yoon,yoon@email.com,1234567A,true
+    //        if (customer != null) {
+    //            new CustomerDashboard(customer);
+    //        }
+    //        else {
+    //            System.out.println("error: "+customer);
+    //        }
+    //    });
+    //}
     
 }

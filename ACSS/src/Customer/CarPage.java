@@ -18,7 +18,6 @@ import java.util.ArrayList;
 
 public class CarPage implements DashboardPage {
     
-    // Reference to store the customer for use in the createCarBox method
     private Customer customer;
     
     @Override
@@ -26,6 +25,7 @@ public class CarPage implements DashboardPage {
         // Store the customer reference
         this.customer = customer;
         
+        // Page Unique Code
         JPanel CarPage = DashboardUIUtils.createBasicPagePanel("Available Cars", frame);
 
         // Load salesman data

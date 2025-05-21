@@ -1,6 +1,12 @@
 package Customer;
 
 public class Customer extends User {
+    // Implementation of the abstract method from User class
+    @Override
+    public String getUserType() {
+        return "Customer";
+    }
+    
     private boolean isApproved;
     
     // Constructor for creating a new customer (generates a new ID)
@@ -26,12 +32,6 @@ public class Customer extends User {
     public Customer(String customerId, String name, String email, String password) {
         super(customerId, name, email, password);
         this.isApproved = false; // Default to not approved
-    }
-    
-    // Implementation of the abstract method from User class
-    @Override
-    public String getUserType() {
-        return "Customer";
     }
     
     // Getter for customerId (convenience method that calls parent's getUserId)

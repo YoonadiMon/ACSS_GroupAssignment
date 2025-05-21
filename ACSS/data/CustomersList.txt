@@ -5,3 +5,4 @@ e292d371,Felisha,Felisha@yahoo.com,12345678C,false
 6ebaae77,Tian,Tian@gmail.com,1234567A,false
 7e498c54,Xiao_Wei,xw@yahoo.com,1234567A,true
 cd1e26d8,Sha,sha@email.com,1234567A,false
+4e664afa,Username123,username123@gmail.com,1234567A,false
