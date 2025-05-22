@@ -15,7 +15,7 @@ public class Car {
     private String carId;
     private String brand;
     private double price;
-    private String status; // available / booked / paid / cancel
+    private String status; // available / booked / paid 
     private String salesmanId; // the ID of the salesman responsible for this car
 
     public Car(String carId, String brand, int price, String status, String salesmanId) {

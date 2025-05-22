@@ -3,11 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Salesman/SalesmanGUI.java</file>
-            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/salesmenList.txt</file>
-            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Customer/CustomerDashboard.java</file>
-            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Salesman/SalesmanDashboard.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/MainProgram/MainProgram.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Manager/Customer.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Customer/CustomerLandingGUI.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/MainProgram/MainMenuGUI.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Manager/ManagerGUI.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Manager/CarManagement.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/customerFeedbacks.txt</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/src/Manager/Salesman.java</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/CustomersForgetPwd.txt</file>
             <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/CarRequest.txt</file>
+            <file>file:/C:/CodeNProgram/java/ACSS_GroupAssignment/ACSS/data/CustomersList.txt</file>
         </group>
     </open-files>
 </project-private>

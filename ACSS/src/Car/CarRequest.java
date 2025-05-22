@@ -25,7 +25,11 @@ public class CarRequest {
     private String customerID;
     private String carID;
     private String salesmanID;
-    private String requestStatus;
+    private String requestStatus; // Pending, booked, rejected, paid, cancelled
+    //View + buy: pending-> booked-> paid 
+    //View + not buy: pending-> booked-> cancelled 
+    //View request not approved: pending-> rejected
+    
     private String comment;
 
     public CarRequest(String customerID, String carID, String salesmanID, String requestStatus, String comment) {
