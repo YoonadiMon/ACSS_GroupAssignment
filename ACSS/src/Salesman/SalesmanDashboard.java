@@ -131,7 +131,6 @@ public class SalesmanDashboard implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-     
         frame.dispose(); // Dispose current frame before opening new window
         if (e.getSource() == logoutButton) {
             // Close the current dashboard
@@ -139,7 +138,7 @@ public class SalesmanDashboard implements ActionListener {
             // Open the login page
             new SalesmanGUI(400, 250);
             return; // Return early since we don't want to execute other actions
-            
+
         } else if (e.getSource() == editProfileButton) {
             openEditProfileWindow();
         } else if (e.getSource() == viewCarsButton) {
@@ -157,147 +156,476 @@ public class SalesmanDashboard implements ActionListener {
         }
     }
 
+//    private void openEditProfileWindow() {
+//        JFrame editProfileFrame = new JFrame("Edit Profile");
+//        editProfileFrame.setSize(400, 500); // Increased height for additional fields
+//        editProfileFrame.setLocationRelativeTo(null);
+//        editProfileFrame.setLayout(null);
+//
+//        // Title label
+//        JLabel title = new JLabel("--- Edit Salesman Profile ---");
+//        title.setBounds(100, 20, 200, 30);
+//        editProfileFrame.add(title);
+//
+//        // Current Info Section
+//        JLabel currentInfoLabel = new JLabel("Current Information:");
+//        currentInfoLabel.setBounds(50, 50, 300, 20);
+//        currentInfoLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+//        editProfileFrame.add(currentInfoLabel);
+//
+//        // Display current name
+//        JLabel currentNameLabel = new JLabel("Name: " + currentSalesman.getName());
+//        currentNameLabel.setBounds(50, 70, 300, 20);
+//        editProfileFrame.add(currentNameLabel);
+//
+//        // Display masked password (for security)
+//        JLabel currentPassLabel = new JLabel("Password: ********");
+//        currentPassLabel.setBounds(50, 90, 300, 20);
+//        editProfileFrame.add(currentPassLabel);
+//
+//        // Display security question
+//        JLabel currentQuestionLabel = new JLabel("Security Question: " + currentSalesman.getSecurityQuestion());
+//        currentQuestionLabel.setBounds(50, 110, 300, 20);
+//        editProfileFrame.add(currentQuestionLabel);
+//
+//        // Edit Fields Section
+//        JLabel editInfoLabel = new JLabel("Edit Information:");
+//        editInfoLabel.setBounds(50, 140, 300, 20);
+//        editInfoLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+//        editProfileFrame.add(editInfoLabel);
+//
+//        // Name
+//        JLabel nameLabel = new JLabel("New Name:");
+//        nameLabel.setBounds(50, 170, 120, 20);
+//        JTextField nameField = new JTextField(currentSalesman.getName());
+//        nameField.setBounds(180, 170, 150, 20);
+//
+//        // Password
+//        JLabel passwordLabel = new JLabel("New Password:");
+//        passwordLabel.setBounds(50, 200, 120, 20);
+//        JPasswordField passwordField = new JPasswordField();
+//        passwordField.setBounds(180, 200, 150, 20);
+//
+//        // Confirm Password
+//        JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
+//        confirmPasswordLabel.setBounds(50, 230, 120, 20);
+//        JPasswordField confirmPasswordField = new JPasswordField();
+//        confirmPasswordField.setBounds(180, 230, 150, 20);
+//
+//        // Security Question
+//        JLabel questionLabel = new JLabel("Security Question:");
+//        questionLabel.setBounds(50, 260, 120, 20);
+//        JTextField questionField = new JTextField(currentSalesman.getSecurityQuestion());
+//        questionField.setBounds(180, 260, 150, 20);
+//
+//        // Security Answer
+//        JLabel answerLabel = new JLabel("Security Answer:");
+//        answerLabel.setBounds(50, 290, 120, 20);
+//        JTextField answerField = new JTextField(currentSalesman.getSecurityAnswer());
+//        answerField.setBounds(180, 290, 150, 20);
+//
+//        // Show password checkbox
+//        JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
+//        showPasswordCheckbox.setBounds(180, 320, 150, 20);
+//        showPasswordCheckbox.addActionListener(e -> {
+//            char echoChar = showPasswordCheckbox.isSelected() ? (char) 0 : '*';
+//            passwordField.setEchoChar(echoChar);
+//            confirmPasswordField.setEchoChar(echoChar);
+//        });
+//
+//        // Add all components
+//        editProfileFrame.add(nameLabel);
+//        editProfileFrame.add(nameField);
+//        editProfileFrame.add(passwordLabel);
+//        editProfileFrame.add(passwordField);
+//        editProfileFrame.add(confirmPasswordLabel);
+//        editProfileFrame.add(confirmPasswordField);
+//        editProfileFrame.add(questionLabel);
+//        editProfileFrame.add(questionField);
+//        editProfileFrame.add(answerLabel);
+//        editProfileFrame.add(answerField);
+//        editProfileFrame.add(showPasswordCheckbox);
+//
+//        // Save changes button
+//        JButton saveButton = new JButton("Save Changes");
+//        saveButton.setBounds(60, 360, 150, 30);
+//        saveButton.addActionListener(e -> {
+//            String newName = nameField.getText().trim();
+//            String newPassword = String.valueOf(passwordField.getPassword()).trim();
+//            String confirmPassword = String.valueOf(confirmPasswordField.getPassword()).trim();
+//            String newQuestion = questionField.getText().trim();
+//            String newAnswer = answerField.getText().trim();
+//
+//            // Validation
+//            if (newName.isEmpty() || newQuestion.isEmpty() || newAnswer.isEmpty()) {
+//                JOptionPane.showMessageDialog(editProfileFrame,
+//                        "Name, security question and answer cannot be empty.");
+//                return;
+//            }
+//
+//            if (!newPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
+//                JOptionPane.showMessageDialog(editProfileFrame,
+//                        "Passwords do not match. Please try again.");
+//                return;
+//            }
+//
+//            // Update the salesman
+//            ArrayList<Salesman> updatedList = SalesmanList.loadSalesmanDataFromFile();
+//            for (int i = 0; i < updatedList.size(); i++) {
+//                if (updatedList.get(i).getID().equals(currentSalesman.getID())) {
+//                    currentSalesman.setName(newName);
+//                    if (!newPassword.isEmpty()) {
+//                        currentSalesman.setPassword(newPassword);
+//                    }
+//                    currentSalesman.setSecurityQuestion(newQuestion);
+//                    currentSalesman.setSecurityPassword(newAnswer);
+//                    updatedList.set(i, currentSalesman);
+//
+//                    SalesmanList.saveSalesmanDataToFile(updatedList);
+//
+//                    JOptionPane.showMessageDialog(editProfileFrame,
+//                            "Profile updated successfully!",
+//                            "Success",
+//                            JOptionPane.INFORMATION_MESSAGE);
+//
+//                    editProfileFrame.dispose();
+//                    new SalesmanDashboard(currentSalesman);
+//                    return;
+//                }
+//            }
+//        });
+//
+//        // Go Back button
+//        JButton closeButton = new JButton("Go Back");
+//        closeButton.setBounds(230, 360, 100, 30);
+//        closeButton.addActionListener(e -> {
+//            editProfileFrame.dispose();
+//            new SalesmanDashboard(currentSalesman);
+//        });
+//
+//        editProfileFrame.add(saveButton);
+//        editProfileFrame.add(closeButton);
+//
+//        editProfileFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+//        editProfileFrame.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                editProfileFrame.dispose();
+//                new SalesmanDashboard(currentSalesman);
+//            }
+//        });
+//
+//        editProfileFrame.setVisible(true);
+//    }
     private void openEditProfileWindow() {
         JFrame editProfileFrame = new JFrame("Edit Profile");
-        editProfileFrame.setSize(400, 350); // Adjusted size to fit the extra fields
+        try {
+            // Apply only to this frame and its children
+            SwingUtilities.updateComponentTreeUI(editProfileFrame);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        
+        editProfileFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        editProfileFrame.setMinimumSize(new Dimension(450, 550));
         editProfileFrame.setLocationRelativeTo(null);
-        editProfileFrame.setLayout(null); // Use absolute positioning
 
-        // Title label centered at the top
-        JLabel title = new JLabel("--- Edit Salesman Profile ---");
-        title.setBounds(100, 20, 200, 30);  // Manually set the bounds
-        editProfileFrame.add(title);
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        editProfileFrame.add(mainPanel);
 
-        // Name label and input field
-        // Name
-        JLabel nameLabel = new JLabel("Name:");
-        nameLabel.setBounds(50, 70, 120, 20);  // Width 120 for alignment
-        JTextField nameField = new JTextField(20);
-        nameField.setBounds(180, 70, 150, 20); // Same Y as label
+        JPanel titlePanel = new JPanel();
+        JLabel title = new JLabel("Edit Salesman Profile");
+        title.setFont(new Font("SansSerif", Font.BOLD, 18));
+        titlePanel.add(title);
+        mainPanel.add(titlePanel, BorderLayout.NORTH);
 
-// Password
-        JLabel passwordLabel = new JLabel("Password:");
-        passwordLabel.setBounds(50, 100, 120, 20);
-        JPasswordField passwordField = new JPasswordField(20);
-        passwordField.setBounds(180, 100, 150, 20);
+        JTabbedPane tabbedPane = new JTabbedPane();
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
 
-// Confirm Password
-        JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
-        confirmPasswordLabel.setBounds(50, 130, 120, 20);
-        JPasswordField confirmPasswordField = new JPasswordField(20);
-        confirmPasswordField.setBounds(180, 130, 150, 20);
+        JPanel currentInfoPanel = createCurrentInfoPanel();
+        tabbedPane.addTab("Current Information", currentInfoPanel);
 
-        // Show password checkbox
-        JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
-        showPasswordCheckbox.setBounds(150, 160, 150, 20);  // Position the checkbox below password fields
+        JPanel editInfoPanel = createEditInfoPanel(editProfileFrame);
+        tabbedPane.addTab("Edit Information", editInfoPanel);
 
-        // Action listener for the checkbox to toggle password visibility
-        showPasswordCheckbox.addActionListener(e -> {
-            if (showPasswordCheckbox.isSelected()) {
-                // Set password field visibility to true
-                passwordField.setEchoChar((char) 0);  // Shows the password
-                confirmPasswordField.setEchoChar((char) 0);  // Shows the confirm password
-            } else {
-                // Set password field visibility to false
-                passwordField.setEchoChar('*');  // Hides the password (default)
-                confirmPasswordField.setEchoChar('*');  // Hides the confirm password
-            }
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        JButton saveButton = new JButton("Save Changes");
+        
+        saveButton.addActionListener(e -> saveChanges(editProfileFrame));
+
+        JButton closeButton = new JButton("Go Back");
+        
+        closeButton.addActionListener(e -> {
+            editProfileFrame.dispose();
+            new SalesmanDashboard(currentSalesman);
         });
 
-        // Add the labels, text fields, and checkbox
-        editProfileFrame.add(nameLabel);
-        editProfileFrame.add(nameField);
-        editProfileFrame.add(passwordLabel);
-        editProfileFrame.add(passwordField);
-        editProfileFrame.add(confirmPasswordLabel);
-        editProfileFrame.add(confirmPasswordField);
-        editProfileFrame.add(showPasswordCheckbox);
+        buttonPanel.add(saveButton);
+        buttonPanel.add(closeButton);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Save changes button
-        JButton saveButton = new JButton("Save Changes");
-        saveButton.setBounds(60, 190, 150, 30); // Set position of the button
-
-        saveButton.addActionListener(e -> {
-            String newName = nameField.getText().trim();
-            String newPassword = String.valueOf(passwordField.getPassword()).trim();
-            String confirmPassword = String.valueOf(confirmPasswordField.getPassword()).trim();
-            if (newName.isEmpty() || newPassword.isEmpty()) {
-                JOptionPane.showMessageDialog(editProfileFrame, "Name and password cannot be empty.");
-                return;
-            }
-
-            if (!newPassword.equals(confirmPassword)) {
-                JOptionPane.showMessageDialog(editProfileFrame, "Passwords do not match. Please try again.");
-                return;
-            }
-
-//            ArrayList<Salesman> salesmanList = loadSalesmanDataFromFile(); // Load existing data
-            ArrayList<Salesman> updatedList = SalesmanList.loadSalesmanDataFromFile();
-
-// Find and update current salesman
-            for (int i = 0; i < updatedList.size(); i++) {
-                if (updatedList.get(i).getID().equals(currentSalesman.ID)) {
-                    // Update the currentSalesman object as well as the list
-                    currentSalesman.setName(newName);
-                    currentSalesman.setPassword(newPassword);
-                    updatedList.set(i, currentSalesman);
-                    System.out.println("Saved Edited " + currentSalesman.ID + " to file");
-
-                    JOptionPane.showMessageDialog(
-                            editProfileFrame,
-                            "Profile updated successfully!\nYour changes have been saved.",
-                            "Success",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
-                    // Save updated list back to file
-                    saveEditedSalesmanDataToFile(updatedList);
-                    break;
-                }
-
-                // After successful save:
+        editProfileFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
                 editProfileFrame.dispose();
                 new SalesmanDashboard(currentSalesman);
             }
         });
 
-        // Add the save button
-        editProfileFrame.add(saveButton);
-
-        JButton closeButton = new JButton("Go Back");
-        closeButton.setBounds(230, 190, 100, 30);
-        closeButton.addActionListener(e -> {
-            editProfileFrame.dispose();
-            new SalesmanDashboard(currentSalesman);
-        });
-        editProfileFrame.add(closeButton);
-
-        editProfileFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        editProfileFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                Point location = editProfileFrame.getLocation();
-                editProfileFrame.dispose();
-                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
-
-            }
-        });
-        // Make the frame visible
+        editProfileFrame.pack();
         editProfileFrame.setVisible(true);
     }
 
-    public static void saveEditedSalesmanDataToFile(ArrayList<Salesman> updatedList) {
-        // Save to file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/salesmenList.txt"))) {
-            for (Salesman salesman : updatedList) {
-                writer.write(salesman.getID() + "," + salesman.getName() + "," + salesman.getPassword());
-                writer.newLine(); // Move to next line
+    private JPanel createCurrentInfoPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        JLabel currentInfoLabel = new JLabel("Current Information:");
+        currentInfoLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        panel.add(currentInfoLabel, gbc);
+
+        String[][] infoData = {
+            {"Name:", currentSalesman.getName()},
+            {"Password:", "********"},
+            {"Security Question:", currentSalesman.getSecurityQuestion()},
+            {"Security Answer:", "********"}
+        };
+
+        for (String[] data : infoData) {
+            gbc.gridy++;
+            JLabel label = new JLabel(data[0]);
+            label.setFont(new Font("SansSerif", Font.BOLD, 12));
+            panel.add(label, gbc);
+
+            gbc.gridx = 1;
+            JLabel value = new JLabel(data[1]);
+            panel.add(value, gbc);
+            gbc.gridx = 0;
+        }
+
+        return panel;
+    }
+
+    private JPanel createEditInfoPanel(JFrame parentFrame) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
+        JLabel editInfoLabel = new JLabel("Edit Information:");
+        editInfoLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        panel.add(editInfoLabel, gbc);
+
+        JTextField nameField = new JTextField(currentSalesman.getName(), 20);
+        nameField.setName("nameField");
+
+        JPasswordField passwordField = new JPasswordField(20);
+        passwordField.setName("passwordField");
+
+        JPasswordField confirmPasswordField = new JPasswordField(20);
+        confirmPasswordField.setName("confirmPasswordField");
+
+        JTextField questionField = new JTextField(currentSalesman.getSecurityQuestion(), 20);
+        questionField.setName("questionField");
+
+        JTextField answerField = new JTextField(currentSalesman.getSecurityAnswer(), 20);
+        answerField.setName("answerField");
+
+        JProgressBar strengthBar = new JProgressBar(0, 4);
+        strengthBar.setStringPainted(true);
+        strengthBar.setString("Password Strength");
+        strengthBar.setForeground(Color.RED);
+
+        passwordField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                update();
             }
-            System.out.println("Changed Salesmen data saved to file.");
-        } catch (IOException e) {
-            System.out.println("Problem with file output.");
+
+            public void removeUpdate(DocumentEvent e) {
+                update();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
+
+            private void update() {
+                String password = new String(passwordField.getPassword());
+                int strength = calculatePasswordStrength(password);
+                strengthBar.setValue(strength);
+                if (strength < 2) {
+                    strengthBar.setForeground(Color.RED);
+                } else if (strength < 4) {
+                    strengthBar.setForeground(Color.ORANGE);
+                } else {
+                    strengthBar.setForeground(Color.GREEN);
+                }
+            }
+
+            private int calculatePasswordStrength(String password) {
+                int strength = 0;
+                if (password.length() >= 8) {
+                    strength++;
+                }
+                if (password.matches(".*[A-Z].*")) {
+                    strength++;
+                }
+                if (password.matches(".*[0-9].*")) {
+                    strength++;
+                }
+                if (password.matches(".*[!@#$%^&*].*")) {
+                    strength++;
+                }
+                return strength;
+            }
+        });
+
+        JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
+        
+        showPasswordCheckbox.addActionListener(e -> {
+            char echo = showPasswordCheckbox.isSelected() ? (char) 0 : '*';
+            passwordField.setEchoChar(echo);
+            confirmPasswordField.setEchoChar(echo);
+        });
+
+        addFormField(panel, gbc, "New Name:", 'N', "Enter your full name", nameField);
+        addFormField(panel, gbc, "New Password:", 'P', "Minimum 8 characters with mix of letters and numbers", passwordField);
+        addFormField(panel, gbc, "Confirm Password:", 'C', "Re-enter your password", confirmPasswordField);
+
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        panel.add(strengthBar, gbc);
+        gbc.gridwidth = 1;
+
+        addFormField(panel, gbc, "Security Question:", 'Q', "What was your first pet's name?", questionField);
+        addFormField(panel, gbc, "Security Answer:", 'A', "Answer to your security question", answerField);
+
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        panel.add(showPasswordCheckbox, gbc);
+
+        return panel;
+    }
+
+    private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
+            char mnemonic, String tooltip, JComponent field) {
+        gbc.gridy++;
+        gbc.gridx = 0;
+        JLabel label = new JLabel(labelText);
+        
+        label.setLabelFor(field);
+        panel.add(label, gbc);
+
+        gbc.gridx = 1;
+        field.setToolTipText(tooltip);
+        panel.add(field, gbc);
+    }
+
+    private void saveChanges(JFrame editProfileFrame) {
+        Component editTab = ((JTabbedPane) ((JPanel) editProfileFrame.getContentPane().getComponent(0)).getComponent(1)).getComponent(1);
+
+        JTextField nameField = (JTextField) findComponentByName((Container) editTab, "nameField");
+        JPasswordField passwordField = (JPasswordField) findComponentByName((Container) editTab, "passwordField");
+        JPasswordField confirmPasswordField = (JPasswordField) findComponentByName((Container) editTab, "confirmPasswordField");
+        JTextField questionField = (JTextField) findComponentByName((Container) editTab, "questionField");
+        JTextField answerField = (JTextField) findComponentByName((Container) editTab, "answerField");
+
+        String newName = nameField.getText().trim();
+        String newPassword = String.valueOf(passwordField.getPassword()).trim();
+        String confirmPassword = String.valueOf(confirmPasswordField.getPassword()).trim();
+        String newQuestion = questionField.getText().trim();
+        String newAnswer = answerField.getText().trim();
+
+        if (newName.isEmpty() || newQuestion.isEmpty() || newAnswer.isEmpty()) {
+            showErrorDialog(editProfileFrame, "All fields except password are required.\nPlease fill in all fields.");
+            return;
+        }
+
+        if (!newPassword.isEmpty() && !newPassword.equals(confirmPassword)) {
+            showErrorDialog(editProfileFrame, "Password fields do not match.\nPlease enter the same password in both fields.");
+            return;
+        }
+
+        if (!newPassword.isEmpty() && newPassword.length() < 8) {
+            showErrorDialog(editProfileFrame, "Password must be at least 8 characters long.");
+            return;
+        }
+
+        ArrayList<Salesman> updatedList = SalesmanList.loadSalesmanDataFromFile();
+        for (int i = 0; i < updatedList.size(); i++) {
+            if (updatedList.get(i).getID().equals(currentSalesman.getID())) {
+                currentSalesman.setName(newName);
+                if (!newPassword.isEmpty()) {
+                    currentSalesman.setPassword(newPassword);
+                }
+                currentSalesman.setSecurityQuestion(newQuestion);
+                currentSalesman.setSecurityPassword(newAnswer);
+                updatedList.set(i, currentSalesman);
+
+                SalesmanList.saveSalesmanDataToFile(updatedList);
+
+                JOptionPane.showMessageDialog(editProfileFrame,
+                        "Profile updated successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                editProfileFrame.dispose();
+                new SalesmanDashboard(currentSalesman);
+                return;
+            }
         }
     }
 
+    private void showErrorDialog(Component parent, String message) {
+        JOptionPane.showMessageDialog(parent,
+                "<html><div style='width: 200px;'>" + message.replace("\n", "<br>") + "</div></html>",
+                "Validation Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
+
+    private Component findComponentByName(Container container, String name) {
+        for (Component comp : container.getComponents()) {
+            if (name.equals(comp.getName())) {
+                return comp;
+            }
+            if (comp instanceof Container) {
+                Component child = findComponentByName((Container) comp, name);
+                if (child != null) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
+
+//    public static void saveEditedSalesmanDataToFile(ArrayList<Salesman> updatedList) {
+//        // Save to file
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/salesmenList.txt"))) {
+//            for (Salesman salesman : updatedList) {
+//                writer.write(
+//                        salesman.getID() + ","
+//                        + salesman.getName() + ","
+//                        + salesman.getPassword() + ","
+//                        + salesman.getSecurityQuestion() + ","
+//                        + salesman.getSecurityAnswer()
+//                );
+//                writer.newLine(); // Move to next line
+//            }
+//            System.out.println("Changed Salesmen data saved to file.");
+//        } catch (IOException e) {
+//            System.out.println("Problem with file output.");
+//        }
+//    }
     private JPanel createSummaryBox(String title, String value, Color bgColor) {
         JPanel box = new JPanel(new BorderLayout());
         box.setBorder(BorderFactory.createCompoundBorder(
@@ -1389,7 +1717,7 @@ public class SalesmanDashboard implements ActionListener {
         filterPanel.add(brandFilterField);
         frame.add(filterPanel, BorderLayout.PAGE_START);
 
-        // Table with custom styling
+        // Table with all text in black
         DefaultTableModel tableModel = new DefaultTableModel(
                 new Object[]{"Car ID", "Brand", "Price", "Status", "Customer ID"}, 0) {
             @Override
@@ -1407,19 +1735,9 @@ public class SalesmanDashboard implements ActionListener {
                 if (!isRowSelected(row)) {
                     c.setBackground(row % 2 == 0 ? new Color(250, 250, 250) : Color.WHITE);
                 }
-                
-                
 
-                // Status column styling
-                if (column == 3) {
-                    String status = getValueAt(row, column).toString();
-                    if (status.equalsIgnoreCase("Booked")) {
-                        c.setForeground(new Color(0, 100, 0)); // Dark green
-                    } else if (status.equalsIgnoreCase("Paid")) {
-                        c.setForeground(Color.RED);
-                    }
-                    c.setFont(c.getFont().deriveFont(Font.BOLD));
-                }
+                // All text in black
+                c.setForeground(Color.BLACK);
 
                 return c;
             }
