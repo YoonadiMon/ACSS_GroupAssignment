@@ -20,7 +20,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-
+/**
+ *
+ * @author YOON
+ */
 public class CustomerDashboard implements ActionListener   {
     
     private JFrame frame;
@@ -144,12 +147,22 @@ public class CustomerDashboard implements ActionListener   {
         List<String> bookedCarIDs = new ArrayList<>();
         Map<String, String> bookedCarSalesmanMap = new HashMap<>(); // Maps carID to salesmanID
 
+        //for (CarRequest booking : bookings) {
+        //    String carID = booking.getCarID();
+        //    String salesmanID = booking.getSalesmanID();
+        //    bookedCarIDs.add(carID);
+        //    bookedCarSalesmanMap.put(carID, salesmanID);
+        //}
+        
         for (CarRequest booking : bookings) {
-            String carID = booking.getCarID();
-            String salesmanID = booking.getSalesmanID();
+            // Only include requests that were pending -> approved -> cancelled (meaning customer viewed the car but didn't buy)
+            if ("cancelled".equals(booking.getRequestStatus())) {
+                String carID = booking.getCarID();
+                String salesmanID = booking.getSalesmanID();
 
-            bookedCarIDs.add(carID);
-            bookedCarSalesmanMap.put(carID, salesmanID);
+                bookedCarIDs.add(carID);
+                bookedCarSalesmanMap.put(carID, salesmanID);
+            }
         }
 
         // Extract purchase information (cars they bought)
@@ -266,7 +279,7 @@ public class CustomerDashboard implements ActionListener   {
 
         // Add viewed cars (only booked, not purchased) with matching styling
         if (!onlyBookedCarIDs.isEmpty()) {
-            JLabel viewedHeader = new JLabel("Viewed Cars:");
+            JLabel viewedHeader = new JLabel("Viewed Cars that weren't purchased:");
             viewedHeader.setFont(viewedHeader.getFont().deriveFont(Font.BOLD));
             viewedHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
             carPanel.add(viewedHeader);
@@ -348,12 +361,12 @@ public class CustomerDashboard implements ActionListener   {
             // Remove and recreate the feedback page
             cards.remove(feedbackPage);
             createFeedbackPage();
-            cards.add(feedbackPage, "Feedbacks");  // Match the original identifier "Feedbacks"
-            cardLayout.show(cards, "Feedbacks");   // Match the original identifier "Feedbacks"
+            cards.add(feedbackPage, "Feedbacks");  
+            cardLayout.show(cards, "Feedbacks");   
 
             // Update navigation button state
             for (int i = 0; i < navButtons.length; i++) {
-                if (navButtons[i].getActionCommand().equals("Feedbacks")) {  // Match the original identifier "Feedbacks"
+                if (navButtons[i].getActionCommand().equals("Feedbacks")) {  
                     updateNavButtonsState(i);
                     break;
                 }
@@ -1067,18 +1080,18 @@ public class CustomerDashboard implements ActionListener   {
         }
     }
     
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            CustomerDataIO.readCustomer();
-            Customer customer = CustomerDataIO.searchName("Yoon");
-            //Customer.Customer@1e9b5f31 14cb8731,Yoon,yoon@email.com,1234567A,true
-            if (customer != null) {
-                new CustomerDashboard(customer);
-            }
-            else {
-                System.out.println("error: "+customer);
-            }
-        });
-    }
+    //public static void main(String[] args) {
+    //    SwingUtilities.invokeLater(() -> {
+    //        CustomerDataIO.readCustomer();
+    //        Customer customer = CustomerDataIO.searchName("Yoon");
+    //        //Customer.Customer@1e9b5f31 14cb8731,Yoon,yoon@email.com,1234567A,true
+    //        if (customer != null) {
+    //            new CustomerDashboard(customer);
+    //        }
+    //        else {
+    //            System.out.println("error: "+customer);
+    //        }
+    //    });
+    //}
     
 }

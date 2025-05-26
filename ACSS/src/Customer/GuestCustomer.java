@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Customer;
 
 import java.util.Random;
@@ -9,12 +5,9 @@ import java.util.UUID;
 
 /**
  *
- * @author DELL
+ * @author YOON
  */
 public class GuestCustomer extends User  {
-        
-    private static final String GUEST_PREFIX = "guest_";
-    
     // Constructor with no parameters - auto-generates all necessary details
     public GuestCustomer() {
         // Call the parent constructor with auto-generated values
@@ -32,23 +25,25 @@ public class GuestCustomer extends User  {
         return "Guest";
     }
     
-    // Helper method to generate a unique guest ID
+    private static final String GUEST_PREFIX = "guest_";
+    
+    // Method to generate a unique guest ID
     private static String generateGuestId() {
         // Use UUID to generate a unique ID and add a prefix
         return GUEST_PREFIX + UUID.randomUUID().toString().substring(0, 8);
     }
     
-    // Helper method to generate a guest username
+    // Method to generate a guest username
     private static String generateGuestUsername() {
         return "Guest" + System.currentTimeMillis() % 10000;
     }
     
-    // Helper method to generate a temporary guest email
+    // Method to generate a temporary guest email
     private static String generateGuestEmail() {
         return "guest" + System.currentTimeMillis() % 10000 + "@temp.com";
     }
     
-    // Helper method to generate a random guest password
+    // Method to generate a random guest password
     private static String generateGuestPassword() {
         // Generate a random password with 8 characters
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

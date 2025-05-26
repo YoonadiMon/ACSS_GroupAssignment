@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Customer;
 
 import Car.Car;
@@ -16,9 +12,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+/**
+ *
+ * @author YOON
+ */
 public class CarPage implements DashboardPage {
     
-    // Reference to store the customer for use in the createCarBox method
     private Customer customer;
     
     @Override
@@ -26,6 +25,7 @@ public class CarPage implements DashboardPage {
         // Store the customer reference
         this.customer = customer;
         
+        // Page Unique Code
         JPanel CarPage = DashboardUIUtils.createBasicPagePanel("Available Cars", frame);
 
         // Load salesman data

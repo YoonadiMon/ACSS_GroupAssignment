@@ -15,9 +15,10 @@ public class Car {
     private String carId;
     private String brand;
     private double price;
-    private String status; // available / booked / paid / cancel
-    private String salesmanId; // the ID of the salesman responsible for this car
+    private String status; 
+    private String salesmanId; 
 
+    //constructor 
     public Car(String carId, String brand, int price, String status, String salesmanId) {
         this.carId = carId;
         this.brand = brand;
@@ -26,26 +27,22 @@ public class Car {
         this.salesmanId = salesmanId;
     }
 
+    // Getters and setters for all fields
     public String getCarId() {
         return carId;
     }
-
     public String getBrand() {
         return brand;
     }
-
     public int getPrice() {
         return (int) price;
     }
-
     public String getStatus() {
         return status;
     }
-
     public String getSalesmanId() {
         return salesmanId;
     }
-
     public void setStatus(String status) {
         this.status = status;
     }

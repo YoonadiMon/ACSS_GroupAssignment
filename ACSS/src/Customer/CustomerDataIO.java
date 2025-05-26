@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.UUID;
 
+/**
+ *
+ * @author YOON
+ */
 public class CustomerDataIO {
     public static ArrayList<Customer> allCustomers = new ArrayList<Customer>();
     private static final String FILE_NAME = "data/CustomersList.txt";

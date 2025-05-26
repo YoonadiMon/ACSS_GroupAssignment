@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Customer;
 
 import java.io.BufferedWriter;
@@ -13,19 +9,23 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author YOON
+ */
 public class CustomerFeedbacks {
+    private String customerId;
+    private String itemId;      // carId or salesmanId
+    private String feedbackType; // SALESMAN, CAR_VIEWED, or CAR_PURCHASED
+    private int rating;         // 1-5 star rating
+    private String review;      // Text review
+    
     private static final String FEEDBACK_FILE_PATH = "data/customerFeedbacks.txt";
     
     // Feedback type constants
     public static final String TYPE_SALESMAN = "SALESMAN";
     public static final String TYPE_CAR_VIEWED = "CAR_VIEWED";
     public static final String TYPE_CAR_PURCHASED = "CAR_PURCHASED";
-    
-    private String customerId;
-    private String itemId;      // carId or salesmanId
-    private String feedbackType; // SALESMAN, CAR_VIEWED, or CAR_PURCHASED
-    private int rating;         // 1-5 star rating
-    private String review;      // Text review
     
     // Getters
     public String getCustomerId() { return customerId; }
