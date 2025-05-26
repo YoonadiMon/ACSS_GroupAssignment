@@ -40,11 +40,126 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 
-public class SalesmanDashboard implements ActionListener {
+// Inheritance: implements ActionListener (interface)
+//public class SalesmanDashboard implements ActionListener {
+//
+//    private JFrame frame;
+//    private JPanel mainPanel, buttonPanel;
+//    private JLabel welcomeLabel;
+//    private JButton editProfileButton, viewCarsButton, viewCarRequestButton,
+//            updateCarStatusButton, recordSalesHistory, markCarAsPaidButton,
+//            logoutButton;
+//
+//    private Salesman currentSalesman;// Encapsulation: private attribute with controlled access
+//    public SalesmanDashboard(Salesman salesman) {
+//        this.currentSalesman = salesman;
+//
+//        // Initialize frame
+//        frame = new JFrame("Salesman Dashboard!");
+//        GradientPanel background = new GradientPanel();
+//        background.setLayout(new BorderLayout()); // Important fix!
+//        frame.setContentPane(background);
+//        frame.setSize(600, 400);
+//        frame.setLocationRelativeTo(null);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//
+//        // GUI setup using OOP classes from Swing
+//        // Main panel with border layout
+//        mainPanel = new JPanel(new BorderLayout(10, 10));
+//        mainPanel.setOpaque(false); // Allow background to show through
+//        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+//
+//        // Welcome label at top
+//        welcomeLabel = new JLabel("Welcome, " + currentSalesman.getName() + " (ID: " + currentSalesman.getID() + ")");
+//        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 16));
+//        welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//        mainPanel.add(welcomeLabel, BorderLayout.NORTH);
+//
+//        // Button panel in center
+//        buttonPanel = new JPanel(new GridLayout(3, 2, 15, 15));
+//        buttonPanel.setOpaque(false);
+//        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+//
+//        // Create buttons with consistent styling
+//        editProfileButton = createStyledButton("Edit Profile");
+//        viewCarsButton = createStyledButton("View Car Status");
+//        viewCarRequestButton = createStyledButton("View Car Requests");
+//        updateCarStatusButton = createStyledButton("Update Car Status");
+//        recordSalesHistory = createStyledButton("View Sales History");
+//        markCarAsPaidButton = createStyledButton("Mark Car as Paid");
+//        logoutButton = createStyledButton("Logout");
+//        logoutButton.setBackground(new Color(255, 100, 100)); // Red for logout
+//
+//        // Add buttons to panel
+//        buttonPanel.add(editProfileButton);
+//        buttonPanel.add(viewCarsButton);
+//        buttonPanel.add(viewCarRequestButton);
+//        buttonPanel.add(updateCarStatusButton);
+//        buttonPanel.add(recordSalesHistory);
+//        buttonPanel.add(markCarAsPaidButton);
+//
+//        mainPanel.add(buttonPanel, BorderLayout.CENTER);
+//
+//        // Logout button at bottom
+//        JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+//        logoutPanel.setOpaque(false);
+//        logoutPanel.add(logoutButton);
+//        mainPanel.add(logoutPanel, BorderLayout.SOUTH);
+//
+//        // Add action listeners
+//        editProfileButton.addActionListener(this);
+//        viewCarsButton.addActionListener(this);
+//        viewCarRequestButton.addActionListener(this);
+//        updateCarStatusButton.addActionListener(this);
+//        recordSalesHistory.addActionListener(this);
+//        markCarAsPaidButton.addActionListener(this);
+//        logoutButton.addActionListener(this);
+//
+//        background.add(mainPanel, BorderLayout.CENTER);
+//        WindowNav.setCloseOperation(frame, () -> new MainMenuGUI()); // Abstraction: hides window management logic
+//        frame.setVisible(true);
+//    }
+//
+//    private JButton createStyledButton(String text) {
+//        JButton button = new JButton(text);
+//        button.setFocusPainted(false);
+//        button.setBackground(Color.WHITE);
+//        button.setForeground(Color.BLACK);
+//        button.setFont(new Font("Arial", Font.PLAIN, 14));
+//        return button;
+//    }
+//
+//    @Override
+//    public void actionPerformed(ActionEvent e) {
+//
+//        frame.dispose(); // Dispose current frame before opening new window
+//        if (e.getSource() == logoutButton) {
+//            // Close the current dashboard
+//            frame.dispose();
+//            // Open the login page
+//            new SalesmanGUI(400, 250);
+//            return; // Return early since we don't want to execute other actions
+//
+//        } else if (e.getSource() == editProfileButton) {
+//            openEditProfileWindow();
+//        } else if (e.getSource() == viewCarsButton) {
+//            viewCarStatusWindow();
+//        } else if (e.getSource() == viewCarRequestButton) {
+//            viewCarRequestWindow();
+//        } else if (e.getSource() == updateCarStatusButton) {
+//            updateCarStatusWindow();
+//        } else if (e.getSource() == markCarAsPaidButton) {
+//            markCarAsPaidWindow();
+//        } else if (e.getSource() == recordSalesHistory) {
+//            viewSalesHistoryWindow();
+//        } else if (e.getSource() == logoutButton) {
+//            new SalesmanGUI(400, 250); // Back to login
+//        }
+//    }
+public class SalesmanDashboard extends UserDashboard implements ActionListener {
 
-    private JFrame frame;
-    private JPanel mainPanel, buttonPanel;
-    private JLabel welcomeLabel;
+    // Encapsulation: private fields for buttons and current salesman info
+    private JPanel buttonPanel;
     private JButton editProfileButton, viewCarsButton, viewCarRequestButton,
             updateCarStatusButton, recordSalesHistory, markCarAsPaidButton,
             logoutButton;
@@ -52,34 +167,34 @@ public class SalesmanDashboard implements ActionListener {
     private Salesman currentSalesman;
 
     public SalesmanDashboard(Salesman salesman) {
+        // Inheritance: calling superclass constructor to setup frame and welcome label
+        super("Salesman Dashboard!", "Welcome, " + salesman.getName() + " (ID: " + salesman.getID() + ")");
         this.currentSalesman = salesman;
 
-        // Initialize frame
-        frame = new JFrame("Salesman Dashboard!");
-        GradientPanel background = new GradientPanel();
-        background.setLayout(new BorderLayout()); // Important fix!
-        frame.setContentPane(background);
-        frame.setSize(600, 400);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // Setup buttons specific to SalesmanDashboard
+        setupButtons();
 
-        // Main panel with border layout
-        mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setOpaque(false); // Allow background to show through
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // Add action listeners for buttons
+        editProfileButton.addActionListener(this);
+        viewCarsButton.addActionListener(this);
+        viewCarRequestButton.addActionListener(this);
+        updateCarStatusButton.addActionListener(this);
+        recordSalesHistory.addActionListener(this);
+        markCarAsPaidButton.addActionListener(this);
+        logoutButton.addActionListener(this);
 
-        // Welcome label at top
-        welcomeLabel = new JLabel("Welcome, " + currentSalesman.getName() + " (ID: " + currentSalesman.getID() + ")");
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        mainPanel.add(welcomeLabel, BorderLayout.NORTH);
+        frame.setVisible(true);
+    }
 
-        // Button panel in center
+    @Override
+    protected void setupButtons() {
+        // Polymorphism: overriding abstract method from UserDashboard to define buttons
+
         buttonPanel = new JPanel(new GridLayout(3, 2, 15, 15));
         buttonPanel.setOpaque(false);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Create buttons with consistent styling
+        // Create buttons using inherited method for consistent styling
         editProfileButton = createStyledButton("Edit Profile");
         viewCarsButton = createStyledButton("View Car Status");
         viewCarRequestButton = createStyledButton("View Car Requests");
@@ -87,7 +202,7 @@ public class SalesmanDashboard implements ActionListener {
         recordSalesHistory = createStyledButton("View Sales History");
         markCarAsPaidButton = createStyledButton("Mark Car as Paid");
         logoutButton = createStyledButton("Logout");
-        logoutButton.setBackground(new Color(255, 100, 100)); // Red for logout
+        logoutButton.setBackground(new Color(255, 100, 100)); // red for logout
 
         // Add buttons to panel
         buttonPanel.add(editProfileButton);
@@ -97,15 +212,14 @@ public class SalesmanDashboard implements ActionListener {
         buttonPanel.add(recordSalesHistory);
         buttonPanel.add(markCarAsPaidButton);
 
-        mainPanel.add(buttonPanel, BorderLayout.CENTER);
-
-        // Logout button at bottom
         JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         logoutPanel.setOpaque(false);
         logoutPanel.add(logoutButton);
+
+        // Add button panel and logout button to main panel from superclass
+        mainPanel.add(buttonPanel, BorderLayout.CENTER);
         mainPanel.add(logoutPanel, BorderLayout.SOUTH);
 
-        // Add action listeners
         editProfileButton.addActionListener(this);
         viewCarsButton.addActionListener(this);
         viewCarRequestButton.addActionListener(this);
@@ -113,32 +227,14 @@ public class SalesmanDashboard implements ActionListener {
         recordSalesHistory.addActionListener(this);
         markCarAsPaidButton.addActionListener(this);
         logoutButton.addActionListener(this);
-
-        background.add(mainPanel, BorderLayout.CENTER);
-        WindowNav.setCloseOperation(frame, () -> new MainMenuGUI());
-        frame.setVisible(true);
-    }
-
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setFocusPainted(false);
-        button.setBackground(Color.WHITE);
-        button.setForeground(Color.BLACK);
-        button.setFont(new Font("Arial", Font.PLAIN, 14));
-        return button;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        frame.dispose(); // Close current frame before navigating
 
-        frame.dispose(); // Dispose current frame before opening new window
         if (e.getSource() == logoutButton) {
-            // Close the current dashboard
-            frame.dispose();
-            // Open the login page
             new SalesmanGUI(400, 250);
-            return; // Return early since we don't want to execute other actions
-
         } else if (e.getSource() == editProfileButton) {
             openEditProfileWindow();
         } else if (e.getSource() == viewCarsButton) {
@@ -151,13 +247,12 @@ public class SalesmanDashboard implements ActionListener {
             markCarAsPaidWindow();
         } else if (e.getSource() == recordSalesHistory) {
             viewSalesHistoryWindow();
-        } else if (e.getSource() == logoutButton) {
-            new SalesmanGUI(400, 250); // Back to login
         }
     }
-
-
+    
+    
     private void openEditProfileWindow() {
+        // JFrame instance encapsulates the UI window for editing profile
         JFrame editProfileFrame = new JFrame("Edit Profile");
         try {
             // Apply only to this frame and its children
@@ -204,7 +299,6 @@ public class SalesmanDashboard implements ActionListener {
         buttonPanel.add(saveButton);
         buttonPanel.add(closeButton);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-
 
         WindowNav.setCloseOperation(editProfileFrame, () -> new SalesmanDashboard(currentSalesman));
 
@@ -403,7 +497,7 @@ public class SalesmanDashboard implements ActionListener {
                     currentSalesman.setPassword(newPassword);
                 }
                 currentSalesman.setSecurityQuestion(newQuestion);
-                currentSalesman.setSecurityPassword(newAnswer);
+                currentSalesman.getSecurityAnswer();
                 updatedList.set(i, currentSalesman);
 
                 SalesmanList.saveSalesmanDataToFile(updatedList);
@@ -442,7 +536,6 @@ public class SalesmanDashboard implements ActionListener {
         return null;
     }
 
-
 //    private JPanel createSummaryBox(String title, String value, Color bgColor) {
 //        JPanel box = new JPanel(new BorderLayout());
 //        box.setBorder(BorderFactory.createCompoundBorder(
@@ -480,7 +573,6 @@ public class SalesmanDashboard implements ActionListener {
 //        ((JLabel) paidBox.getComponent(1)).setText(String.valueOf(paidCount));
 //        ((JLabel) availableBox.getComponent(1)).setText(String.valueOf(availableCount));
 //    }
-
     private void viewCarStatusWindow() {
         // Create new frame
         JFrame carListFrame = new JFrame("Cars Assigned to Salesman " + currentSalesman.ID);
@@ -710,6 +802,7 @@ public class SalesmanDashboard implements ActionListener {
     }
 
     public void viewCarRequestWindow() {
+        // OOP - Inheritance: Salesman inherits from a general User class
         String salesmanID = currentSalesman.getID();
 
         JFrame requestFrame = new JFrame("Car Requests");
@@ -2044,7 +2137,7 @@ public class SalesmanDashboard implements ActionListener {
 
         // Initial load
         loadData.run();
-        
+
         WindowNav.setCloseOperation(frame, () -> new SalesmanDashboard(currentSalesman));
         frame.setVisible(true);
     }

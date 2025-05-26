@@ -64,7 +64,9 @@ public class SalesmanGUI implements ActionListener {
 
         frame.setVisible(true);
     }
-
+    
+    
+// POLYMORPHISM: Implementing ActionListener interface
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == exitButton) {
@@ -196,7 +198,9 @@ public class SalesmanGUI implements ActionListener {
         formPanel.add(closeButton);
 
         loginPageFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        loginPageFrame.addWindowListener(new WindowAdapter() {
+        
+        // POLYMORPHISM: Using WindowAdapter (abstract class) for window events
+        loginPageFrame.addWindowListener(new WindowAdapter() { 
             @Override
             public void windowClosing(WindowEvent e) {
                 Point location = loginPageFrame.getLocation();
