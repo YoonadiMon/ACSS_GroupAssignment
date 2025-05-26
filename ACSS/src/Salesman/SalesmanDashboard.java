@@ -326,7 +326,6 @@ public class SalesmanDashboard implements ActionListener {
             e.printStackTrace();
         }
 
-        
         editProfileFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         editProfileFrame.setMinimumSize(new Dimension(450, 550));
         editProfileFrame.setLocationRelativeTo(null);
@@ -352,11 +351,11 @@ public class SalesmanDashboard implements ActionListener {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         JButton saveButton = new JButton("Save Changes");
-        
+
         saveButton.addActionListener(e -> saveChanges(editProfileFrame));
 
         JButton closeButton = new JButton("Go Back");
-        
+
         closeButton.addActionListener(e -> {
             editProfileFrame.dispose();
             new SalesmanDashboard(currentSalesman);
@@ -366,13 +365,14 @@ public class SalesmanDashboard implements ActionListener {
         buttonPanel.add(closeButton);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        editProfileFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                editProfileFrame.dispose();
-                new SalesmanDashboard(currentSalesman);
-            }
-        });
+//        editProfileFrame.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                editProfileFrame.dispose();
+//                new SalesmanDashboard(currentSalesman);
+//            }
+//        });
+        WindowNav.setCloseOperation(editProfileFrame, () -> new SalesmanDashboard(currentSalesman));
 
         editProfileFrame.pack();
         editProfileFrame.setVisible(true);
@@ -491,7 +491,7 @@ public class SalesmanDashboard implements ActionListener {
         });
 
         JCheckBox showPasswordCheckbox = new JCheckBox("Show Password");
-        
+
         showPasswordCheckbox.addActionListener(e -> {
             char echo = showPasswordCheckbox.isSelected() ? (char) 0 : '*';
             passwordField.setEchoChar(echo);
@@ -522,7 +522,7 @@ public class SalesmanDashboard implements ActionListener {
         gbc.gridy++;
         gbc.gridx = 0;
         JLabel label = new JLabel(labelText);
-        
+
         label.setLabelFor(field);
         panel.add(label, gbc);
 
@@ -885,15 +885,17 @@ public class SalesmanDashboard implements ActionListener {
         carListFrame.add(buttonPanel, BorderLayout.SOUTH);
 
         carListFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        carListFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                Point location = carListFrame.getLocation();
-                carListFrame.dispose();
-                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
+//        carListFrame.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                Point location = carListFrame.getLocation();
+//                carListFrame.dispose();
+//                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
+//
+//            }
+//        });
 
-            }
-        });
+        WindowNav.setCloseOperation(carListFrame, () -> new SalesmanDashboard(currentSalesman));
 
         // Display the window
         carListFrame.setVisible(true);
@@ -1093,6 +1095,7 @@ public class SalesmanDashboard implements ActionListener {
         buttonPanel.add(closeButton);
         requestFrame.add(buttonPanel, BorderLayout.SOUTH);
 
+        WindowNav.setCloseOperation(requestFrame, () -> new SalesmanDashboard(currentSalesman));
         requestFrame.setVisible(true);
     }
 
@@ -1672,16 +1675,17 @@ public class SalesmanDashboard implements ActionListener {
         }
         );
 
-        updateFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        updateFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                Point location = updateFrame.getLocation();
-                updateFrame.dispose();
-                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
-
-            }
-        });
+//        updateFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+//        updateFrame.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                Point location = updateFrame.getLocation();
+//                updateFrame.dispose();
+//                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
+//
+//            }
+//        });
+        WindowNav.setCloseOperation(updateFrame, () -> new SalesmanDashboard(currentSalesman));
 
         updateFrame.setVisible(
                 true);
@@ -1995,16 +1999,17 @@ public class SalesmanDashboard implements ActionListener {
         // Initial load
         loadBookedCars.run();
 
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                Point location = frame.getLocation();
-                frame.dispose();
-                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
-
-            }
-        });
+//        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+//        frame.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                Point location = frame.getLocation();
+//                frame.dispose();
+//                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
+//
+//            }
+//        });
+        WindowNav.setCloseOperation(frame, () -> new SalesmanDashboard(currentSalesman));
 
         frame.setVisible(true);
     }
@@ -2231,6 +2236,8 @@ public class SalesmanDashboard implements ActionListener {
 
         // Initial load
         loadData.run();
+        
+        WindowNav.setCloseOperation(frame, () -> new SalesmanDashboard(currentSalesman));
         frame.setVisible(true);
     }
 
