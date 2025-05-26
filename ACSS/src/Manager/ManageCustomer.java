@@ -3,44 +3,43 @@ package Manager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ManageCustomerGUI extends JFrame {
+public class ManageCustomer extends JFrame {
     private List<Customer> customerList = new ArrayList<>();
     private static final String FILE_NAME = "customerList.txt";
 
     // GUI Components
     private JTextArea outputArea;
     private JTextField idField, nameField, contactField;
-    private JButton approveButton, deleteButton, searchButton, updateButton, listButton;
+    private JButton approveButton;
+    private JButton deleteButton;
+    private JButton updateButton;
+    private JButton listButton;
+    private JCheckBox approvedCheckBox;
 
-    public ManageCustomerGUI() {
+    public ManageCustomer() {
         super("Customer Management System");
         loadCustomersFromFile();
-        initializeGUI();
+        initialize();
     }
 
-    private void initializeGUI() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private void initialize() {
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(800, 600);
         setLocationRelativeTo(null);
 
-        // Create main panel with BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Create form panel
         JPanel formPanel = createFormPanel();
         mainPanel.add(formPanel, BorderLayout.NORTH);
 
-        // Create button panel
         JPanel buttonPanel = createButtonPanel();
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
-        // Create output area
         outputArea = new JTextArea(15, 50);
         outputArea.setEditable(false);
         outputArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
@@ -52,7 +51,7 @@ public class ManageCustomerGUI extends JFrame {
     }
 
     private JPanel createFormPanel() {
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(4, 2, 5, 5));
         panel.setBorder(BorderFactory.createTitledBorder("Customer Information"));
 
         // ID Field
@@ -70,6 +69,12 @@ public class ManageCustomerGUI extends JFrame {
         contactField = new JTextField();
         panel.add(contactField);
 
+        // Approved Checkbox
+        panel.add(new JLabel("Approved:"));
+        approvedCheckBox = new JCheckBox();
+        approvedCheckBox.setSelected(true); // Default to approved
+        panel.add(approvedCheckBox);
+
         return panel;
     }
 
@@ -78,55 +83,60 @@ public class ManageCustomerGUI extends JFrame {
 
         // Approve/Add Button
         approveButton = new JButton("Approve/Add");
-        approveButton.addActionListener(e -> approveCustomer());
+        approveButton.addActionListener(this::approveCustomer);
         panel.add(approveButton);
 
         // Delete Button
         deleteButton = new JButton("Delete");
-        deleteButton.addActionListener(e -> deleteCustomer());
+        deleteButton.addActionListener(this::deleteCustomer);
         panel.add(deleteButton);
 
         // Search Button
-        searchButton = new JButton("Search");
-        searchButton.addActionListener(e -> searchCustomer());
+        JButton searchButton = new JButton("Search");
+        searchButton.addActionListener(this::searchCustomer);
         panel.add(searchButton);
 
         // Update Button
         updateButton = new JButton("Update");
-        updateButton.addActionListener(e -> updateCustomer());
+        updateButton.addActionListener(this::updateCustomer);
         panel.add(updateButton);
 
         // List All Button
         listButton = new JButton("List All");
-        listButton.addActionListener(e -> listAllCustomers());
+        listButton.addActionListener(this::listAllCustomers);
         panel.add(listButton);
 
         return panel;
     }
 
-    private void approveCustomer() {
+    private void approveCustomer(ActionEvent e) {
         String id = idField.getText().trim();
         String name = nameField.getText().trim();
         String contact = contactField.getText().trim();
+        boolean approved = approvedCheckBox.isSelected();
 
         if (id.isEmpty() || name.isEmpty() || contact.isEmpty()) {
             showMessage("Please fill in all fields");
             return;
         }
 
-        if (findCustomerById(id) != null) {
-            showMessage("Customer with this ID already exists!");
-            return;
+        Customer existing = findCustomerById(id);
+        if (existing != null) {
+            existing.setName(name);
+            existing.setContact(contact);
+            existing.setApproved(approved);
+            showMessage("Customer information updated.");
+        } else {
+            Customer newCustomer = new Customer(id, name, contact, approved);
+            customerList.add(newCustomer);
+            showMessage("Customer added successfully.");
         }
 
-        Customer newCustomer = new Customer(id, name, contact, true);
-        customerList.add(newCustomer);
         saveCustomersToFile();
-        showMessage("Customer approved and added successfully.");
         clearFields();
     }
 
-    private void deleteCustomer() {
+    private void deleteCustomer(ActionEvent e) {
         String id = idField.getText().trim();
         if (id.isEmpty()) {
             showMessage("Please enter Customer ID");
@@ -144,7 +154,7 @@ public class ManageCustomerGUI extends JFrame {
         }
     }
 
-    private void searchCustomer() {
+    private void searchCustomer(ActionEvent e) {
         String id = idField.getText().trim();
         if (id.isEmpty()) {
             showMessage("Please enter Customer ID");
@@ -156,12 +166,13 @@ public class ManageCustomerGUI extends JFrame {
             outputArea.setText("Customer Found:\n" + found);
             nameField.setText(found.getName());
             contactField.setText(found.getContact());
+            approvedCheckBox.setSelected(found.isApproved());
         } else {
             showMessage("Customer not found.");
         }
     }
 
-    private void updateCustomer() {
+    private void updateCustomer(ActionEvent e) {
         String id = idField.getText().trim();
         if (id.isEmpty()) {
             showMessage("Please enter Customer ID");
@@ -180,6 +191,7 @@ public class ManageCustomerGUI extends JFrame {
                 found.setContact(newContact);
             }
 
+            found.setApproved(approvedCheckBox.isSelected());
             saveCustomersToFile();
             showMessage("Customer information updated.");
         } else {
@@ -187,7 +199,7 @@ public class ManageCustomerGUI extends JFrame {
         }
     }
 
-    private void listAllCustomers() {
+    private void listAllCustomers(ActionEvent e) {
         if (customerList.isEmpty()) {
             showMessage("No customers to show.");
         } else {
@@ -205,6 +217,7 @@ public class ManageCustomerGUI extends JFrame {
     }
 
     private void loadCustomersFromFile() {
+        customerList.clear();
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -236,6 +249,7 @@ public class ManageCustomerGUI extends JFrame {
         idField.setText("");
         nameField.setText("");
         contactField.setText("");
+        approvedCheckBox.setSelected(true);
     }
 
     private void showMessage(String message) {
@@ -243,6 +257,51 @@ public class ManageCustomerGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ManageCustomerGUI());
+        SwingUtilities.invokeLater(() -> new ManageCustomer());
+    }
+
+    JPanel getPanel() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    // Inner Customer class
+    private static class Customer {
+        private String id;
+        private String name;
+        private String contact;
+        private boolean approved;
+
+        public Customer(String id, String name, String contact, boolean approved) {
+            this.id = id;
+            this.name = name;
+            this.contact = contact;
+            this.approved = approved;
+        }
+
+        public String getId() { return id; }
+        public String getName() { return name; }
+        public String getContact() { return contact; }
+        public boolean isApproved() { return approved; }
+        public void setName(String name) { this.name = name; }
+        public void setContact(String contact) { this.contact = contact; }
+        public void setApproved(boolean approved) { this.approved = approved; }
+
+        @Override
+        public String toString() {
+            return String.format("ID: %s, Name: %s, Contact: %s, Approved: %s",
+                    id, name, contact, approved ? "Yes" : "No");
+        }
+
+        public String toFileString() {
+            return String.join(",", id, name, contact, String.valueOf(approved));
+        }
+
+        public static Customer fromFileString(String line) {
+            String[] parts = line.split(",");
+            if (parts.length != 4) {
+                throw new IllegalArgumentException("Invalid customer data format");
+            }
+            return new Customer(parts[0], parts[1], parts[2], Boolean.parseBoolean(parts[3]));
+        }
     }
 }

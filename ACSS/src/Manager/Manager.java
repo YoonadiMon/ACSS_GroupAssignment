@@ -1,73 +1,43 @@
 package Manager;
 
-import java.util.Scanner;
-
 public class Manager {
+    String username;
+    String password;
+    String securityphrase;
 
-    static Scanner scanner = new Scanner(System.in);
+    public Manager(String username, String password, String securityphrase) {
+        this.username = username;
+        this.password = password;
+        this.securityphrase = securityphrase;
+    }
 
-    public static void managerFeatures() {
-        while (true) {
-            System.out.println("\n=== Manager Features Menu ===");
-            System.out.println("1. Manage Staff and Salesman");
-            System.out.println("2. Manage Customers");
-            System.out.println("3. Manage Car Inventory");
-            System.out.println("4. Payment and Feedback");
-            System.out.println("5. Reports");
-            System.out.println("6. Logout");
-            System.out.print("Enter your choice: ");
+    public String getUsername() {
+        return username;
+    }
 
-            int choice = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+    public String getPassword() {
+        return password;
+    }
 
-            switch (choice) {
-                case 1 -> manageStaffSalesman(); // 3A
-                case 2 -> manageCustomer();      // 3B
-                case 3 -> manageCarInventory();  // 3C
-                case 4 -> paymentFeedback();     // 3D
-                case 5 -> generateReports();     // 3E
-                case 6 -> {
-                    System.out.println("Logged Out");
-                    return;
-                }
-                default -> System.out.println("Invalid input");
-            }
+    public String getSecurityPhrase(){
+        return securityphrase;
+    }
+
+    public void setPassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    @Override
+    public String toString() {
+        return username + "," + password + "," + securityphrase;
+    }
+
+    public static Manager fromString(String line) {
+        String[] parts = line.split(",");
+        if (parts.length == 3) {
+            return new Manager(parts[0], parts[1], parts[2]);
+        } else {
+            throw new IllegalArgumentException("Invalid manager data: " + line);
         }
     }
-
-    // Managing staff and salesman
-    static void manageStaffSalesman() {
-        System.out.println("[3A] Managing Staff and Salesmen...");
-        // call real functionality here
-    }
-
-    // Managing customers
-    static void manageCustomer() {
-        System.out.println("[3B] Managing Customers...");
-        // call real functionality here
-    }
-
-    // Managing car inventory
-    static void manageCarInventory() {
-        System.out.println("[3C] Managing Car Inventory...");
-        // call real functionality here
-    }
-
-    // Payments and feedback
-    static void paymentFeedback() {
-        System.out.println("[3D] Handling Payment and Feedback...");
-        // call real functionality here
-    }
-
-    // Generating reports
-    static void generateReports() {
-        System.out.println("[3E] Generating Reports...");
-        // call real functionality here
-    }
-
-    // Entry point for demo
-    public static void main(String[] args) {
-        managerFeatures();
-    }
 }
-
