@@ -20,7 +20,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-
+/**
+ *
+ * @author YOON
+ */
 public class CustomerDashboard implements ActionListener   {
     
     private JFrame frame;

@@ -3,6 +3,10 @@ import javax.swing.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ *
+ * @author YOON
+ */
 public class CustomerDataValidator {
     // Regular expression for email validation
     private static final String EMAIL_PATTERN =

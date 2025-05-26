@@ -15,6 +15,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ *
+ * @author YOON
+ */
 public class CustomerLandingGUI implements ActionListener, KeyListener {
     private JFrame frame;
     private JPanel cards;

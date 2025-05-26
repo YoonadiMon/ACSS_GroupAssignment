@@ -6,7 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @author DELL
+ *
+ * @author YOON
  */
 public class MainPage implements DashboardPage {
     private static JFrame mainFrame;

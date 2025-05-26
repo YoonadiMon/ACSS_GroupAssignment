@@ -1,5 +1,9 @@
 package Customer;
 
+/**
+ *
+ * @author YOON
+ */
 public class Customer extends User {
     // Implementation of the abstract method from User class
     @Override
