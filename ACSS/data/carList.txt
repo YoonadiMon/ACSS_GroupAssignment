@@ -8,3 +8,4 @@ C008,Proton,13000,paid,S002
 C010,Mazda,27000,available,S002
 C012,Ford,24000,paid,S001
 C014,Tesla,150000,paid,S002
+C015,Mazda,27000,available,S002
