@@ -28,41 +28,32 @@ public abstract class AccountSalesman {
         this.securityQuestion = securityQuestion;
         this.securityAnswer = securityAnswer;
     }
-
     // === GETTERS: Read-only access to private data ===
     public String getID() {
         return ID;
     }
-
     public String getName() {
         return name;
     }
-
     public String getPassword() {
         return password;
     }
-
     public String getSecurityQuestion() {
         return securityQuestion;
     }
-
     public String getSecurityAnswer() {
         return securityAnswer;
     }
-
     // === SETTERS: Allow controlled modification of fields ===
     public void setName(String name) {
         this.name = name;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
-
     public void setSecurityQuestion(String securityQuestion) {
         this.securityQuestion = securityQuestion;
     }
-
     public void setSecurityAnswer(String securityAnswer) {
         this.securityAnswer = securityAnswer;
     }

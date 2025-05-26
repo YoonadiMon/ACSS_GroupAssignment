@@ -16,17 +16,14 @@ public class Salesman extends AccountSalesman {
     public Salesman(String ID, String name, String password, String securityQuestion, String securityAnswer) {
         super(ID, name, password, securityQuestion, securityAnswer);
     }
-
     // === POLYMORPHISM: Provides its own implementation of displayRole ===
     @Override
     public void displayRole() {
         System.out.println("Role: Salesman");
     }
-
     public void setSecurityQuestion(String securityQuestion) {
         this.securityQuestion = securityQuestion;
     }
-
     public void setSecurityAnswer(String securityAnswer) {
         this.securityAnswer = securityAnswer;
     }

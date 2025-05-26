@@ -25,11 +25,7 @@ public class CarRequest {
     private String customerID;
     private String carID;
     private String salesmanID;
-    private String requestStatus; // Pending, booked, rejected, paid, cancelled
-    //View + buy: pending-> booked-> paid 
-    //View + not buy: pending-> booked-> cancelled 
-    //View request not approved: pending-> rejected
-    
+    private String requestStatus;
     private String comment;
 
     public CarRequest(String customerID, String carID, String salesmanID, String requestStatus, String comment) {
@@ -76,15 +72,7 @@ public class CarRequest {
         }
     }
 
-    //public static void initializeCarRequests() {
-    //    carRequestsList.add(new CarRequest("14cb8731", "C001", "S001", "pending", "."));
-    //    carRequestsList.add(new CarRequest("f1363ffa", "C002", "S001", "pending", "."));
-    //    carRequestsList.add(new CarRequest("e292d371", "C003", "S002", "pending", "."));
-    //}
-    //public static void saveInitialCarRequestsToFile() {
-    //    initializeCarRequests();
-    //    writeCarRequests(carRequestsList);
-    //}
+   
     public static ArrayList<CarRequest> loadCarRequestDataFromFile() {
         ArrayList<CarRequest> loadedRequestList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("data/CarRequest.txt"))) {
