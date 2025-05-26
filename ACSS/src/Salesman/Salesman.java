@@ -8,76 +8,57 @@ package Salesman;
  *
  * @author hp
  */
-//public class Salesman {
-//
-//    String ID;
-//    String name;
-//    String password;
-//    String securityQuestion;
-//    String securityAnswer;
-//
-//    public Salesman(String ID, String name, String password, String securityQuestion, String securityAnswer) {
-//        this.ID = ID;
-//        this.name = name;
-//        this.password = password;
-//        this.securityQuestion = securityQuestion;
-//        this.securityAnswer = securityAnswer;
-//    }
-//
-//    public String getID() {
-//        return ID;
-//    }
-//
-//    public String getName() {
-//        return name;
-//    }
-//
-//    public String getPassword() {
-//        return password;
-//    }
-//
-//    public void setName(String name) {
-//        this.name = name;
-//    }
-//
-//    public void setPassword(String password) {
-//        this.password = password;
-//    }
-//    
-//    public void setSecurityPassword(String SecurityPassword) {
-//        this.securityAnswer = SecurityPassword;
-//    }
-//    
-//    public void setSecurityQuestion(String SecurityQuestion) {
-//        this.securityQuestion = SecurityQuestion;
-//    }
-//    
-//
-//    public String getSecurityQuestion() {
-//        return securityQuestion;
-//    }
-//
-//    public String getSecurityAnswer() {
-//        return securityAnswer;
-//    }
-//}
-public class Salesman extends AccountSalesman {
+public class Salesman {
+
+    String ID;
+    String name;
+    String password;
+    String securityQuestion;
+    String securityAnswer;
 
     public Salesman(String ID, String name, String password, String securityQuestion, String securityAnswer) {
-        super(ID, name, password, securityQuestion, securityAnswer);
+        this.ID = ID;
+        this.name = name;
+        this.password = password;
+        this.securityQuestion = securityQuestion;
+        this.securityAnswer = securityAnswer;
     }
 
+    public String getID() {
+        return ID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
     public void setSecurityPassword(String SecurityPassword) {
         this.securityAnswer = SecurityPassword;
     }
-
+    
     public void setSecurityQuestion(String SecurityQuestion) {
         this.securityQuestion = SecurityQuestion;
     }
+    
 
-    @Override
-    public void displayRole() {
-        System.out.println("I am a Salesman.");
+    public String getSecurityQuestion() {
+        return securityQuestion;
     }
 
+    public String getSecurityAnswer() {
+        return securityAnswer;
+    }
 }
+

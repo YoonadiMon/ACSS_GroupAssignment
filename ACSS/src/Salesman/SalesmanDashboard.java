@@ -443,43 +443,43 @@ public class SalesmanDashboard implements ActionListener {
     }
 
 
-    private JPanel createSummaryBox(String title, String value, Color bgColor) {
-        JPanel box = new JPanel(new BorderLayout());
-        box.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.GRAY, 1),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
-        box.setBackground(bgColor);
-
-        JLabel titleLabel = new JLabel(title, JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
-
-        JLabel valueLabel = new JLabel(value, JLabel.CENTER);
-        valueLabel.setFont(new Font("Arial", Font.BOLD, 18));
-
-        box.add(titleLabel, BorderLayout.NORTH);
-        box.add(valueLabel, BorderLayout.CENTER);
-
-        return box;
-    }
-
-    private void updateSummaryBoxes(ArrayList<Car> cars, JPanel totalBox, JPanel paidBox, JPanel availableBox) {
-        int totalCount = cars.size();
-        int paidCount = 0;
-        int availableCount = 0;
-
-        for (Car car : cars) {
-            if (car.getStatus().equalsIgnoreCase("Paid")) {
-                paidCount++;
-            } else if (car.getStatus().equalsIgnoreCase("Available")) {
-                availableCount++;
-            }
-        }
-
-        ((JLabel) totalBox.getComponent(1)).setText(String.valueOf(totalCount));
-        ((JLabel) paidBox.getComponent(1)).setText(String.valueOf(paidCount));
-        ((JLabel) availableBox.getComponent(1)).setText(String.valueOf(availableCount));
-    }
+//    private JPanel createSummaryBox(String title, String value, Color bgColor) {
+//        JPanel box = new JPanel(new BorderLayout());
+//        box.setBorder(BorderFactory.createCompoundBorder(
+//                BorderFactory.createLineBorder(Color.GRAY, 1),
+//                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+//        ));
+//        box.setBackground(bgColor);
+//
+//        JLabel titleLabel = new JLabel(title, JLabel.CENTER);
+//        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+//
+//        JLabel valueLabel = new JLabel(value, JLabel.CENTER);
+//        valueLabel.setFont(new Font("Arial", Font.BOLD, 18));
+//
+//        box.add(titleLabel, BorderLayout.NORTH);
+//        box.add(valueLabel, BorderLayout.CENTER);
+//
+//        return box;
+//    }
+//
+//    private void updateSummaryBoxes(ArrayList<Car> cars, JPanel totalBox, JPanel paidBox, JPanel availableBox) {
+//        int totalCount = cars.size();
+//        int paidCount = 0;
+//        int availableCount = 0;
+//
+//        for (Car car : cars) {
+//            if (car.getStatus().equalsIgnoreCase("Paid")) {
+//                paidCount++;
+//            } else if (car.getStatus().equalsIgnoreCase("Available")) {
+//                availableCount++;
+//            }
+//        }
+//
+//        ((JLabel) totalBox.getComponent(1)).setText(String.valueOf(totalCount));
+//        ((JLabel) paidBox.getComponent(1)).setText(String.valueOf(paidCount));
+//        ((JLabel) availableBox.getComponent(1)).setText(String.valueOf(availableCount));
+//    }
 
     private void viewCarStatusWindow() {
         // Create new frame
