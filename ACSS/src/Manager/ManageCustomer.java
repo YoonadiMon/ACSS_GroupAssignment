@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ManageCustomer extends JFrame {
     private List<Customer> customerList = new ArrayList<>();
-    private static final String FILE_NAME = "customerList.txt";
+    private static final String FILE_NAME = "data/CustomersList.txt";
 
     // GUI Components
     private JTextArea outputArea;
