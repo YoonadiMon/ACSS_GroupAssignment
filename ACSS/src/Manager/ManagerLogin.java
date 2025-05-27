@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ManagerLogin extends JFrame {
 
-    private static final String DATA_FILE = "managerList.txt";  // Changed filename here
+    private static final String DATA_FILE = "data/managerList.txt";  // Changed filename here
 
     private static final List<Manager> managerList = new ArrayList<>();
     private static final int MAX_ATTEMPTS = 3;
