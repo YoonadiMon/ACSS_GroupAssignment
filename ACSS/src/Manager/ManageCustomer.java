@@ -22,8 +22,9 @@ public class ManageCustomer extends JFrame {
 
     public ManageCustomer() {
         super("Customer Management System");
+        initialize(); // FOR FELISHA: initialise first 
         loadCustomersFromFile();
-        initialize();
+        
     }
 
     private void initialize() {

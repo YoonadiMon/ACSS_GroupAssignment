@@ -22,8 +22,8 @@ public class ManageStaffSalesman {
     }
 
     public static void main(String[] args) {
-        loadUsersFromFile("staffList.txt", staffList);
-        loadUsersFromFile("salesmanList.txt", salesmanList);
+        loadUsersFromFile("data/staffList.txt", staffList);
+        loadUsersFromFile("data/salesmanList.txt", salesmanList);
 
         try (Scanner scanner = new Scanner(System.in)) {
             int choice;
@@ -40,8 +40,8 @@ public class ManageStaffSalesman {
                     case 5 -> listAllUsers();
                     case 0 -> {
                         System.out.println("Exiting system...");
-                        saveUsersToFile("staffList.txt", staffList);
-                        saveUsersToFile("salesmanList.txt", salesmanList);
+                        saveUsersToFile("data/staffList.txt", staffList);
+                        saveUsersToFile("data/salesmanList.txt", salesmanList);
                         return;
                     }
                     default -> System.out.println("Invalid choice. Try again.");

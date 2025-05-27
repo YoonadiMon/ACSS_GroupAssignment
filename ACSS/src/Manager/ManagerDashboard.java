@@ -128,7 +128,8 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         if (source == manageStaffSalesmanButton) {
             openManageStaffSalesman();
         } else if (source == manageCustomerButton) {
-            openManageCustomer();
+            setVisible(false);
+            new ManageCustomer();
         } else if (source == manageCarInventoryButton) {
             openManageCarInventory();
         } else if (source == paymentFeedbackButton) {
@@ -156,20 +157,20 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         dialog.setVisible(true);
     }
 
-    private void openManageCustomer() {
-        JDialog dialog = createFeatureDialog("Customer Management");
-        JPanel content = new JPanel(new GridLayout(4, 1, 5, 5));
-        content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        content.add(new JLabel("Customer Management:", SwingConstants.CENTER));
-        content.add(new JButton("Approve Customer"));
-        content.add(new JButton("Delete Customer"));
-        content.add(new JButton("Update Customer"));
-        content.add(new JButton("Customer List"));
-
-        dialog.add(content);
-        dialog.setVisible(true);
-    }
+//    private void openManageCustomer() {
+//        JDialog dialog = createFeatureDialog("Customer Management");
+//        JPanel content = new JPanel(new GridLayout(4, 1, 5, 5));
+//        content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+//
+//        content.add(new JLabel("Customer Management:", SwingConstants.CENTER));
+//        content.add(new JButton("Approve Customer"));
+//        content.add(new JButton("Delete Customer"));
+//        content.add(new JButton("Update Customer"));
+//        content.add(new JButton("Customer List"));
+//
+//        dialog.add(content);
+//        dialog.setVisible(true);
+//    }
 
     private void openManageCarInventory() {
         JDialog dialog = createFeatureDialog("Car Inventory Management");

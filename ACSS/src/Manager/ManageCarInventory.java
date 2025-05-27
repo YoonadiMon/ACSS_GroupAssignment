@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 public class ManageCarInventory {
     private static final List<Car> carList = new ArrayList<>();
-    private static final String FILE_NAME = "carList.txt";
+    private static final String FILE_NAME = "data/carList.txt";
     private JFrame frame;
     private JTable carTable;
     private CarTableModel tableModel;

@@ -10,13 +10,13 @@ public class GenerateReports {
     private static final Scanner scanner = new Scanner(System.in);
 
     // File paths
-    private static final String STAFF_FILE = "staffList.txt";
-    private static final String SALESMEN_FILE = "salesmenList.txt";
-    private static final String CUSTOMERS_FILE = "customerList.txt";
-    private static final String CARS_FILE = "carList.txt";
-    private static final String SOLD_CARS_FILE = "soldCars.txt";
-    private static final String PAYMENTS_FILE = "paymentList.txt";
-    private static final String FEEDBACK_FILE = "feedbackList.txt";
+    private static final String STAFF_FILE = "data/staffList.txt";
+    private static final String SALESMEN_FILE = "data/salesmenList.txt";
+    private static final String CUSTOMERS_FILE = "data/customerList.txt";
+    private static final String CARS_FILE = "data/carList.txt";
+    private static final String SOLD_CARS_FILE = "data/soldCars.txt";
+    private static final String PAYMENTS_FILE = "data/paymentList.txt";
+    private static final String FEEDBACK_FILE = "data/feedbackList.txt";
 
     public static void ReportsMenu() {
         loadAllData();
