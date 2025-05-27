@@ -129,7 +129,7 @@ public class ManagerDashboard extends JFrame implements ActionListener {
             openManageStaffSalesman();
         } else if (source == manageCustomerButton) {
             setVisible(false);
-            new ManageCustomer();
+            new ManageCustomer(manager);
         } else if (source == manageCarInventoryButton) {
             openManageCarInventory();
         } else if (source == paymentFeedbackButton) {

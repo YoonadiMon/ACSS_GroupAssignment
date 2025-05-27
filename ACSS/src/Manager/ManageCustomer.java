@@ -1,5 +1,7 @@
 package Manager;
 
+import Customer.Customer;
+import Customer.CustomerDataIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,27 +12,35 @@ import java.util.List;
 public class ManageCustomer extends JFrame {
     private List<Customer> customerList = new ArrayList<>();
     private static final String FILE_NAME = "data/CustomersList.txt";
+    private Object manager; // Store the manager object to pass back
 
     // GUI Components
     private JTextArea outputArea;
-    private JTextField idField, nameField, contactField;
-    private JButton approveButton;
+    private JTextField idField, nameField, emailField, passwordField, searchIdField;
     private JButton deleteButton;
     private JButton updateButton;
     private JButton listButton;
     private JCheckBox approvedCheckBox;
 
-    public ManageCustomer() {
+    public ManageCustomer(Object manager) {
         super("Customer Management System");
-        initialize(); // FOR FELISHA: initialise first 
-        loadCustomersFromFile();
-        
+        this.manager = manager;
+        initialize(); // Initialize GUI first
+        loadCustomersFromFile(); // Then load data
     }
 
     private void initialize() {
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setSize(900, 700);
         setLocationRelativeTo(null);
+
+        // Add window listener to handle closing event
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                returnToManagerDashboard();
+            }
+        });
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -52,12 +62,21 @@ public class ManageCustomer extends JFrame {
     }
 
     private JPanel createFormPanel() {
-        JPanel panel = new JPanel(new GridLayout(4, 2, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
         panel.setBorder(BorderFactory.createTitledBorder("Customer Information"));
 
-        // ID Field
+        // Search ID Field
+        panel.add(new JLabel("Search by ID:"));
+        searchIdField = new JTextField();
+        searchIdField.setToolTipText("Enter Customer ID to search, update, delete, or approve");
+        panel.add(searchIdField);
+
+        // ID Field (Display Only)
         panel.add(new JLabel("Customer ID:"));
         idField = new JTextField();
+        idField.setToolTipText("Customer ID (Display Only)");
+        idField.setEditable(false);
+        idField.setBackground(Color.LIGHT_GRAY);
         panel.add(idField);
 
         // Name Field
@@ -65,15 +84,20 @@ public class ManageCustomer extends JFrame {
         nameField = new JTextField();
         panel.add(nameField);
 
-        // Contact Field
-        panel.add(new JLabel("Contact:"));
-        contactField = new JTextField();
-        panel.add(contactField);
+        // Email Field
+        panel.add(new JLabel("Email:"));
+        emailField = new JTextField();
+        panel.add(emailField);
+
+        // Password Field
+        panel.add(new JLabel("Password:"));
+        passwordField = new JPasswordField();
+        panel.add(passwordField);
 
         // Approved Checkbox
         panel.add(new JLabel("Approved:"));
         approvedCheckBox = new JCheckBox();
-        approvedCheckBox.setSelected(true); // Default to approved
+        approvedCheckBox.setSelected(false);
         panel.add(approvedCheckBox);
 
         return panel;
@@ -81,11 +105,6 @@ public class ManageCustomer extends JFrame {
 
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-
-        // Approve/Add Button
-        approveButton = new JButton("Approve/Add");
-        approveButton.addActionListener(this::approveCustomer);
-        panel.add(approveButton);
 
         // Delete Button
         deleteButton = new JButton("Delete");
@@ -102,43 +121,44 @@ public class ManageCustomer extends JFrame {
         updateButton.addActionListener(this::updateCustomer);
         panel.add(updateButton);
 
+        // Approve Button
+        JButton approveCustomerButton = new JButton("Approve");
+        approveCustomerButton.addActionListener(this::approveCustomer);
+        panel.add(approveCustomerButton);
+
         // List All Button
         listButton = new JButton("List All");
         listButton.addActionListener(this::listAllCustomers);
         panel.add(listButton);
 
+        // Back Button
+        JButton backButton = new JButton("Back to Dashboard");
+        backButton.addActionListener(e -> returnToManagerDashboard());
+        panel.add(backButton);
+
         return panel;
     }
 
     private void approveCustomer(ActionEvent e) {
-        String id = idField.getText().trim();
-        String name = nameField.getText().trim();
-        String contact = contactField.getText().trim();
-        boolean approved = approvedCheckBox.isSelected();
-
-        if (id.isEmpty() || name.isEmpty() || contact.isEmpty()) {
-            showMessage("Please fill in all fields");
+        String id = searchIdField.getText().trim();
+        if (id.isEmpty()) {
+            showMessage("Please enter Customer ID to approve");
             return;
         }
 
-        Customer existing = findCustomerById(id);
-        if (existing != null) {
-            existing.setName(name);
-            existing.setContact(contact);
-            existing.setApproved(approved);
-            showMessage("Customer information updated.");
+        Customer found = findCustomerById(id);
+        if (found != null) {
+            found.setApproved(true);
+            saveCustomersToFile();
+            showMessage("Customer approved successfully.");
+            approvedCheckBox.setSelected(true);
         } else {
-            Customer newCustomer = new Customer(id, name, contact, approved);
-            customerList.add(newCustomer);
-            showMessage("Customer added successfully.");
+            showMessage("Customer not found.");
         }
-
-        saveCustomersToFile();
-        clearFields();
     }
 
     private void deleteCustomer(ActionEvent e) {
-        String id = idField.getText().trim();
+        String id = searchIdField.getText().trim();
         if (id.isEmpty()) {
             showMessage("Please enter Customer ID");
             return;
@@ -156,7 +176,7 @@ public class ManageCustomer extends JFrame {
     }
 
     private void searchCustomer(ActionEvent e) {
-        String id = idField.getText().trim();
+        String id = searchIdField.getText().trim();
         if (id.isEmpty()) {
             showMessage("Please enter Customer ID");
             return;
@@ -164,9 +184,11 @@ public class ManageCustomer extends JFrame {
 
         Customer found = findCustomerById(id);
         if (found != null) {
-            outputArea.setText("Customer Found:\n" + found);
-            nameField.setText(found.getName());
-            contactField.setText(found.getContact());
+            outputArea.setText("Customer Found:\n" + formatCustomerInfo(found));
+            idField.setText(found.getCustomerId());
+            nameField.setText(found.getUsername());
+            emailField.setText(found.getEmail());
+            passwordField.setText(found.getPassword());
             approvedCheckBox.setSelected(found.isApproved());
         } else {
             showMessage("Customer not found.");
@@ -174,7 +196,7 @@ public class ManageCustomer extends JFrame {
     }
 
     private void updateCustomer(ActionEvent e) {
-        String id = idField.getText().trim();
+        String id = searchIdField.getText().trim();
         if (id.isEmpty()) {
             showMessage("Please enter Customer ID");
             return;
@@ -184,12 +206,17 @@ public class ManageCustomer extends JFrame {
         if (found != null) {
             String newName = nameField.getText().trim();
             if (!newName.isEmpty()) {
-                found.setName(newName);
+                found.setUsername(newName);
             }
 
-            String newContact = contactField.getText().trim();
-            if (!newContact.isEmpty()) {
-                found.setContact(newContact);
+            String newEmail = emailField.getText().trim();
+            if (!newEmail.isEmpty()) {
+                found.setEmail(newEmail);
+            }
+
+            String newPassword = passwordField.getText().trim();
+            if (!newPassword.isEmpty()) {
+                found.setPassword(newPassword);
             }
 
             found.setApproved(approvedCheckBox.isSelected());
@@ -205,40 +232,102 @@ public class ManageCustomer extends JFrame {
             showMessage("No customers to show.");
         } else {
             StringBuilder sb = new StringBuilder("--- List of All Customers ---\n");
-            customerList.forEach(c -> sb.append(c).append("\n"));
+            customerList.forEach(c -> sb.append(formatCustomerInfo(c)).append("\n\n"));
             outputArea.setText(sb.toString());
         }
     }
 
     private Customer findCustomerById(String id) {
         return customerList.stream()
-                .filter(c -> c.getId().equalsIgnoreCase(id))
+                .filter(c -> c.getCustomerId().equalsIgnoreCase(id))
                 .findFirst()
                 .orElse(null);
     }
 
+    private Customer findCustomerByEmail(String email) {
+        return customerList.stream()
+                .filter(c -> c.getEmail().equalsIgnoreCase(email))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String formatCustomerInfo(Customer customer) {
+        return String.format("ID: %s\nName: %s\nEmail: %s\nApproved: %s\nUser Type: %s",
+                customer.getCustomerId(), 
+                customer.getUsername(), 
+                customer.getEmail(), 
+                customer.isApproved() ? "Yes" : "No",
+                customer.getUserType());
+    }
+
     private void loadCustomersFromFile() {
         customerList.clear();
+        StringBuilder messages = new StringBuilder();
+        int loadedCount = 0;
+        int skippedCount = 0;
+        
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
-                    customerList.add(Customer.fromFileString(line));
+                    Customer customer = parseCustomerFromLine(line);
+                    customerList.add(customer);
+                    loadedCount++;
                 } catch (IllegalArgumentException e) {
-                    showMessage("Skipping invalid customer data: " + line);
+                    messages.append("Skipping invalid customer data: ").append(line).append("\n");
+                    skippedCount++;
                 }
             }
+            
+            // Show summary message
+            if (loadedCount > 0) {
+                messages.append("Successfully loaded ").append(loadedCount).append(" customers.\n");
+            }
+            if (skippedCount > 0) {
+                messages.append("Skipped ").append(skippedCount).append(" invalid records.\n");
+            }
+            
         } catch (FileNotFoundException e) {
-            showMessage("No existing customer file found. Starting fresh.");
+            messages.append("No existing customer file found. Starting fresh.\n");
         } catch (IOException e) {
-            showMessage("Error reading customer file: " + e.getMessage());
+            messages.append("Error reading customer file: ").append(e.getMessage()).append("\n");
+        }
+        
+        // Only show message if there's something to display
+        if (messages.length() > 0) {
+            showMessage(messages.toString().trim());
         }
     }
 
+    private Customer parseCustomerFromLine(String line) {
+        String[] parts = line.split(",");
+        if (parts.length != 5) {
+            throw new IllegalArgumentException("Invalid customer data format. Expected 5 fields, got " + parts.length);
+        }
+        
+        String customerId = parts[0].trim();
+        String name = parts[1].trim();
+        String email = parts[2].trim();
+        String password = parts[3].trim();
+        boolean approved = Boolean.parseBoolean(parts[4].trim());
+        
+        return new Customer(customerId, name, email, password, approved);
+    }
+
     private void saveCustomersToFile() {
+        // Create directory if it doesn't exist
+        File file = new File(FILE_NAME);
+        file.getParentFile().mkdirs();
+        
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
             for (Customer c : customerList) {
-                writer.write(c.toFileString());
+                String line = String.format("%s,%s,%s,%s,%s",
+                        c.getCustomerId(),
+                        c.getUsername(),
+                        c.getEmail(),
+                        c.getPassword(),
+                        c.isApproved());
+                writer.write(line);
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -247,62 +336,85 @@ public class ManageCustomer extends JFrame {
     }
 
     private void clearFields() {
+        searchIdField.setText("");
         idField.setText("");
         nameField.setText("");
-        contactField.setText("");
-        approvedCheckBox.setSelected(true);
+        emailField.setText("");
+        passwordField.setText("");
+        approvedCheckBox.setSelected(false);
     }
 
     private void showMessage(String message) {
-        outputArea.setText(message);
+        if (outputArea != null) {
+            outputArea.setText(message);
+        } else {
+            System.out.println(message); // Fallback for early initialization messages
+        }
+    }
+
+    private void returnToManagerDashboard() {
+        try {
+            // Close current window
+            this.dispose();
+            
+            // Create and show ManagerDashboard using reflection
+            Class<?> managerDashboardClass = Class.forName("Manager.ManagerDashboard");
+            
+            // Try different constructor signatures
+            java.lang.reflect.Constructor<?> constructor = null;
+            try {
+                // Try with the actual manager class type
+                constructor = managerDashboardClass.getConstructor(manager.getClass());
+            } catch (NoSuchMethodException e1) {
+                try {
+                    // Try with Object parameter
+                    constructor = managerDashboardClass.getConstructor(Object.class);
+                } catch (NoSuchMethodException e2) {
+                    try {
+                        // Try looking for any single-parameter constructor
+                        java.lang.reflect.Constructor<?>[] constructors = managerDashboardClass.getConstructors();
+                        for (java.lang.reflect.Constructor<?> c : constructors) {
+                            if (c.getParameterCount() == 1) {
+                                constructor = c;
+                                break;
+                            }
+                        }
+                    } catch (Exception e3) {
+                        throw new Exception("No suitable constructor found");
+                    }
+                }
+            }
+            
+            if (constructor != null) {
+                constructor.newInstance(manager);
+            } else {
+                throw new Exception("No suitable constructor found");
+            }
+            
+        } catch (Exception e) {
+            // Fallback - try simpler approach or just close
+            System.err.println("Could not return to ManagerDashboard: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Alternative: Try to call it directly if possible
+            try {
+                SwingUtilities.invokeLater(() -> {
+                    // This will work if ManagerDashboard is in the classpath
+                    // You might need to replace this with the actual constructor call
+                    System.out.println("Attempting to create ManagerDashboard with manager: " + manager);
+                    // new Manager.ManagerDashboard(manager); // Uncomment and fix type if needed
+                });
+            } catch (Exception fallbackError) {
+                System.err.println("Fallback also failed: " + fallbackError.getMessage());
+            }
+        }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ManageCustomer());
+        SwingUtilities.invokeLater(() -> new ManageCustomer(null));
     }
 
     JPanel getPanel() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    // Inner Customer class
-    private static class Customer {
-        private String id;
-        private String name;
-        private String contact;
-        private boolean approved;
-
-        public Customer(String id, String name, String contact, boolean approved) {
-            this.id = id;
-            this.name = name;
-            this.contact = contact;
-            this.approved = approved;
-        }
-
-        public String getId() { return id; }
-        public String getName() { return name; }
-        public String getContact() { return contact; }
-        public boolean isApproved() { return approved; }
-        public void setName(String name) { this.name = name; }
-        public void setContact(String contact) { this.contact = contact; }
-        public void setApproved(boolean approved) { this.approved = approved; }
-
-        @Override
-        public String toString() {
-            return String.format("ID: %s, Name: %s, Contact: %s, Approved: %s",
-                    id, name, contact, approved ? "Yes" : "No");
-        }
-
-        public String toFileString() {
-            return String.join(",", id, name, contact, String.valueOf(approved));
-        }
-
-        public static Customer fromFileString(String line) {
-            String[] parts = line.split(",");
-            if (parts.length != 4) {
-                throw new IllegalArgumentException("Invalid customer data format");
-            }
-            return new Customer(parts[0], parts[1], parts[2], Boolean.parseBoolean(parts[3]));
-        }
     }
 }

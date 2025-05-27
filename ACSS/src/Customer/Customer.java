@@ -43,6 +43,10 @@ public class Customer extends User {
         return getUserId();
     }
     
+    public String getCustomerName() {
+        return getUsername();
+    }
+    
     // Getter and setter for isApproved
     public boolean isApproved() {
         return isApproved;
