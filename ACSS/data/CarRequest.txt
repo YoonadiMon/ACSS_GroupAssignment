@@ -9,4 +9,3 @@ f1363ffa,C004,S002,booked,Approved by salesman
 f1363ffa,C010,S002,rejected,.
 14cb8731,C015,S002,rejected,.
 f1363ffa,C014,S002,paid,Payment completed
-14cb8731,C016,S001,rejected,No comments

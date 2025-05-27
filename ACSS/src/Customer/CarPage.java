@@ -170,7 +170,7 @@ public class CarPage implements DashboardPage {
                         }
                         if (alreadyRequested) {
                             JOptionPane.showMessageDialog(parentPanel,
-                                    "You have already requested for a booking for this car. Please wait for approval.",
+                                    "You have already made a request for a booking for this car previously. Please check your Cars History.",
                                     "Car Not Available",
                                     JOptionPane.WARNING_MESSAGE);
                             return;
