@@ -887,8 +887,12 @@ public class CustomerDashboard implements ActionListener   {
 
         // Create tabs for different feedback types
         JTabbedPane feedbackTabs = new JTabbedPane();
+        feedbackTabs.setFont(new Font("Arial", Font.PLAIN, 14));
+        feedbackTabs.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+        
         feedbackTabs.addTab("Salesman Feedback", createFeedbackList(CustomerFeedbacks.TYPE_SALESMAN));
-        feedbackTabs.addTab("Car Feedback", createFeedbackList(null)); 
+        feedbackTabs.addTab("Car Feedback", createFeedbackList(null));
+        
 
         // Add tabs to the content panel
         contentPanel.add(refreshButton, BorderLayout.NORTH);
@@ -1080,18 +1084,18 @@ public class CustomerDashboard implements ActionListener   {
         }
     }
     
-    //public static void main(String[] args) {
-    //    SwingUtilities.invokeLater(() -> {
-    //        CustomerDataIO.readCustomer();
-    //        Customer customer = CustomerDataIO.searchName("Yoon");
-    //        //Customer.Customer@1e9b5f31 14cb8731,Yoon,yoon@email.com,1234567A,true
-    //        if (customer != null) {
-    //            new CustomerDashboard(customer);
-    //        }
-    //        else {
-    //            System.out.println("error: "+customer);
-    //        }
-    //    });
-    //}
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(() -> {
+//            CustomerDataIO.readCustomer();
+//            Customer customer = CustomerDataIO.searchName("Yoonadi");
+//            //Customer.Customer@1e9b5f31 14cb8731,Yoon,yoon@email.com,1234567A,true
+//            if (customer != null) {
+//                new CustomerDashboard(customer);
+//            }
+//            else {
+//                System.out.println("error: "+customer);
+//            }
+//        });
+//    }
     
 }
