@@ -1,7 +1,7 @@
 package MainProgram;
 
 import Customer.CustomerLandingGUI;
-import Manager.ManagerGUI;
+import Manager.ManagerLogin;
 import Salesman.SalesmanGUI;
 import Utils.ButtonStyler;
 
@@ -19,7 +19,7 @@ public class MainMenuGUI implements ActionListener {
     private static final String ADMIN_PASSWORD = "admin123"; // Change this to your desired password
 
     public MainMenuGUI() {
-        x = new JFrame("Main Program");
+        x = new JFrame("--- Main Program ---");
         x.setSize(500, 300);
         x.setLocationRelativeTo(null); // Center the frame
         x.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15)); // Use FlowLayout for button arrangement
@@ -56,7 +56,7 @@ public class MainMenuGUI implements ActionListener {
         centerPanel.add(customerButton);
         centerPanel.add(salesmanButton);
         centerPanel.add(managerButton);
-        
+
 
         x.add(welcomeTxt);
         x.add(roleTxt);
@@ -94,7 +94,7 @@ public class MainMenuGUI implements ActionListener {
             new CustomerLandingGUI();
         } else if (e.getSource() == managerButton) {
             x.setVisible(false);
-            new ManagerGUI();
+            new ManagerLogin();
         } else if (e.getSource() == salesmanButton) {
             x.setVisible(false);
             new SalesmanGUI(x.getWidth(), x.getHeight());

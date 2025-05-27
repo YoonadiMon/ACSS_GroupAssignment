@@ -78,7 +78,7 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         button.setBackground(backgroundColor);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createRaisedBorderBorder());
+        //button.setBorder(BorderFactory.createRaisedBorderBorder());
         button.setPreferredSize(new Dimension(200, 60));
 
         // Add hover effect
@@ -149,6 +149,7 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         content.add(new JButton("Add Staff/Salesman"));
         content.add(new JButton("Delete Staff/Salesman"));
         content.add(new JButton("Update Staff/Salesman"));
+        content.add(new JButton("Assign Car"));
         content.add(new JButton("List All"));
 
         dialog.add(content);
@@ -630,7 +631,7 @@ public class ManagerDashboard extends JFrame implements ActionListener {
             // Return to login screen
             SwingUtilities.invokeLater(() -> {
                 try {
-                    new ManagerLogin().showLoginScreen();
+                    new ManagerLogin();
                 } catch (Exception ex) {
                     // If ManagerLogin class is not available, show a message
                     JOptionPane.showMessageDialog(null,
