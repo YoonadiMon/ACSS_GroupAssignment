@@ -1,7 +1,7 @@
 package MainProgram;
 
 import Customer.CustomerLandingGUI;
-import Manager.Manager;
+import Manager.ManagerGUI;
 import Salesman.SalesmanGUI;
 import Utils.ButtonStyler;
 
@@ -94,7 +94,7 @@ public class MainMenuGUI implements ActionListener {
             new CustomerLandingGUI();
         } else if (e.getSource() == managerButton) {
             x.setVisible(false);
-            new Manager();
+            new ManagerGUI();
         } else if (e.getSource() == salesmanButton) {
             x.setVisible(false);
             new SalesmanGUI(x.getWidth(), x.getHeight());
