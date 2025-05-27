@@ -38,6 +38,8 @@ public class ManagerGUI implements ActionListener {
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         showLoginPanel();
+        
+        WindowNav.setCloseOperation(frame, () -> new ManagerLogin());
     }
 
     private void showLoginPanel() {

@@ -1,5 +1,7 @@
 package Manager;
 
+import MainProgram.MainMenuGUI;
+import Utils.WindowNav;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -37,6 +39,8 @@ public class ManagerLogin extends JFrame {
         createDefaultManagerDataIfMissing(DATA_FILE);
         loadManagersFromFile(DATA_FILE);
         SwingUtilities.invokeLater(ManagerLogin::showLoginScreen);
+        
+        
     }
     /**
      *
@@ -72,6 +76,8 @@ public class ManagerLogin extends JFrame {
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         loginFrame.setSize(400, 250);
         loginFrame.setLocationRelativeTo(null);
+        
+        WindowNav.setCloseOperation(loginFrame, () -> new MainMenuGUI());
 
         JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
         JTextField usernameField = new JTextField();
@@ -101,7 +107,15 @@ public class ManagerLogin extends JFrame {
             if (m != null) {
                 loginAttempts = 0;
                 loginFrame.dispose();
-                showDashboard(m.getUsername());
+                ManagerLogin.Manager Manager = new ManagerLogin.Manager(
+                    username,
+                    password,
+                    phrase
+            );
+                new ManagerDashboard(Manager);
+                
+                
+                // showDashboard(m.getUsername());
             } else {
                 loginAttempts++;
                 if (loginAttempts >= MAX_ATTEMPTS) {
