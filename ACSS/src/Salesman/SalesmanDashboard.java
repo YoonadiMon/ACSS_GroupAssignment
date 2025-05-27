@@ -134,13 +134,12 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             viewSalesHistoryWindow();
         }
     }
-    
-    
+
     private void openEditProfileWindow() {
-        
+
         JFrame editProfileFrame = new JFrame("Edit Profile");
         try {
-            
+
             SwingUtilities.updateComponentTreeUI(editProfileFrame);
         } catch (Exception e) {
             e.printStackTrace();
@@ -1645,135 +1644,147 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         });
 
         // Paid button action (keep your existing business logic)
-        paidButton.addActionListener(e -> {
+        paidButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String carID = carIDField.getText().trim();
+                String customerID = customerIDField.getText().trim();
+                String comment = commentField.getText().trim();
+                String date = dateField.getText().trim();
 
-            String carID = carIDField.getText().trim();
-            String customerID = customerIDField.getText().trim();
-            String comment = commentField.getText().trim();
-            String date = dateField.getText().trim();
-
-            // 1. Validate inputs
-            if (carID.isEmpty() || customerID.isEmpty()) {
-                JOptionPane.showMessageDialog(frame,
-                        "Please enter both Car ID and Customer ID.",
-                        "Input Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // 2. Validate date format
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                sdf.setLenient(false);
-                sdf.parse(date);
-            } catch (ParseException ex) {
-                JOptionPane.showMessageDialog(frame,
-                        "Please enter a valid date in YYYY-MM-DD format.",
-                        "Invalid Date", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // 3. Check if car exists and is booked
-            ArrayList<Car> cars = CarList.loadCarDataFromFile();
-            ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
-
-            boolean carFound = false;
-            boolean validBooking = false;
-
-            for (Car car : cars) {
-                if (car.getCarId().equalsIgnoreCase(carID)
-                        && car.getSalesmanId().equals(currentSalesman.ID)) {
-
-                    carFound = true;
-
-                    // 4. Check if already paid
-                    if (car.getStatus().equalsIgnoreCase("paid")) {
-                        JOptionPane.showMessageDialog(frame,
-                                "This car has already been marked as paid.",
-                                "Error", JOptionPane.WARNING_MESSAGE);
-                        return;
-                    }
-
-                    // 5. Verify booking exists
-                    for (CarRequest req : requests) {
-                        if (req.getCarID().equalsIgnoreCase(carID)
-                                && req.getCustomerID().equalsIgnoreCase(customerID)
-                                && req.getRequestStatus().equalsIgnoreCase("booked")) {
-
-                            validBooking = true;
-                            break;
-                        }
-                    }
-
-                    if (!validBooking) {
-                        JOptionPane.showMessageDialog(frame,
-                                "No valid booking found for this car and customer.",
-                                "Error", JOptionPane.WARNING_MESSAGE);
-                        return;
-                    }
-
-                    // 6. Update car status
-                    car.setStatus("paid");
-
-                    // 7. Update request status
-                    ArrayList<CarRequest> updatedRequests = new ArrayList<>();
-                    for (CarRequest req : requests) {
-                        if (req.getCarID().equalsIgnoreCase(carID)) {
-                            if (req.getCustomerID().equalsIgnoreCase(customerID)) {
-                                // Update the booked request to paid
-                                updatedRequests.add(new CarRequest(
-                                        req.getCustomerID(),
-                                        req.getCarID(),
-                                        req.getSalesmanID(),
-                                        "paid",
-                                        comment.isEmpty() ? "Payment completed" : comment
-                                ));
-                            } else {
-                                // Reject other requests for this car
-                                updatedRequests.add(new CarRequest(
-                                        req.getCustomerID(),
-                                        req.getCarID(),
-                                        req.getSalesmanID(),
-                                        "rejected",
-                                        "Car has been sold"
-                                ));
-                            }
-                        } else {
-                            updatedRequests.add(req);
-                        }
-                    }
-
-                    // 8. Save changes
-                    CarList.saveUpdatedCarToFile(cars);
-                    CarRequest.writeCarRequests(updatedRequests);
-
-                    // 9. Create sales record
-                    SalesRecords sale = new SalesRecords(
-                            customerID,
-                            carID,
-                            currentSalesman.ID,
-                            car.getPrice(),
-                            "paid",
-                            comment.isEmpty() ? "No comments" : comment,
-                            date
-                    );
-                    SalesRecords.saveSalesRecord(sale);
-
-                    // 10. Update UI
+                // 1. Validate inputs
+                if (carID.isEmpty() || customerID.isEmpty()) {
                     JOptionPane.showMessageDialog(frame,
-                            "Car successfully marked as paid!",
-                            "Success", JOptionPane.INFORMATION_MESSAGE);
-                    loadBookedCars.run();
-                    carIDField.setText("");
-                    customerIDField.setText("");
-                    commentField.setText("");
-                    break;
+                            "Please enter both Car ID and Customer ID.",
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
-            }
 
-            if (!carFound) {
-                JOptionPane.showMessageDialog(frame,
-                        "No booked car found with ID: " + carID,
-                        "Error", JOptionPane.WARNING_MESSAGE);
+                // 2. Validate date format
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    sdf.setLenient(false);
+                    sdf.parse(date);
+                } catch (ParseException ex) {
+                    JOptionPane.showMessageDialog(frame,
+                            "Please enter a valid date in YYYY-MM-DD format.",
+                            "Invalid Date", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // 3. Check if car exists and is booked
+                ArrayList<Car> cars = CarList.loadCarDataFromFile();
+                ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+
+                boolean carFound = false;
+                boolean validBooking = false;
+
+                for (Car car : cars) {
+                    if (car.getCarId().equalsIgnoreCase(carID)
+                            && car.getSalesmanId().equals(currentSalesman.ID)) {
+
+                        carFound = true;
+
+                        // 4. Check if already paid
+                        if (car.getStatus().equalsIgnoreCase("paid")) {
+                            JOptionPane.showMessageDialog(frame,
+                                    "This car has already been marked as paid.",
+                                    "Error", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+
+                        // 5. Verify booking exists
+                        for (CarRequest req : requests) {
+                            if (req.getCarID().equalsIgnoreCase(carID)
+                                    && req.getCustomerID().equalsIgnoreCase(customerID)
+                                    && req.getRequestStatus().equalsIgnoreCase("booked")) {
+
+                                validBooking = true;
+                                break;
+                            }
+                        }
+
+                        if (!validBooking) {
+                            JOptionPane.showMessageDialog(frame,
+                                    "No valid booking found for this car and customer.",
+                                    "Error", JOptionPane.WARNING_MESSAGE);
+                            return;
+                        }
+
+                        // 6. Update car status
+                        car.setStatus("paid");
+
+                        // 7. Update request status
+                        ArrayList<CarRequest> updatedRequests = new ArrayList<>();
+                        for (CarRequest req : requests) {
+                            if (req.getCarID().equalsIgnoreCase(carID)) {
+                                if (req.getCustomerID().equalsIgnoreCase(customerID)) {
+                                    // Update the booked request to paid
+                                    updatedRequests.add(new CarRequest(
+                                            req.getCustomerID(),
+                                            req.getCarID(),
+                                            req.getSalesmanID(),
+                                            "paid",
+                                            comment.isEmpty() ? "Payment completed" : comment
+                                    ));
+                                } else {
+                                    // Reject other requests for this car
+                                    updatedRequests.add(new CarRequest(
+                                            req.getCustomerID(),
+                                            req.getCarID(),
+                                            req.getSalesmanID(),
+                                            "rejected",
+                                            "Car has been sold"
+                                    ));
+                                }
+                            } else {
+                                updatedRequests.add(req);
+                            }
+                        }
+
+                        // 8. Save changes
+                        CarList.saveUpdatedCarToFile(cars);
+                        CarRequest.writeCarRequests(updatedRequests);
+
+                        // 9. Create sales record
+                        SalesRecords sale = new SalesRecords(
+                                customerID,
+                                carID,
+                                currentSalesman.ID,
+                                car.getPrice(),
+                                "paid",
+                                comment.isEmpty() ? "No comments" : comment,
+                                date
+                        );
+                        SalesRecords.saveSalesRecord(sale);
+
+                        // 10. Save sold car record
+                        SoldCarRecord.saveSoldCarRecord(
+                                carID,
+                                String.valueOf(car.getPrice()), // Convert int to String
+                                customerID,
+                                currentSalesman.ID,
+                                date,
+                                comment.isEmpty() ? "No comments" : comment
+                        );
+
+                        // 11. Update UI
+                        JOptionPane.showMessageDialog(frame,
+                                "Car successfully marked as paid!",
+                                "Success", JOptionPane.INFORMATION_MESSAGE);
+                        loadBookedCars.run();
+                        carIDField.setText("");
+                        customerIDField.setText("");
+                        commentField.setText("");
+                        break;
+                    }
+                }
+
+                if (!carFound) {
+                    JOptionPane.showMessageDialog(frame,
+                            "No booked car found with ID: " + carID,
+                            "Error", JOptionPane.WARNING_MESSAGE);
+                }
             }
         });
 
@@ -1785,16 +1796,6 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         // Initial load
         loadBookedCars.run();
 
-//        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-//        frame.addWindowListener(new WindowAdapter() {
-//            @Override
-//            public void windowClosing(WindowEvent e) {
-//                Point location = frame.getLocation();
-//                frame.dispose();
-//                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
-//
-//            }
-//        });
         WindowNav.setCloseOperation(frame, () -> new SalesmanDashboard(currentSalesman));
 
         frame.setVisible(true);
