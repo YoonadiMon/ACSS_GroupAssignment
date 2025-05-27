@@ -19,7 +19,7 @@ public class MainMenuGUI implements ActionListener {
     private static final String ADMIN_PASSWORD = "admin123"; // Change this to your desired password
 
     public MainMenuGUI() {
-        x = new JFrame("--- Main Program ---");
+        x = new JFrame("Main Program");
         x.setSize(500, 300);
         x.setLocationRelativeTo(null); // Center the frame
         x.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15)); // Use FlowLayout for button arrangement
