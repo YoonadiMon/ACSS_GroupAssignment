@@ -17,18 +17,22 @@ public class SalesmanList {
 
     public static ArrayList<Salesman> salesmanList = new ArrayList<>();
 
-    public static void initializeSalesman() {
-        // Create default salesmen with security questions and answers
-        salesmanList.add(new Salesman("S001", "Ali", "S001",
-                "What is your mother's maiden name?", "Smith"));
-        salesmanList.add(new Salesman("S002", "Abu", "S002",
-                "What was your first pet's name?", "Fluffy"));
-        salesmanList.add(new Salesman("S003", "Kelvin", "S003",
-                "What city were you born in?", "Kuala Lumpur"));
-        salesmanList.add(new Salesman("S004", "Ben", "S004",
-                "What is your favorite book?", "Harry Potter"));
-
-        saveInitializedSalesmanDataToFile();
+    public static void saveSalesmanDataToFile(ArrayList<Salesman> list) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/salesmenList.txt"))) {
+            for (Salesman salesman : list) {
+                writer.write(String.join(",",
+                        salesman.getID(),
+                        salesman.getName(),
+                        salesman.getPassword(),
+                        salesman.getSecurityQuestion(),
+                        salesman.getSecurityAnswer()
+                ));
+                writer.newLine();
+            }
+            System.out.println("Salesmen saved to file.");
+        } catch (IOException e) {
+            System.out.println("Problem with file output.");
+        }
     }
 
     public static void saveInitializedSalesmanDataToFile() {
@@ -49,22 +53,18 @@ public class SalesmanList {
         }
     }
 
-    public static void saveSalesmanDataToFile(ArrayList<Salesman> list) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/salesmenList.txt"))) {
-            for (Salesman salesman : list) {
-                writer.write(String.join(",",
-                        salesman.getID(),
-                        salesman.getName(),
-                        salesman.getPassword(),
-                        salesman.getSecurityQuestion(),
-                        salesman.getSecurityAnswer()
-                ));
-                writer.newLine();
-            }
-            System.out.println("Salesmen saved to file.");
-        } catch (IOException e) {
-            System.out.println("Problem with file output.");
-        }
+    public static void initializeSalesman() {
+        // Create default salesmen with security questions and answers
+        salesmanList.add(new Salesman("S001", "Ali", "S001",
+                "What is your mother's maiden name?", "Smith"));
+        salesmanList.add(new Salesman("S002", "Abu", "S002",
+                "What was your first pet's name?", "Fluffy"));
+        salesmanList.add(new Salesman("S003", "Kelvin", "S003",
+                "What city were you born in?", "Kuala Lumpur"));
+        salesmanList.add(new Salesman("S004", "Ben", "S004",
+                "What is your favorite book?", "Harry Potter"));
+
+        saveInitializedSalesmanDataToFile();
     }
 
     public static ArrayList<Salesman> loadSalesmanDataFromFile() {
@@ -87,16 +87,25 @@ public class SalesmanList {
                 }
             }
         } catch (IOException e) {
-            System.out.println("Problem with file input. Initializing default salesmen.");
+            System.out.println("Problem with file input. ");
             initializeSalesman();
         }
 
         return salesmanList;
     }
 
-    public static Salesman findSalesmanById(String salesmanId) {
+//    public static Salesman findSalesmanById(String salesmanId) {
+//        for (Salesman salesman : salesmanList) {
+//            if (salesman.getID().equals(salesmanId)) {
+//                return salesman;
+//            }
+//        }
+//        return null;
+//    }
+    public static Salesman findSalesmanById(String id) {
+        ArrayList<Salesman> salesmanList = loadSalesmanDataFromFile(); // Ensure data is loaded
         for (Salesman salesman : salesmanList) {
-            if (salesman.getID().equals(salesmanId)) {
+            if (salesman.getID().equals(id)) {
                 return salesman;
             }
         }

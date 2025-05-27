@@ -7,6 +7,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class WindowNav {
+
+    public static class setCloseOperation {
+
+        public setCloseOperation() {
+        }
+    }
     @FunctionalInterface
     public interface FrameAction {
         void showFrame();

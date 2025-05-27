@@ -282,7 +282,7 @@ public class SalesmanGUI implements ActionListener {
         questionLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         panel.add(questionLabel, gbc);
 
-        JPasswordField answerField = new JPasswordField(20);
+        JTextField answerField = new JTextField(20);
         panel.add(answerField, gbc);
 
         JButton submitButton = new JButton("Submit");
@@ -295,7 +295,7 @@ public class SalesmanGUI implements ActionListener {
         panel.add(statusLabel, gbc);
 
         submitButton.addActionListener(e -> {
-            String answer = new String(answerField.getPassword()).trim();
+            String answer = new String(answerField.getText()).trim();
 
             if (SalesmanList.verifySecurityAnswer(salesman.getID(), answer)) {
                 JOptionPane.showMessageDialog(dialog,

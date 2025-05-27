@@ -21,8 +21,6 @@ import static Car.CarRequest.carRequestsList;
 import Car.SalesRecords;
 import Car.SoldCarRecord;
 import Salesman.SalesmanList;
-//import static Salesman.SalesmanList.loadSalesmanDataFromFile;
-//import static Salesman.SalesmanList.salesmanList;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
@@ -60,14 +58,16 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         setupButtons();
 
         // Add action listeners for buttons
-        editProfileButton.addActionListener(this);
-        viewCarsButton.addActionListener(this);
-        viewCarRequestButton.addActionListener(this);
-        updateCarStatusButton.addActionListener(this);
-        recordSalesHistory.addActionListener(this);
-        markCarAsPaidButton.addActionListener(this);
-        logoutButton.addActionListener(this);
+//        editProfileButton.addActionListener(this);
+//        viewCarsButton.addActionListener(this);
+//        viewCarRequestButton.addActionListener(this);
+//        updateCarStatusButton.addActionListener(this);
+//        recordSalesHistory.addActionListener(this);
+//        markCarAsPaidButton.addActionListener(this);
+//        logoutButton.addActionListener(this);
 
+
+        WindowNav.setCloseOperation(frame, () -> new MainMenuGUI());
         frame.setVisible(true);
     }
 
@@ -112,6 +112,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         recordSalesHistory.addActionListener(this);
         markCarAsPaidButton.addActionListener(this);
         logoutButton.addActionListener(this);
+
     }
 
     @Override
@@ -119,8 +120,11 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         frame.dispose(); // Close current frame before navigating
 
         if (e.getSource() == logoutButton) {
-            new SalesmanGUI(400, 250);
+            //new SalesmanGUI(400, 250);
+            new MainMenuGUI();
+
         } else if (e.getSource() == editProfileButton) {
+
             openEditProfileWindow();
         } else if (e.getSource() == viewCarsButton) {
             viewCarStatusWindow();
@@ -138,6 +142,8 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
     private void openEditProfileWindow() {
 
         JFrame editProfileFrame = new JFrame("Edit Profile");
+        System.out.println("created open edit profile frame");
+
         try {
 
             SwingUtilities.updateComponentTreeUI(editProfileFrame);
@@ -177,7 +183,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
 
         closeButton.addActionListener(e -> {
             editProfileFrame.dispose();
-            new SalesmanDashboard(currentSalesman);
+            frame.setVisible(true);
         });
 
         buttonPanel.add(saveButton);
@@ -205,9 +211,9 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
 
         String[][] infoData = {
             {"Name:", currentSalesman.getName()},
-            {"Password:", "********"},
+            {"Password:", currentSalesman.getPassword()},
             {"Security Question:", currentSalesman.getSecurityQuestion()},
-            {"Security Answer:", "********"}
+            {"Security Answer:", currentSalesman.getSecurityAnswer()}
         };
 
         for (String[] data : infoData) {
@@ -1096,21 +1102,6 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         // Status filter action
         statusFilter.addActionListener(e -> loadRequests.run());
 
-        // Close button action
-        closeButton.addActionListener(e -> {
-            updateFrame.dispose();
-            new SalesmanDashboard(currentSalesman);
-        });
-
-        // Window close handler
-        updateFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        updateFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                new SalesmanDashboard(currentSalesman);
-            }
-        });
-
         approveBtn.addActionListener(e -> {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
@@ -1460,16 +1451,6 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         }
         );
 
-//        updateFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-//        updateFrame.addWindowListener(new WindowAdapter() {
-//            @Override
-//            public void windowClosing(WindowEvent e) {
-//                Point location = updateFrame.getLocation();
-//                updateFrame.dispose();
-//                SalesmanDashboard dashboard = new SalesmanDashboard(currentSalesman);
-//
-//            }
-//        });
         WindowNav.setCloseOperation(updateFrame, () -> new SalesmanDashboard(currentSalesman));
 
         updateFrame.setVisible(
