@@ -230,7 +230,6 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                     return;
                 }
 
-                // Use the proper verification method
                 if (CustomersForgetPwd.verifySecurityAnswer(customerId, userAnswer.trim())) {
                     JOptionPane.showMessageDialog(frame, "Security answer verified! You may now reset your password.");
                     frame.dispose();

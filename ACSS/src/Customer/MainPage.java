@@ -140,8 +140,7 @@ public class MainPage implements DashboardPage {
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Toggle edit mode
-                boolean editMode = !usernameField.isEditable();
+                boolean editMode = !usernameField.isEditable(); // Toggle edit mode
 
                 // Update UI based on edit mode
                 usernameField.setEditable(editMode);
@@ -154,8 +153,7 @@ public class MainPage implements DashboardPage {
                     emailField.setText(customer.getEmail());
                     passwordField.setText("");
 
-                    // Change edit button appearance
-                    editButton.setBackground(new Color(100, 100, 100)); // Gray color
+                    editButton.setBackground(new Color(100, 100, 100)); // Change edit button appearance
 
                     // Show the save button
                     saveButton.setVisible(true);
