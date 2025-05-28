@@ -39,7 +39,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
     private final Color LIGHT_TEXT_COLOR = new Color(111, 143, 175);
 
     public CustomerLandingGUI() {
-        CustomerDataIO.readCustomer();
+        CustomerDataIO.loadAllData();
         frame = new JFrame("Customer Account");
         frame.setSize(400, 550);
         frame.setLocationRelativeTo(null);
