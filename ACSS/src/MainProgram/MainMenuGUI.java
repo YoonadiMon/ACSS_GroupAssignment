@@ -16,13 +16,16 @@ public class MainMenuGUI implements ActionListener {
     JFrame x;
     JButton customerButton, managerButton, salesmanButton, exitButton;
     JLabel welcomeTxt, roleTxt;
-    private static final String ADMIN_PASSWORD = "admin123"; // Change this to your desired password
+    // Change this to the password needed to turn off system
+    private static final String ADMIN_PASSWORD = "admin123"; 
 
     public MainMenuGUI() {
         x = new JFrame("Main Program");
         x.setSize(500, 300);
         x.setLocationRelativeTo(null); // Center the frame
         x.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15)); // Use FlowLayout for button arrangement
+        x.setResizable(false);
+        x.setMinimumSize(new Dimension(450, 300));
 
         // Welcome Message
         welcomeTxt = new JLabel("Welcome to APU Car Sales System");
