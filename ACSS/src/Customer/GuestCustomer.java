@@ -7,7 +7,7 @@ import java.util.UUID;
  *
  * @author YOON
  */
-public class GuestCustomer extends User  {
+public class GuestCustomer extends BaseCustomer  {
     // Constructor with no parameters - auto-generates all necessary details
     public GuestCustomer() {
         // Call the parent constructor with auto-generated values

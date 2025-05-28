@@ -4,7 +4,7 @@ package Customer;
  *
  * @author YOON
  */
-public class Customer extends User {
+public class Customer extends BaseCustomer {
     // Implementation of the abstract method from User class
     @Override
     public String getUserType() {

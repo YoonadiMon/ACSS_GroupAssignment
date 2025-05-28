@@ -4,14 +4,14 @@ package Customer;
  *
  * @author YOON
  */
-public abstract class User {
+public abstract class BaseCustomer {
     protected String userId;
     protected String username;
     protected String email;
     protected String password;
     
     // Constructor
-    public User(String userId, String username, String email, String password) {
+    public BaseCustomer(String userId, String username, String email, String password) {
         this.userId = userId;
         this.username = username;
         this.email = email;
