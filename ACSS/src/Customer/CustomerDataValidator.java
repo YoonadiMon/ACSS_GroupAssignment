@@ -21,7 +21,11 @@ public class CustomerDataValidator {
             return false;
         }
         Matcher matcher = emailPattern.matcher(email);
-        return matcher.matches();
+        
+        return matcher.matches() 
+           && !email.contains(",") 
+           && !email.contains("\"") 
+           && !email.contains("\n");
     }
 
     public static boolean isValidPassword(String password) {
@@ -33,7 +37,10 @@ public class CustomerDataValidator {
 
         boolean hasDigit = false;
         boolean hasUpperCase = false;
-
+        
+        if (password.contains(",") || password.contains("\"") || password.contains("\n")) {
+            return false;
+        }
         for (char c : password.toCharArray()) {
             if (Character.isDigit(c)) {
                 hasDigit = true;
@@ -56,6 +63,9 @@ public class CustomerDataValidator {
             return false;
         }
 
-        return username.matches("^[a-zA-Z0-9_]+$");
+        return username.matches("^[a-zA-Z0-9_]+$")
+           && !username.contains(",") 
+           && !username.contains("\"") 
+           && !username.contains("\n");
     }
 }

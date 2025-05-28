@@ -428,8 +428,8 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == loginBtn) {
             try {
-                String userOrEmail = loginUserOrEmailTF.getText();
-                String password = new String(loginPasswordTF.getPassword());
+                String userOrEmail = loginUserOrEmailTF.getText().trim();
+                String password = new String(loginPasswordTF.getPassword()).trim();
 
                 if (userOrEmail.isEmpty() || password.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "Please fill all fields", "Login Error", JOptionPane.ERROR_MESSAGE);
@@ -469,10 +469,10 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
             }
         } else if (e.getSource() == registerBtn) {
             try {
-                String username = registerUsernameTF.getText();
-                String email = registerEmailTF.getText();
-                String password = new String(registerPasswordTF.getPassword());
-                String confirmPassword = new String(confirmPasswordTF.getPassword());
+                String username = registerUsernameTF.getText().trim();
+                String email = registerEmailTF.getText().trim();
+                String password = new String(registerPasswordTF.getPassword()).trim();
+                String confirmPassword = new String(confirmPasswordTF.getPassword()).trim();
 
                 if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "Please fill all fields", "Registering Error", JOptionPane.ERROR_MESSAGE);
@@ -484,11 +484,11 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                 } else if (CustomerDataIO.searchName(username) != null) {
                     JOptionPane.showMessageDialog(frame, "Username already taken!", "Register Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidUsername(username)) {
-                    JOptionPane.showMessageDialog(frame, "Username is not valid! (At least 3 characters. Must not contain any special characters except underscore)", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Username is not valid! (At least 3 characters. Must not contain any special characters such as commas, quotes, newlines except underscore)", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidEmail(email)) {
-                    JOptionPane.showMessageDialog(frame, "Email is not valid!", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Email is not valid! Must not contain any special characters such as commas, quotes, newlines.", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidPassword(password)){
-                    JOptionPane.showMessageDialog(frame, "Passwords is not valid! (At least 8 characters containing one uppercase letter)", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Passwords is not valid! Must not contain any special characters such as commas, quotes, newlines. (At least 8 characters containing one uppercase letter)", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!password.equals(confirmPassword)) {
                     JOptionPane.showMessageDialog(frame, "Passwords do not match!", "Password Error", JOptionPane.ERROR_MESSAGE);
                 } else {
@@ -498,7 +498,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                     CustomerDataIO.writeCustomer(); // Save to file with approval status
 
                     JOptionPane.showMessageDialog(frame,
-                            "Account has been created! Your account needs approval by admin before you can login.",
+                            "Account has been created! Your account needs approval by admin before you can login.\nTip: All values have been trimed to remove extra spaces at front and end!",
                             "Registration Successful",
                             JOptionPane.INFORMATION_MESSAGE);
 
