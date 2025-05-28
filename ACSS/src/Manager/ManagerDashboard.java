@@ -1,14 +1,12 @@
 package Manager;
 
+import Customer.CustomerFeedbacks;
+import Car.SalesRecords;
 import Utils.ButtonStyler;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ManagerDashboard extends JFrame implements ActionListener {
@@ -178,7 +176,9 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         content.add(new JLabel("Car Inventory Management:", SwingConstants.CENTER));
-        content.add(new JButton("Edit Car Details"));
+        content.add(new JButton("Add Car Details"));
+        content.add(new JButton("Delete Car Details"));
+        content.add(new JButton("Update Car Details"));
         content.add(new JButton("Search Car Details"));
         content.add(new JButton("List All Cars"));
 
@@ -232,15 +232,18 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         JScrollPane paymentScrollPane = new JScrollPane(paymentListArea);
         listPaymentsPanel.add(paymentScrollPane, BorderLayout.CENTER);
 
+        // Buttons: Refresh + Filter
         JPanel paymentButtonPanel = new JPanel(new FlowLayout());
         JButton refreshPaymentsBtn = new JButton("Refresh List");
         refreshPaymentsBtn.addActionListener(e -> loadPaymentData(paymentListArea));
         paymentButtonPanel.add(refreshPaymentsBtn);
-        paymentButtonPanel.add(new JButton("Export to CSV"));
-        paymentButtonPanel.add(new JButton("Filter Payments"));
-        listPaymentsPanel.add(paymentButtonPanel, BorderLayout.SOUTH);
+
+        JButton filterPaymentsBtn = new JButton("Filter Payments");
+        filterPaymentsBtn.addActionListener(e -> showFilteredPaymentDialog());
+        paymentButtonPanel.add(filterPaymentsBtn);
 
         paymentSubTabs.addTab("List Payments", listPaymentsPanel);
+        listPaymentsPanel.add(paymentButtonPanel, BorderLayout.SOUTH);
 
         // Analyze Payments subtab
         JPanel analyzePaymentsPanel = createPaymentAnalysisPanel();
@@ -253,39 +256,118 @@ public class ManagerDashboard extends JFrame implements ActionListener {
     private void loadPaymentData(JTextArea textArea) {
         try {
             StringBuilder content = new StringBuilder();
-            content.append(String.format("%-12s %-20s %-12s %-12s %-12s\n",
-                    "Payment ID", "Customer", "Amount", "Date", "Status"));
-            content.append("------------|--------------------|-----------|-----------|-----------\n");
+            content.append(String.format("%-12s %-12s %-15s %-10s %-10s %-20s %-12s\n",
+                    "Customer ID", "Car ID", "Salesman ID", "Price", "Status", "Comment", "Date"));
+            content.append("------------|------------|---------------|----------|----------|--------------------|------------\n");
 
-            BufferedReader reader = new BufferedReader(new FileReader("data/salesList.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (!line.isEmpty()) {
-                    String[] parts = line.split("\\|");
-                    if (parts.length >= 5) {
-                        content.append(String.format("%-12s %-20s %-12s %-12s %-12s\n",
-                                parts[0].trim(), parts[1].trim(), parts[2].trim(),
-                                parts[3].trim(), parts[4].trim()));
-                    }
+            List<SalesRecords> records = SalesRecords.loadSalesRecords();
+
+            for (SalesRecords record : records) {
+                String comment = record.getComment();
+                if (comment.length() > 18) {
+                    comment = comment.substring(0, 17) + "...";
+                }
+
+                content.append(String.format("%-12s %-12s %-15s %-10.2f %-10s %-20s %-12s\n",
+                        record.getCustomerID(),
+                        record.getCarID(),
+                        record.getSalesmanID(),
+                        record.getPrice(),
+                        record.getStatus(),
+                        comment,
+                        record.getDate()));
+            }
+
+            textArea.setText(content.toString());
+        } catch (Exception e) {
+            textArea.setText("Error loading payment data: " + e.getMessage() + "\n\n" +
+                    "Sample Data:\n" +
+                    String.format("%-12s %-12s %-15s %-10s %-10s %-20s %-12s\n",
+                            "Customer ID", "Car ID", "Salesman ID", "Price", "Status", "Comment", "Date") +
+                    "------------|------------|---------------|----------|----------|----------------------|------------\n" +
+                    String.format("%-12s %-12s %-15s %-10s %-10s %-20s %-12s\n",
+                            "C001", "CAR123", "S001", 25000.00, "Completed", "Smooth transaction", "2024-01-01") +
+                    String.format("%-12s %-12s %-15s %-10s %-10s %-20s %-12s\n",
+                            "C002", "CAR202", "S002", 30000.00, "Pending", "Needs follow-up", "2024-01-02"));
+        }
+    }
+
+    private void loadPaymentData(JTextArea paidTextArea, JTextArea unpaidTextArea) {
+        try {
+            List<SalesRecords> records = SalesRecords.loadSalesRecords();
+
+            StringBuilder paidContent = new StringBuilder();
+            StringBuilder unpaidContent = new StringBuilder();
+
+            String header = String.format("%-12s %-12s %-15s %-10s %-10s %-20s %-12s\n",
+                    "Customer ID", "Car ID", "Salesman ID", "Price", "Status", "Comment", "Date") +
+                    "------------|------------|---------------|----------|----------|--------------------|------------\n";
+
+            paidContent.append(header);
+            unpaidContent.append(header);
+
+            for (SalesRecords record : records) {
+                String comment = record.getComment();
+                if (comment.length() > 18) {
+                    comment = comment.substring(0, 17) + "...";
+                }
+
+                String row = String.format("%-12s %-12s %-15s %-10.2f %-10s %-20s %-12s\n",
+                        record.getCustomerID(),
+                        record.getCarID(),
+                        record.getSalesmanID(),
+                        record.getPrice(),
+                        record.getStatus(),
+                        comment,
+                        record.getDate());
+
+                if (record.getStatus().equalsIgnoreCase("paid")) {
+                    paidContent.append(row);
+                } else {
+                    unpaidContent.append(row);
                 }
             }
-            reader.close();
-            textArea.setText(content.toString());
 
-        } catch (IOException e) {
-            textArea.setText("Error loading payment data: " + e.getMessage() + "\n\n" +
-                    "Sample Data (File not found):\n" +
-                    String.format("%-12s %-20s %-12s %-12s %-12s\n",
-                            "Payment ID", "Customer", "Amount", "Date", "Status") +
-                    "------------|--------------------|-----------|-----------|-----------\n" +
-                    String.format("%-12s %-20s %-12s %-12s %-12s\n",
-                            "PAY001", "John Doe", "$25,000", "2024-01-15", "Completed") +
-                    String.format("%-12s %-20s %-12s %-12s %-12s\n",
-                            "PAY002", "Jane Smith", "$30,000", "2024-01-16", "Pending") +
-                    String.format("%-12s %-20s %-12s %-12s %-12s\n",
-                            "PAY003", "Bob Wilson", "$22,500", "2024-01-17", "Completed"));
+            paidTextArea.setText(paidContent.toString());
+            unpaidTextArea.setText(unpaidContent.toString());
+
+        } catch (Exception e) {
+            String errorMsg = "Error loading payment data: " + e.getMessage();
+            paidTextArea.setText(errorMsg);
+            unpaidTextArea.setText(errorMsg);
         }
+    }
+
+    private void showFilteredPaymentDialog() {
+        JDialog dialog = new JDialog((Frame) null, "Filter Payments", true);
+        dialog.setSize(900, 600);
+        dialog.setLocationRelativeTo(null);
+
+        JPanel mainPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JTextArea paidTextArea = new JTextArea();
+        JTextArea unpaidTextArea = new JTextArea();
+        paidTextArea.setEditable(false);
+        unpaidTextArea.setEditable(false);
+        paidTextArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        unpaidTextArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+        loadPaymentData(paidTextArea, unpaidTextArea);
+
+        JPanel paidPanel = new JPanel(new BorderLayout());
+        paidPanel.setBorder(BorderFactory.createTitledBorder("Paid Transactions"));
+        paidPanel.add(new JScrollPane(paidTextArea), BorderLayout.CENTER);
+
+        JPanel unpaidPanel = new JPanel(new BorderLayout());
+        unpaidPanel.setBorder(BorderFactory.createTitledBorder("Unpaid Transactions"));
+        unpaidPanel.add(new JScrollPane(unpaidTextArea), BorderLayout.CENTER);
+
+        mainPanel.add(paidPanel);
+        mainPanel.add(unpaidPanel);
+
+        dialog.setContentPane(mainPanel);
+        dialog.setVisible(true);
     }
 
     private JPanel createPaymentAnalysisPanel() {
@@ -315,7 +397,6 @@ public class ManagerDashboard extends JFrame implements ActionListener {
             updatePaymentAnalysisLabels(analyzePaymentsPanel, newAnalytics);
         });
         analyticsButtonPanel.add(refreshAnalyticsBtn);
-        analyticsButtonPanel.add(new JButton("Generate Payment Report"));
         analyticsButtonPanel.add(new JButton("View Payment Trends"));
 
         analyzeContainer.add(analyzePaymentsPanel, BorderLayout.CENTER);
@@ -328,40 +409,26 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         PaymentAnalytics analytics = new PaymentAnalytics();
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("data/salesList.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (!line.isEmpty()) {
-                    String[] parts = line.split("\\|");
-                    if (parts.length >= 5) {
-                        analytics.totalPayments++;
+            List<SalesRecords> records = SalesRecords.loadSalesRecords();
 
-                        // Parse amount (remove $ and commas)
-                        String amountStr = parts[2].trim().replaceAll("[$,]", "");
-                        try {
-                            double amount = Double.parseDouble(amountStr);
-                            analytics.totalAmount += amount;
-                        } catch (NumberFormatException e) {
-                            // Skip invalid amounts
-                        }
+            for (SalesRecords record : records) {
+                analytics.totalPayments++;
+                analytics.totalAmount += record.getPrice();
 
-                        // Check if completed
-                        if (parts[4].trim().equalsIgnoreCase("completed")) {
-                            analytics.completedPayments++;
-                        }
-                    }
+                if (record.getStatus().equalsIgnoreCase("paid")) {
+                    analytics.completedPayments++;
                 }
             }
-            reader.close();
 
-            analytics.averageAmount = analytics.totalPayments > 0 ?
-                    analytics.totalAmount / analytics.totalPayments : 0;
-            analytics.completionRate = analytics.totalPayments > 0 ?
-                    (analytics.completedPayments * 100.0) / analytics.totalPayments : 0;
+            analytics.averageAmount = analytics.totalPayments > 0
+                    ? analytics.totalAmount / analytics.totalPayments
+                    : 0;
 
-        } catch (IOException e) {
-            // Use sample data if file not found
+            analytics.completionRate = analytics.totalPayments > 0
+                    ? (analytics.completedPayments * 100.0) / analytics.totalPayments
+                    : 0;
+
+        } catch (Exception e) {
             analytics.totalPayments = 4;
             analytics.totalAmount = 112500;
             analytics.averageAmount = 28125;
@@ -371,6 +438,7 @@ public class ManagerDashboard extends JFrame implements ActionListener {
 
         return analytics;
     }
+
 
     private void updatePaymentAnalysisLabels(JPanel panel, PaymentAnalytics analytics) {
         Component[] components = panel.getComponents();
@@ -419,12 +487,17 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         listFeedbacksPanel.add(feedbackScrollPane, BorderLayout.CENTER);
 
         JPanel feedbackButtonPanel = new JPanel(new FlowLayout());
-        JButton refreshFeedbackBtn = new JButton("Refresh List");
-        refreshFeedbackBtn.addActionListener(e -> loadFeedbackData(feedbackListArea));
-        feedbackButtonPanel.add(refreshFeedbackBtn);
-        feedbackButtonPanel.add(new JButton("Export to CSV"));
-        feedbackButtonPanel.add(new JButton("Filter by Rating"));
+
+        JButton refreshFeedbackButton = new JButton("Refresh List");
+        refreshFeedbackButton.addActionListener(e -> loadFeedbackData(feedbackListArea));
+        feedbackButtonPanel.add(refreshFeedbackButton);
+
+        JButton filterByRatingButton = new JButton("Filter by Rating (High to Low)");
+        filterByRatingButton.addActionListener(e -> loadFeedbackDataSortedByRating(feedbackListArea));
+        feedbackButtonPanel.add(filterByRatingButton);
+
         listFeedbacksPanel.add(feedbackButtonPanel, BorderLayout.SOUTH);
+
 
         feedbackSubTabs.addTab("List Feedbacks", listFeedbacksPanel);
 
@@ -439,44 +512,63 @@ public class ManagerDashboard extends JFrame implements ActionListener {
     private void loadFeedbackData(JTextArea textArea) {
         try {
             StringBuilder content = new StringBuilder();
-            content.append(String.format("%-12s %-20s %-8s %-12s %-30s\n",
-                    "Feedback ID", "Customer", "Rating", "Date", "Comment"));
-            content.append("------------|--------------------|---------|-----------|-----------------------\n");
+            content.append(String.format("%-12s %-15s %-12s %-8s %-30s\n",
+                    "Customer ID", "Item ID", "Type", "Rating", "Comment"));
+            content.append("------------|----------------|-------------|--------|-------------------------------\n");
 
-            BufferedReader reader = new BufferedReader(new FileReader("data/customerFeedbacks.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (!line.isEmpty()) {
-                    String[] parts = line.split("\\|");
-                    if (parts.length >= 5) {
-                        String comment = parts[4].trim();
-                        if (comment.length() > 28) {
-                            comment = comment.substring(0, 25) + "...";
-                        }
-                        content.append(String.format("%-12s %-20s %-8s %-12s %-30s\n",
-                                parts[0].trim(), parts[1].trim(), parts[2].trim(),
-                                parts[3].trim(), comment));
-                    }
+            List<CustomerFeedbacks> feedbacks = CustomerFeedbacks.getAllFeedbacks();
+            for (CustomerFeedbacks fb : feedbacks) {
+                String review = fb.getReview();
+                if (review.length() > 28) {
+                    review = review.substring(0, 25) + "...";
                 }
-            }
-            reader.close();
-            textArea.setText(content.toString());
 
-        } catch (IOException e) {
+                content.append(String.format("%-12s %-15s %-12s %-8s %-30s\n",
+                        fb.getCustomerId(), fb.getItemId(), fb.getFeedbackType(), fb.getRating(), review));
+            }
+
+            textArea.setText(content.toString());
+        } catch (Exception e) {
             textArea.setText("Error loading feedback data: " + e.getMessage() + "\n\n" +
-                    "Sample Data (File not found):\n" +
-                    String.format("%-12s %-20s %-8s %-12s %-30s\n",
-                            "Feedback ID", "Customer", "Rating", "Date", "Comment") +
-                    "------------|--------------------|---------|-----------|-----------------------\n" +
-                    String.format("%-12s %-20s %-8s %-12s %-30s\n",
-                            "FB001", "John Doe", "5/5", "2024-01-15", "Excellent service!") +
-                    String.format("%-12s %-20s %-8s %-12s %-30s\n",
-                            "FB002", "Jane Smith", "4/5", "2024-01-16", "Good experience overall") +
-                    String.format("%-12s %-20s %-8s %-12s %-30s\n",
-                            "FB003", "Bob Wilson", "3/5", "2024-01-17", "Average service"));
+                    "Sample Data:\n" +
+                    String.format("%-12s %-15s %-12s %-8s %-30s\n",
+                            "Customer ID", "Item ID", "Type", "Rating", "Comment") +
+                    "------------|----------------|-------------|--------|-------------------------------\n" +
+                    String.format("%-12s %-15s %-12s %-8s %-30s\n",
+                            "C001", "CAR123", "CAR_VIEWED", "4", "Nice car but could be cheaper") +
+                    String.format("%-12s %-15s %-12s %-8s %-30s\n",
+                            "C002", "SM002", "SALESMAN", "5", "Very professional service"));
         }
     }
+
+    private void loadFeedbackDataSortedByRating(JTextArea textArea) {
+        try {
+            StringBuilder content = new StringBuilder();
+            content.append(String.format("%-12s %-15s %-12s %-8s %-30s\n",
+                    "Customer ID", "Item ID", "Type", "Rating", "Comment"));
+            content.append("------------|----------------|-------------|--------|-------------------------------\n");
+
+            List<CustomerFeedbacks> feedbacks = CustomerFeedbacks.getAllFeedbacks();
+
+            // Sort feedbacks from highest to lowest rating
+            feedbacks.sort((a, b) -> Integer.compare(b.getRating(), a.getRating()));
+
+            for (CustomerFeedbacks fb : feedbacks) {
+                String review = fb.getReview();
+                if (review.length() > 28) {
+                    review = review.substring(0, 25) + "...";
+                }
+
+                content.append(String.format("%-12s %-15s %-12s %-8s %-30s\n",
+                        fb.getCustomerId(), fb.getItemId(), fb.getFeedbackType(), fb.getRating(), review));
+            }
+
+            textArea.setText(content.toString());
+        } catch (Exception e) {
+            textArea.setText("Error filtering feedback data: " + e.getMessage());
+        }
+    }
+
 
     private JPanel createFeedbackAnalysisPanel() {
         JPanel analyzeContainer = new JPanel(new BorderLayout());
@@ -505,7 +597,6 @@ public class ManagerDashboard extends JFrame implements ActionListener {
             updateFeedbackAnalysisLabels(analyzeFeedbacksPanel, newAnalytics);
         });
         feedbackAnalyticsButtonPanel.add(refreshFeedbackAnalyticsBtn);
-        feedbackAnalyticsButtonPanel.add(new JButton("Generate Feedback Report"));
         feedbackAnalyticsButtonPanel.add(new JButton("Sentiment Analysis"));
 
         analyzeContainer.add(analyzeFeedbacksPanel, BorderLayout.CENTER);
@@ -518,47 +609,31 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         FeedbackAnalytics analytics = new FeedbackAnalytics();
 
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("data/customerFeedbacks.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (!line.isEmpty()) {
-                    String[] parts = line.split("\\|");
-                    if (parts.length >= 5) {
-                        analytics.totalFeedbacks++;
+            List<CustomerFeedbacks> feedbacks = CustomerFeedbacks.getAllFeedbacks();
+            analytics.totalFeedbacks = feedbacks.size();
 
-                        // Parse rating (extract number from "X/5" format)
-                        String ratingStr = parts[2].trim();
-                        try {
-                            if (ratingStr.contains("/")) {
-                                String[] ratingParts = ratingStr.split("/");
-                                int rating = Integer.parseInt(ratingParts[0].trim());
-                                analytics.totalRatingPoints += rating;
+            for (CustomerFeedbacks fb : feedbacks) {
+                int rating = fb.getRating();  // This uses getRating() from your model
 
-                                if (rating >= 4) {
-                                    analytics.positiveCount++;
-                                }
-                                if (rating == 5) {
-                                    analytics.fiveStarCount++;
-                                }
-                            }
-                        } catch (NumberFormatException e) {
-                            // Skip invalid ratings
-                        }
-                    }
+                analytics.totalRatingPoints += rating;
+
+                if (rating >= 4) {
+                    analytics.positiveCount++;
+                }
+                if (rating == 5) {
+                    analytics.fiveStarCount++;
                 }
             }
-            reader.close();
 
-            analytics.averageRating = analytics.totalFeedbacks > 0 ?
-                    (double)analytics.totalRatingPoints / analytics.totalFeedbacks : 0;
-            analytics.positiveRate = analytics.totalFeedbacks > 0 ?
-                    (analytics.positiveCount * 100.0) / analytics.totalFeedbacks : 0;
-            analytics.fiveStarRate = analytics.totalFeedbacks > 0 ?
-                    (analytics.fiveStarCount * 100.0) / analytics.totalFeedbacks : 0;
+            // Compute metrics
+            if (analytics.totalFeedbacks > 0) {
+                analytics.averageRating = (double) analytics.totalRatingPoints / analytics.totalFeedbacks;
+                analytics.positiveRate = (analytics.positiveCount * 100.0) / analytics.totalFeedbacks;
+                analytics.fiveStarRate = (analytics.fiveStarCount * 100.0) / analytics.totalFeedbacks;
+            }
 
-        } catch (IOException e) {
-            // Use sample data if file not found
+        } catch (Exception e) {
+            // Sample fallback values
             analytics.totalFeedbacks = 4;
             analytics.totalRatingPoints = 17;
             analytics.averageRating = 4.25;
@@ -570,6 +645,8 @@ public class ManagerDashboard extends JFrame implements ActionListener {
 
         return analytics;
     }
+
+
 
     private void updateFeedbackAnalysisLabels(JPanel panel, FeedbackAnalytics analytics) {
         Component[] components = panel.getComponents();
@@ -595,19 +672,9 @@ public class ManagerDashboard extends JFrame implements ActionListener {
     }
 
     private void openGenerateReports() {
-        JDialog dialog = createFeatureDialog("Reports");
-        JPanel content = new JPanel(new GridLayout(5, 1, 5, 5));
-        content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        content.add(new JLabel("Reports:", SwingConstants.CENTER));
-        content.add(new JButton("Sales Reports"));
-        content.add(new JButton("Inventory Reports"));
-        content.add(new JButton("Salesman Reports"));
-        content.add(new JButton("Customer Reports"));
-        content.add(new JButton("All Reports"));
-
-        dialog.add(content);
-        dialog.setVisible(true);
+        JDialog dialog = new JDialog(this, "Reports", true);
+        dialog.setSize(900, 600);
+        dialog.setLocationRelativeTo(this);
     }
 
     private JDialog createFeatureDialog(String title) {

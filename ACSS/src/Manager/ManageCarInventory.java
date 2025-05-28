@@ -1,597 +1,426 @@
 package Manager;
 
+import Car.Car;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-import java.util.Objects;
 
-/**
- *
- * @author felis
- */
-public class ManageCarInventory {
-    private static final List<Car> carList = new ArrayList<>();
-    private static final String FILE_NAME = "data/carList.txt";
-    private JFrame frame;
-    private JTable carTable;
-    private CarTableModel tableModel;
+public class ManageCarInventory extends JFrame {
+    private List<Car> carList = new ArrayList<>();
+    private static final String FILE_NAME = "data/CarList.txt";
+    private Object manager; // Store the manager object to pass back
 
-    public static void main(String[] args) {
-        // Check if GUI mode should be used (you could add command line argument handling here)
-        boolean useGUI = true;
+    // GUI Components
+    private JTextArea outputArea;
+    private JTextField carIdField, brandField, priceField, statusField, salesmanIdField, searchCarIdField;
+    private JButton addButton;
+    private JButton deleteButton;
+    private JButton updateButton;
+    private JButton searchButton;
+    private JButton listButton;
 
-        if (useGUI) {
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    new ManageCarInventory().initializeGUI();
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, "Error initializing application: " + e.getMessage(),
-                            "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            });
-        } else {
-            // Run console version
-            loadCarsFromFile();
+    public ManageCarInventory(Object manager) {
+        super("Car Inventory Management System");
+        this.manager = manager;
+        initialize(); // Initialize GUI first
+        loadCarsFromFile(); // Then load data
+    }
 
-            int choice;
-            try (Scanner scanner = new Scanner(System.in)) {
-                do {
-                    displayMenu();
+    private void initialize() {
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setSize(900, 700);
+        setLocationRelativeTo(null);
 
-                    while(!scanner.hasNextInt()) {
-                        System.out.println("Please enter a number!");
-                        scanner.next();
-                    }
-
-                    choice = scanner.nextInt();
-                    scanner.nextLine();
-                    switch (choice) {
-                        case 0:
-                            System.out.println("Exiting and saving data...");
-                            break;
-                        case 1:
-                            addCar(scanner);
-                            break;
-                        case 2:
-                            deleteCar(scanner);
-                            break;
-                        case 3:
-                            searchCar(scanner);
-                            break;
-                        case 4:
-                            updateCar(scanner);
-                            break;
-                        case 5:
-                            listAllCars();
-                            break;
-                        default:
-                            System.out.println("Invalid choice. Try again.");
-                    }
-                } while(choice != 0);
+        // Add window listener to handle closing event
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                returnToManagerDashboard();
             }
+        });
 
-            saveCarsToFile();
-        }
-    }
-
-    // GUI Methods
-    private void initializeGUI() {
-        loadCarsFromFile();
-
-        frame = new JFrame("Car Dealership Management System");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
-        frame.setLocationRelativeTo(null);
-
-        createMenuBar();
-        createMainPanel();
-
-        frame.setVisible(true);
-    }
-
-    private void createMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-
-        JMenu fileMenu = new JMenu("File");
-        JMenuItem saveItem = new JMenuItem("Save Data");
-        saveItem.addActionListener(_ -> saveCarsToFile());
-        JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.addActionListener(_ -> System.exit(0));
-        fileMenu.add(saveItem);
-        fileMenu.addSeparator();
-        fileMenu.add(exitItem);
-
-        JMenu carMenu = new JMenu("Car Management");
-        JMenuItem addItem = new JMenuItem("Add Car");
-        addItem.addActionListener(_ -> showAddCarDialog());
-        JMenuItem deleteItem = new JMenuItem("Delete Car");
-        deleteItem.addActionListener(_ -> deleteCar());
-        JMenuItem searchItem = new JMenuItem("Search Car");
-        searchItem.addActionListener(_ -> searchCar());
-        JMenuItem updateItem = new JMenuItem("Update Car");
-        updateItem.addActionListener(_ -> updateCar());
-        JMenuItem listItem = new JMenuItem("List All Cars");
-        listItem.addActionListener(_ -> listAllCars());
-
-        carMenu.add(addItem);
-        carMenu.add(deleteItem);
-        carMenu.add(searchItem);
-        carMenu.add(updateItem);
-        carMenu.addSeparator();
-        carMenu.add(listItem);
-
-        menuBar.add(fileMenu);
-        menuBar.add(carMenu);
-
-        frame.setJMenuBar(menuBar);
-    }
-
-    private void createMainPanel() {
-        JPanel mainPanel = new JPanel(new BorderLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        tableModel = new CarTableModel(carList);
-        carTable = new JTable(tableModel);
-        carTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        carTable.getColumnModel().getColumn(3).setCellRenderer(new CurrencyRenderer());
+        JPanel formPanel = createFormPanel();
+        mainPanel.add(formPanel, BorderLayout.NORTH);
 
-        JScrollPane scrollPane = new JScrollPane(carTable);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        JPanel buttonPanel = createButtonPanel();
+        mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
-        mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
+        outputArea = new JTextArea(15, 50);
+        outputArea.setEditable(false);
+        outputArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        mainPanel.add(scrollPane, BorderLayout.SOUTH);
 
-        frame.add(mainPanel);
+        add(mainPanel);
+        setVisible(true);
+    }
+
+    private JPanel createFormPanel() {
+        JPanel panel = new JPanel(new GridLayout(7, 2, 5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Car Information"));
+
+        // Search Car ID Field
+        panel.add(new JLabel("Search by Car ID:"));
+        searchCarIdField = new JTextField();
+        searchCarIdField.setToolTipText("Enter Car ID to search, update, or delete");
+        panel.add(searchCarIdField);
+
+        // Car ID Field
+        panel.add(new JLabel("Car ID:"));
+        carIdField = new JTextField();
+        carIdField.setToolTipText("Enter unique Car ID");
+        panel.add(carIdField);
+
+        // Brand Field
+        panel.add(new JLabel("Brand:"));
+        brandField = new JTextField();
+        panel.add(brandField);
+
+        // Price Field
+        panel.add(new JLabel("Price:"));
+        priceField = new JTextField();
+        panel.add(priceField);
+
+        // Status Field
+        panel.add(new JLabel("Status:"));
+        statusField = new JTextField();
+        statusField.setToolTipText("e.g., Available, Sold, Reserved");
+        panel.add(statusField);
+
+        // Salesman ID Field
+        panel.add(new JLabel("Assign Salesman:"));
+        salesmanIdField = new JTextField();
+        salesmanIdField.setToolTipText("Enter Salesman ID to assign");
+        panel.add(salesmanIdField);
+
+        return panel;
     }
 
     private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-        JButton addButton = new JButton("Add Car");
-        addButton.addActionListener(_ -> showAddCarDialog());
-        buttonPanel.add(addButton);
+        // Add Button
+        addButton = new JButton("Add Car");
+        addButton.addActionListener(this::addCar);
+        panel.add(addButton);
 
-        JButton deleteButton = new JButton("Delete Car");
-        deleteButton.addActionListener(_ -> deleteCar());
-        buttonPanel.add(deleteButton);
+        // Delete Button
+        deleteButton = new JButton("Delete");
+        deleteButton.addActionListener(this::deleteCar);
+        panel.add(deleteButton);
 
-        JButton searchButton = new JButton("Search Car");
-        searchButton.addActionListener(_ -> searchCar());
-        buttonPanel.add(searchButton);
+        // Search Button
+        searchButton = new JButton("Search");
+        searchButton.addActionListener(this::searchCar);
+        panel.add(searchButton);
 
-        JButton updateButton = new JButton("Update Car");
-        updateButton.addActionListener(_ -> updateCar());
-        buttonPanel.add(updateButton);
+        // Update Button
+        updateButton = new JButton("Update");
+        updateButton.addActionListener(this::updateCar);
+        panel.add(updateButton);
 
-        JButton refreshButton = new JButton("Refresh List");
-        refreshButton.addActionListener(_ -> listAllCars());
-        buttonPanel.add(refreshButton);
+        // List All Button
+        listButton = new JButton("List All");
+        listButton.addActionListener(this::listAllCars);
+        panel.add(listButton);
 
-        return buttonPanel;
+        // Back Button
+        JButton backButton = new JButton("Back to Dashboard");
+        backButton.addActionListener(e -> returnToManagerDashboard());
+        panel.add(backButton);
+
+        return panel;
     }
 
-    private void showAddCarDialog() {
-        JDialog dialog = new JDialog(frame, "Add New Car", true);
-        dialog.setLayout(new GridLayout(5, 2, 10, 10));
-        dialog.setSize(400, 250);
-        dialog.setLocationRelativeTo(frame);
+    private void addCar(ActionEvent e) {
+        String carId = carIdField.getText().trim();
+        String brand = brandField.getText().trim();
+        String priceStr = priceField.getText().trim();
+        String status = statusField.getText().trim();
+        String salesmanId = salesmanIdField.getText().trim();
 
-        JTextField regNoField = new JTextField();
-        JTextField modelField = new JTextField();
-        JTextField brandField = new JTextField();
-        JTextField priceField = new JTextField();
-
-        dialog.add(new JLabel("Registration Number:"));
-        dialog.add(regNoField);
-        dialog.add(new JLabel("Model:"));
-        dialog.add(modelField);
-        dialog.add(new JLabel("Brand:"));
-        dialog.add(brandField);
-        dialog.add(new JLabel("Price:"));
-        dialog.add(priceField);
-
-        JButton addButton = new JButton("Add");
-        addButton.addActionListener(_ -> {
-            try {
-                String regNo = regNoField.getText().trim();
-                if (regNo.isEmpty()) {
-                    throw new IllegalArgumentException("Registration number cannot be empty");
-                }
-
-                if (findCarByRegNo(regNo) != null) {
-                    throw new IllegalArgumentException("Car with this registration number already exists");
-                }
-
-                String model = modelField.getText().trim();
-                String brand = brandField.getText().trim();
-                double price = Double.parseDouble(priceField.getText().trim());
-
-                carList.add(new Car(regNo, model, brand, price));
-                tableModel.fireTableDataChanged();
-                dialog.dispose();
-                JOptionPane.showMessageDialog(frame, "Car added successfully!",
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Please enter a valid price",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(dialog, ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(_ -> dialog.dispose());
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        buttonPanel.add(addButton);
-        buttonPanel.add(cancelButton);
-
-        dialog.add(new JLabel());
-        dialog.add(buttonPanel);
-
-        dialog.setVisible(true);
-    }
-
-    private void deleteCar() {
-        int selectedRow = carTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(frame, "Please select a car to delete",
-                    "Error", JOptionPane.ERROR_MESSAGE);
+        // Validation
+        if (carId.isEmpty() || brand.isEmpty() || priceStr.isEmpty() || status.isEmpty()) {
+            showMessage("Please fill in all required fields (Car ID, Brand, Price, Status)");
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(frame,
-                "Are you sure you want to delete this car?",
-                "Confirm Delete", JOptionPane.YES_NO_OPTION);
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            carList.remove(selectedRow);
-            tableModel.fireTableDataChanged();
-            JOptionPane.showMessageDialog(frame, "Car deleted successfully",
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private void searchCar() {
-        String regNo = JOptionPane.showInputDialog(frame, "Enter Registration Number to search:");
-        if (regNo == null || regNo.trim().isEmpty()) return;
-
-        Car car = findCarByRegNo(regNo.trim());
-        if (car != null) {
-            int index = carList.indexOf(car);
-            carTable.setRowSelectionInterval(index, index);
-            carTable.scrollRectToVisible(carTable.getCellRect(index, 0, true));
-        } else {
-            JOptionPane.showMessageDialog(frame, "Car not found",
-                    "Search Result", JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private void updateCar() {
-        int selectedRow = carTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(frame, "Please select a car to update",
-                    "Error", JOptionPane.ERROR_MESSAGE);
+        // Check if car ID already exists
+        if (findCarById(carId) != null) {
+            showMessage("Car ID already exists. Please use a different ID.");
             return;
         }
 
-        Car car = carList.get(selectedRow);
+        try {
+            double price = Double.parseDouble(priceStr);
 
-        JDialog dialog = new JDialog(frame, "Update Car", true);
-        dialog.setLayout(new GridLayout(5, 2, 10, 10));
-        dialog.setSize(400, 250);
-        dialog.setLocationRelativeTo(frame);
+            // Create new car object
+            Car newCar = new Car(carId, brand, price, status, salesmanId);
+            carList.add(newCar);
 
-        JLabel regNoLabel = new JLabel("Registration Number:");
-        JTextField regNoField = new JTextField(car.getRegNo());
-        regNoField.setEditable(false);
-        JTextField modelField = new JTextField(car.getModel());
-        JTextField brandField = new JTextField(car.getBrand());
-        JTextField priceField = new JTextField(String.valueOf(car.getPrice()));
+            // Save to file
+            saveCarsToFile();
 
-        dialog.add(regNoLabel);
-        dialog.add(regNoField);
-        dialog.add(new JLabel("Model:"));
-        dialog.add(modelField);
-        dialog.add(new JLabel("Brand:"));
-        dialog.add(brandField);
-        dialog.add(new JLabel("Price:"));
-        dialog.add(priceField);
-
-        JButton updateButton = new JButton("Update");
-        updateButton.addActionListener(_ -> {
-            try {
-                String model = modelField.getText().trim();
-                String brand = brandField.getText().trim();
-                double price = Double.parseDouble(priceField.getText().trim());
-
-                car.setModel(model);
-                car.setBrand(brand);
-                car.setPrice(price);
-
-                tableModel.fireTableDataChanged();
-                dialog.dispose();
-                JOptionPane.showMessageDialog(frame, "Car updated successfully!",
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Please enter a valid price",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(_ -> dialog.dispose());
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        buttonPanel.add(updateButton);
-        buttonPanel.add(cancelButton);
-
-        dialog.add(new JLabel());
-        dialog.add(buttonPanel);
-
-        dialog.setVisible(true);
-    }
-
-    // Console Methods
-    private static void displayMenu() {
-        System.out.println("\n--- Car Management Menu ---");
-        System.out.println("1. Add Car");
-        System.out.println("2. Delete Car");
-        System.out.println("3. Search Car");
-        System.out.println("4. Update Car");
-        System.out.println("5. List All Cars");
-        System.out.println("0. Exit");
-        System.out.print("Enter your choice: ");
-    }
-
-    private static void addCar(Scanner scanner) {
-        System.out.print("Enter Registration Number: ");
-        String regNo = scanner.nextLine().trim();
-        if (findCarByRegNo(regNo) != null) {
-            System.out.println("Car with this registration number already exists!");
-        } else {
-            System.out.print("Enter Model: ");
-            String model = scanner.nextLine().trim();
-            System.out.print("Enter Brand: ");
-            String brand = scanner.nextLine().trim();
-            System.out.print("Enter Price: ");
-
-            while(!scanner.hasNextDouble()) {
-                System.out.println("Please enter a valid price!");
-                scanner.next();
-            }
-
-            double price = scanner.nextDouble();
-            scanner.nextLine();
-            carList.add(new Car(regNo, model, brand, price));
-            System.out.println("Car added successfully.");
+            showMessage("Car added successfully.");
+            clearFields();
+        } catch (NumberFormatException ex) {
+            showMessage("Invalid price format. Please enter a valid number.");
         }
     }
 
-    private static void deleteCar(Scanner scanner) {
-        System.out.print("Enter Registration Number to delete: ");
-        String regNo = scanner.nextLine().trim();
-        Car car = findCarByRegNo(regNo);
-        if (car != null) {
-            carList.remove(car);
-            System.out.println("Car deleted successfully.");
+    private void deleteCar(ActionEvent e) {
+        String carId = searchCarIdField.getText().trim();
+        if (carId.isEmpty()) {
+            showMessage("Please enter Car ID");
+            return;
+        }
+
+        Car found = findCarById(carId);
+        if (found != null) {
+            carList.remove(found);
+            saveCarsToFile();
+            showMessage("Car deleted successfully.");
+            clearFields();
         } else {
-            System.out.println("Car not found.");
+            showMessage("Car not found.");
         }
     }
 
-    private static void searchCar(Scanner scanner) {
-        System.out.print("Enter Registration Number to search: ");
-        String regNo = scanner.nextLine().trim();
-        Car car = findCarByRegNo(regNo);
-        if (car != null) {
-            System.out.println("Car Found: " + car);
+    private void searchCar(ActionEvent e) {
+        String carId = searchCarIdField.getText().trim();
+        if (carId.isEmpty()) {
+            showMessage("Please enter Car ID");
+            return;
+        }
+
+        Car found = findCarById(carId);
+        if (found != null) {
+            outputArea.setText("Car Found:\n" + formatCarInfo(found));
+            carIdField.setText(found.getCarId());
+            brandField.setText(found.getBrand());
+            priceField.setText(String.valueOf(found.getPrice()));
+            statusField.setText(found.getStatus());
+            salesmanIdField.setText(found.getSalesmanId() != null ? found.getSalesmanId() : "");
         } else {
-            System.out.println("Car not found.");
+            showMessage("Car not found.");
         }
     }
 
-    private static void updateCar(Scanner scanner) {
-        System.out.print("Enter Registration Number to update: ");
-        String regNo = scanner.nextLine().trim();
-        Car car = findCarByRegNo(regNo);
-        if (car != null) {
-            System.out.print("Enter new Model (leave blank to keep current): ");
-            String newModel = scanner.nextLine().trim();
-            if (!newModel.isEmpty()) {
-                car.setModel(newModel);
-            }
+    private void updateCar(ActionEvent e) {
+        String carId = searchCarIdField.getText().trim();
+        if (carId.isEmpty()) {
+            showMessage("Please enter Car ID");
+            return;
+        }
 
-            System.out.print("Enter new Brand (leave blank to keep current): ");
-            String newBrand = scanner.nextLine().trim();
+        Car found = findCarById(carId);
+        if (found != null) {
+            String newBrand = brandField.getText().trim();
             if (!newBrand.isEmpty()) {
-                car.setBrand(newBrand);
+                found.setBrand(newBrand);
             }
 
-            System.out.print("Enter new Price (leave blank to keep current): ");
-            String priceInput = scanner.nextLine().trim();
-            if (!priceInput.isEmpty()) {
+            String newPriceStr = priceField.getText().trim();
+            if (!newPriceStr.isEmpty()) {
                 try {
-                    car.setPrice(Double.parseDouble(priceInput));
-                } catch (NumberFormatException var7) {
-                    System.out.println("Invalid price format. Price not updated.");
+                    double newPrice = Double.parseDouble(newPriceStr);
+                    found.setPrice(newPrice);
+                } catch (NumberFormatException ex) {
+                    showMessage("Invalid price format. Price not updated.");
+                    return;
                 }
             }
 
-            System.out.println("Car updated successfully.");
+            String newStatus = statusField.getText().trim();
+            if (!newStatus.isEmpty()) {
+                found.setStatus(newStatus);
+            }
+
+            String newSalesmanId = salesmanIdField.getText().trim();
+            found.setSalesmanId(newSalesmanId);
+
+            saveCarsToFile();
+            showMessage("Car information updated.");
         } else {
-            System.out.println("Car not found.");
+            showMessage("Car not found.");
         }
     }
 
-    private static void listAllCars() {
+    private void listAllCars(ActionEvent e) {
         if (carList.isEmpty()) {
-            System.out.println("No cars in inventory.");
+            showMessage("No cars to show.");
         } else {
-            System.out.println("\n--- Car Inventory ---");
-            carList.forEach(System.out::println);
+            StringBuilder sb = new StringBuilder("--- List of All Cars ---\n");
+            carList.forEach(c -> sb.append(formatCarInfo(c)).append("\n\n"));
+            outputArea.setText(sb.toString());
         }
     }
 
-    // Shared Methods
-    private static Car findCarByRegNo(String regNo) {
+    private Car findCarById(String carId) {
         return carList.stream()
-                .filter(c -> c.getRegNo().equalsIgnoreCase(regNo))
+                .filter(c -> c.getCarId().equalsIgnoreCase(carId))
                 .findFirst()
                 .orElse(null);
     }
 
-    private static void saveCarsToFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            for (Car car : carList) {
-                writer.write(car.toFileString());
-                writer.newLine();
-            }
+    private String formatCarInfo(Car car) {
+        return String.format("Car ID: %s\nBrand: %s\nPrice: $%.2f\nStatus: %s\nAssigned Salesman: %s",
+                car.getCarId(),
+                car.getBrand(),
+                car.getPrice(),
+                car.getStatus(),
+                car.getSalesmanId() != null && !car.getSalesmanId().isEmpty() ? car.getSalesmanId() : "Not Assigned");
+    }
 
-            if (frame != null) {
-                JOptionPane.showMessageDialog(frame, "Data saved successfully!",
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                System.out.println("Data saved successfully!");
+    private void loadCarsFromFile() {
+        carList.clear();
+        File file = new File(FILE_NAME);
+
+        // Create directory if it doesn't exist
+        file.getParentFile().mkdirs();
+
+        if (!file.exists()) {
+            showMessage("No existing car data found. Starting with empty inventory.");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            int loadedCount = 0;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    try {
+                        Car car = parseCarFromLine(line);
+                        carList.add(car);
+                        loadedCount++;
+                    } catch (Exception ex) {
+                        System.err.println("Error parsing line: " + line + " - " + ex.getMessage());
+                    }
+                }
+            }
+            showMessage("Loaded " + loadedCount + " cars.");
+        } catch (IOException e) {
+            showMessage("Error loading cars from file: " + e.getMessage());
+        }
+    }
+
+    private Car parseCarFromLine(String line) {
+        String[] parts = line.split(",");
+        if (parts.length < 4) {
+            throw new IllegalArgumentException("Invalid car data format. Expected at least 4 fields, got " + parts.length);
+        }
+
+        String carId = parts[0].trim();
+        String brand = parts[1].trim();
+        double price = Double.parseDouble(parts[2].trim());
+        String status = parts[3].trim();
+        String salesmanId = parts.length > 4 ? parts[4].trim() : "";
+
+        return new Car(carId, brand, price, status, salesmanId);
+    }
+
+    private void saveCarsToFile() {
+        File file = new File(FILE_NAME);
+
+        // Create directory if it doesn't exist
+        file.getParentFile().mkdirs();
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+            for (Car car : carList) {
+                writer.println(car.toString());
             }
         } catch (IOException e) {
-            if (frame != null) {
-                JOptionPane.showMessageDialog(frame, "Error saving car data: " + e.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+            showMessage("Error saving cars to file: " + e.getMessage());
+        }
+    }
+
+    private void clearFields() {
+        searchCarIdField.setText("");
+        carIdField.setText("");
+        brandField.setText("");
+        priceField.setText("");
+        statusField.setText("");
+        salesmanIdField.setText("");
+    }
+
+    private void showMessage(String message) {
+        if (outputArea != null) {
+            outputArea.setText(message);
+        } else {
+            System.out.println(message); // Fallback for early initialization messages
+        }
+    }
+
+    private void returnToManagerDashboard() {
+        try {
+            // Close current window
+            this.dispose();
+
+            // Create and show ManagerDashboard using reflection
+            Class<?> managerDashboardClass = Class.forName("Manager.ManagerDashboard");
+
+            // Try different constructor signatures
+            java.lang.reflect.Constructor<?> constructor = null;
+            try {
+                // Try with the actual manager class type
+                constructor = managerDashboardClass.getConstructor(manager.getClass());
+            } catch (NoSuchMethodException e1) {
+                try {
+                    // Try with Object parameter
+                    constructor = managerDashboardClass.getConstructor(Object.class);
+                } catch (NoSuchMethodException e2) {
+                    try {
+                        // Try looking for any single-parameter constructor
+                        java.lang.reflect.Constructor<?>[] constructors = managerDashboardClass.getConstructors();
+                        for (java.lang.reflect.Constructor<?> c : constructors) {
+                            if (c.getParameterCount() == 1) {
+                                constructor = c;
+                                break;
+                            }
+                        }
+                    } catch (Exception e3) {
+                        throw new Exception("No suitable constructor found");
+                    }
+                }
+            }
+
+            if (constructor != null) {
+                constructor.newInstance(manager);
             } else {
-                System.err.println("Error saving car data: " + e.getMessage());
+                throw new Exception("No suitable constructor found");
+            }
+
+        } catch (Exception e) {
+            // Fallback - try simpler approach or just close
+            System.err.println("Could not return to ManagerDashboard: " + e.getMessage());
+            e.printStackTrace();
+
+            // Alternative: Try to call it directly if possible
+            try {
+                SwingUtilities.invokeLater(() -> {
+                    // This will work if ManagerDashboard is in the classpath
+                    // You might need to replace this with the actual constructor call
+                    System.out.println("Attempting to create ManagerDashboard with manager: " + manager);
+                    // new Manager.ManagerDashboard(manager); // Uncomment and fix type if needed
+                });
+            } catch (Exception fallbackError) {
+                System.err.println("Fallback also failed: " + fallbackError.getMessage());
             }
         }
     }
 
-    private static void loadCarsFromFile() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                try {
-                    carList.add(Car.fromFileString(line));
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Skipping invalid car data: " + line);
-                }
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("No existing car file found. Starting fresh.");
-        } catch (IOException e) {
-            if (frame != null) {
-                JOptionPane.showMessageDialog(frame, "Error loading car data: " + e.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            } else {
-                System.err.println("Error loading car data: " + e.getMessage());
-            }
-        }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new ManageCarInventory(null));
     }
 
     JPanel getPanel() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    // Inner Classes
-    private static class Car {
-        private final String regNo;
-        private String model;
-        private String brand;
-        private double price;
-
-        public Car(String regNo, String model, String brand, double price) {
-            this.regNo = regNo;
-            this.model = model;
-            this.brand = brand;
-            this.price = price;
-        }
-
-        public String getRegNo() { return regNo; }
-        public String getModel() { return model; }
-        public String getBrand() { return brand; }
-        public double getPrice() { return price; }
-
-        public void setModel(String model) { this.model = model; }
-        public void setBrand(String brand) { this.brand = brand; }
-        public void setPrice(double price) { this.price = price; }
-
-        @Override
-        public String toString() {
-            return String.format("Reg No: %s, Model: %s, Brand: %s, Price: RM %.2f",
-                    regNo, model, brand, price);
-        }
-
-        public String toFileString() {
-            return String.join(",", regNo, model, brand, String.valueOf(price));
-        }
-
-        public static Car fromFileString(String line) throws IllegalArgumentException {
-            String[] parts = line.split(",");
-            if (parts.length != 4) {
-                throw new IllegalArgumentException("Invalid car data format");
-            }
-            try {
-                return new Car(parts[0], parts[1], parts[2], Double.parseDouble(parts[3]));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid price format");
-            }
-        }
-    }
-
-    private static class CarTableModel extends javax.swing.table.AbstractTableModel {
-        private final List<Car> carList;
-        private final String[] columnNames = {"Reg No", "Model", "Brand", "Price"};
-
-        public CarTableModel(List<Car> carList) {
-            this.carList = carList;
-        }
-
-        @Override
-        public int getRowCount() {
-            return carList.size();
-        }
-
-        @Override
-        public int getColumnCount() {
-            return columnNames.length;
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            return columnNames[column];
-        }
-
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            Car car = carList.get(rowIndex);
-            return switch (columnIndex) {
-                case 0 -> car.getRegNo();
-                case 1 -> car.getModel();
-                case 2 -> car.getBrand();
-                case 3 -> car.getPrice();
-                default -> null;
-            };
-        }
-
-        @Override
-        public Class<?> getColumnClass(int columnIndex) {
-            return columnIndex == 3 ? Double.class : String.class;
-        }
-    }
-
-    private static class CurrencyRenderer extends javax.swing.table.DefaultTableCellRenderer {
-        private final java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance();
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-            if (value instanceof Double) {
-                value = currencyFormat.format(value);
-            }
-            return super.getTableCellRendererComponent(table, value, isSelected,
-                    hasFocus, row, column);
-        }
     }
 }
