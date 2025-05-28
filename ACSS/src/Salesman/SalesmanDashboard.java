@@ -44,7 +44,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
     // Encapsulation: private fields for buttons and current salesman info
     private JPanel buttonPanel;
     private JButton editProfileButton, viewCarsButton, viewCarRequestButton,
-            updateCarStatusButton, recordSalesHistory, markCarAsPaidButton,
+            updateRequestButton, recordSalesHistory, markCarAsPaidButton,
             logoutButton;
 
     private Salesman currentSalesman;
@@ -65,8 +65,6 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
 //        recordSalesHistory.addActionListener(this);
 //        markCarAsPaidButton.addActionListener(this);
 //        logoutButton.addActionListener(this);
-
-
         WindowNav.setCloseOperation(frame, () -> new MainMenuGUI());
         frame.setVisible(true);
     }
@@ -83,7 +81,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         editProfileButton = createStyledButton("Edit Profile");
         viewCarsButton = createStyledButton("View Car Status");
         viewCarRequestButton = createStyledButton("View Car Requests");
-        updateCarStatusButton = createStyledButton("Update Car Status");
+        updateRequestButton = createStyledButton("Update Request");
         recordSalesHistory = createStyledButton("View Sales History");
         markCarAsPaidButton = createStyledButton("Mark Car as Paid");
         logoutButton = createStyledButton("Logout");
@@ -93,7 +91,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         buttonPanel.add(editProfileButton);
         buttonPanel.add(viewCarsButton);
         buttonPanel.add(viewCarRequestButton);
-        buttonPanel.add(updateCarStatusButton);
+        buttonPanel.add(updateRequestButton);
         buttonPanel.add(recordSalesHistory);
         buttonPanel.add(markCarAsPaidButton);
 
@@ -108,7 +106,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         editProfileButton.addActionListener(this);
         viewCarsButton.addActionListener(this);
         viewCarRequestButton.addActionListener(this);
-        updateCarStatusButton.addActionListener(this);
+        updateRequestButton.addActionListener(this);
         recordSalesHistory.addActionListener(this);
         markCarAsPaidButton.addActionListener(this);
         logoutButton.addActionListener(this);
@@ -130,8 +128,8 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             viewCarStatusWindow();
         } else if (e.getSource() == viewCarRequestButton) {
             viewCarRequestWindow();
-        } else if (e.getSource() == updateCarStatusButton) {
-            updateCarStatusWindow();
+        } else if (e.getSource() == updateRequestButton) {
+            updateStatusWindow();
         } else if (e.getSource() == markCarAsPaidButton) {
             markCarAsPaidWindow();
         } else if (e.getSource() == recordSalesHistory) {
@@ -477,7 +475,13 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         carListFrame.add(titleLabel, BorderLayout.NORTH);
 
         // Table model
-        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Price", "Status"}, 0);
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Car ID", "Brand", "Price", "Status"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Make all cells non-editable
+                return false;
+            }
+        };
 
         // Create the table with custom styling
         JTable carTable = new JTable(tableModel) {
@@ -509,6 +513,12 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
                 return c;
             }
         };
+
+        // Disable all selection and interaction
+        carTable.setRowSelectionAllowed(false);
+        carTable.setColumnSelectionAllowed(false);
+        carTable.setCellSelectionEnabled(false);
+        carTable.setFocusable(false);
 
         // Table styling
         carTable.setRowHeight(25);
@@ -707,7 +717,13 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
 
         DefaultTableModel tableModel = new DefaultTableModel(
                 new Object[]{"Customer ID", "Car ID", "Status", "Comment"}, 0
-        );
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Make all cells non-editable
+                return false;
+            }
+        };
 
         // Create the table with custom styling
         JTable requestTable = new JTable(tableModel) {
@@ -742,6 +758,12 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
                 return c;
             }
         };
+
+        // Disable all selection and interaction
+        requestTable.setRowSelectionAllowed(false);
+        requestTable.setColumnSelectionAllowed(false);
+        requestTable.setCellSelectionEnabled(false);
+        requestTable.setFocusable(false);
 
         // Table styling
         requestTable.setRowHeight(25);
@@ -900,8 +922,8 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         return row;
     }
 
-    public void updateCarStatusWindow() {
-        JFrame updateFrame = new JFrame("Update Car Status");
+    public void updateStatusWindow() {
+        JFrame updateFrame = new JFrame("Update Request");
         updateFrame.setSize(800, 500);
         updateFrame.setLocationRelativeTo(null);
         updateFrame.setLayout(new BorderLayout(10, 10));
@@ -914,7 +936,8 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Customer ID", "Car ID", "Status"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make table non-editable
+                // Make all cells non-editable
+                return false;
             }
         };
 
@@ -1492,6 +1515,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
                 new Object[]{"Car ID", "Brand", "Price", "Status", "Customer ID"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
+                // Make all cells non-editable
                 return false;
             }
         };
@@ -1840,6 +1864,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
                 new Object[]{"Date", "Customer ID", "Car ID", "Price", "Status"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
+                // Make all cells non-editable
                 return false;
             }
         };
