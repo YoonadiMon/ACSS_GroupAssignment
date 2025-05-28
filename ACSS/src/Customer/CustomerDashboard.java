@@ -247,7 +247,7 @@ public class CustomerDashboard implements ActionListener   {
             salesmanItemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             salesmanItemPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
 
-            JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName );
+            JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName  + " ("+ salesmanID + ")");
             salesmanLabel.setPreferredSize(new Dimension(150, 25));
 
             // Add feedback button with consistent size

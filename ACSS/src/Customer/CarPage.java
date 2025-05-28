@@ -107,7 +107,7 @@ public class CarPage implements DashboardPage {
 
         String salesmanId = car.getSalesmanId();
         String salesmanName = SalesmanList.getSalesmanNameById(salesmanId);
-        JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName);
+        JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName + " ("+ salesmanId + ")");
         salesmanLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         // Add labels to the info panel
