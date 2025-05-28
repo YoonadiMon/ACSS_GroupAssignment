@@ -2,6 +2,7 @@ package Manager;
 
 import Customer.Customer;
 import Customer.CustomerDataIO;
+import Customer.DeletedCustomer;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -146,12 +147,15 @@ public class ManageCustomer extends JFrame {
             return;
         }
 
-        Customer found = findCustomerById(id);
+        // Use CustomerDataIO to find and approve customer
+        Customer found = CustomerDataIO.searchId(id);
         if (found != null) {
             found.setApproved(true);
-            saveCustomersToFile();
+            CustomerDataIO.writeCustomer(); // Save using CustomerDataIO
             showMessage("Customer approved successfully.");
             approvedCheckBox.setSelected(true);
+            // Refresh local list
+            loadCustomersFromFile();
         } else {
             showMessage("Customer not found.");
         }
@@ -164,14 +168,60 @@ public class ManageCustomer extends JFrame {
             return;
         }
 
-        Customer found = findCustomerById(id);
-        if (found != null) {
-            customerList.remove(found);
-            saveCustomersToFile();
-            showMessage("Customer deleted successfully.");
+        // Use CustomerDataIO to properly delete customer (moves to deleted list)
+        boolean success = CustomerDataIO.deleteCustomer(id);
+        if (success) {
+            showMessage("Customer moved to deleted customers file successfully.");
             clearFields();
+            // Refresh local list
+            loadCustomersFromFile();
         } else {
             showMessage("Customer not found.");
+        }
+    }
+
+    private void restoreCustomer(ActionEvent e) {
+        String id = searchIdField.getText().trim();
+        if (id.isEmpty()) {
+            showMessage("Please enter Customer ID to restore");
+            return;
+        }
+
+        // Confirm restoration
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to restore this deleted customer?",
+            "Confirm Restoration",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Use CustomerDataIO to restore customer
+            boolean success = CustomerDataIO.restoreCustomer(id);
+            if (success) {
+                showMessage("Customer restored successfully.");
+                clearFields();
+                // Refresh local list
+                loadCustomersFromFile();
+            } else {
+                showMessage("Deleted customer not found or restoration failed.");
+            }
+        }
+    }
+
+    private void listDeletedCustomers(ActionEvent e) {
+        // Load deleted customers data first
+        CustomerDataIO.readDeletedCustomer();
+        
+        if (CustomerDataIO.allDeletedCustomers.isEmpty()) {
+            showMessage("No deleted customers to show.");
+        } else {
+            StringBuilder sb = new StringBuilder("--- List of All Deleted Customers ---\n");
+            for (DeletedCustomer dc : CustomerDataIO.allDeletedCustomers) {
+                sb.append(formatDeletedCustomerInfo(dc)).append("\n\n");
+            }
+            outputArea.setText(sb.toString());
         }
     }
 
@@ -202,7 +252,7 @@ public class ManageCustomer extends JFrame {
             return;
         }
 
-        Customer found = findCustomerById(id);
+        Customer found = CustomerDataIO.searchId(id);
         if (found != null) {
             String newName = nameField.getText().trim();
             if (!newName.isEmpty()) {
@@ -220,8 +270,10 @@ public class ManageCustomer extends JFrame {
             }
 
             found.setApproved(approvedCheckBox.isSelected());
-            saveCustomersToFile();
+            CustomerDataIO.writeCustomer(); // Save using CustomerDataIO
             showMessage("Customer information updated.");
+            // Refresh local list
+            loadCustomersFromFile();
         } else {
             showMessage("Customer not found.");
         }
@@ -260,43 +312,23 @@ public class ManageCustomer extends JFrame {
                 customer.getUserType());
     }
 
+    private String formatDeletedCustomerInfo(DeletedCustomer customer) {
+        return String.format("ID: %s\nName: %s\nEmail: %s\nUser Type: %s\nStatus: DELETED",
+                customer.getUserId(), 
+                customer.getUsername(), 
+                customer.getEmail(), 
+                customer.getUserType());
+    }
+
     private void loadCustomersFromFile() {
+        // Use CustomerDataIO to load data
+        CustomerDataIO.readCustomer();
+        
+        // Copy to local list for compatibility with existing code
         customerList.clear();
-        StringBuilder messages = new StringBuilder();
-        int loadedCount = 0;
-        int skippedCount = 0;
+        customerList.addAll(CustomerDataIO.allCustomers);
         
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                try {
-                    Customer customer = parseCustomerFromLine(line);
-                    customerList.add(customer);
-                    loadedCount++;
-                } catch (IllegalArgumentException e) {
-                    messages.append("Skipping invalid customer data: ").append(line).append("\n");
-                    skippedCount++;
-                }
-            }
-            
-            // Show summary message
-            if (loadedCount > 0) {
-                messages.append("Successfully loaded ").append(loadedCount).append(" customers.\n");
-            }
-            if (skippedCount > 0) {
-                messages.append("Skipped ").append(skippedCount).append(" invalid records.\n");
-            }
-            
-        } catch (FileNotFoundException e) {
-            messages.append("No existing customer file found. Starting fresh.\n");
-        } catch (IOException e) {
-            messages.append("Error reading customer file: ").append(e.getMessage()).append("\n");
-        }
-        
-        // Only show message if there's something to display
-        if (messages.length() > 0) {
-            showMessage(messages.toString().trim());
-        }
+        showMessage("Loaded " + customerList.size() + " customers.");
     }
 
     private Customer parseCustomerFromLine(String line) {
@@ -315,24 +347,9 @@ public class ManageCustomer extends JFrame {
     }
 
     private void saveCustomersToFile() {
-        // Create directory if it doesn't exist
-        File file = new File(FILE_NAME);
-        file.getParentFile().mkdirs();
-        
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            for (Customer c : customerList) {
-                String line = String.format("%s,%s,%s,%s,%s",
-                        c.getCustomerId(),
-                        c.getUsername(),
-                        c.getEmail(),
-                        c.getPassword(),
-                        c.isApproved());
-                writer.write(line);
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            showMessage("Error saving customers to file: " + e.getMessage());
-        }
+        // Use CustomerDataIO instead of manual file writing
+        CustomerDataIO.writeCustomer();
+        CustomerDataIO.writeDeletedCustomer();
     }
 
     private void clearFields() {
