@@ -175,35 +175,95 @@ public class MainPage implements DashboardPage {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Save the updated information
-                customer.setUsername(usernameField.getText());
-                customer.setEmail(emailField.getText());
+                // Get the updated information
+                String newUsername = usernameField.getText().trim();
+                String newEmail = emailField.getText().trim();
+                String password = new String(passwordField.getPassword()).trim();
 
-                String password = new String(passwordField.getPassword());
-                if (!password.isEmpty()) {
-                    // Update password if changed and valid
-                    if (!CustomerDataValidator.isValidPassword(password)) {
-                        JOptionPane.showMessageDialog(null, "Password is not valid!", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                    else {
-                        customer.setPassword(password);
+                // Validate all fields are not empty
+                if (newUsername.isEmpty() || newEmail.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Username and email cannot be empty!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Check if username is valid format
+                if (!CustomerDataValidator.isValidUsername(newUsername)) {
+                    JOptionPane.showMessageDialog(null, "Username is not valid! (At least 3 characters. Must not contain any special characters such as commas, quotes, newlines except underscore)", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Check if email is valid format
+                if (!CustomerDataValidator.isValidEmail(newEmail)) {
+                    JOptionPane.showMessageDialog(null, "Email is not valid! Must not contain any special characters such as commas, quotes, newlines.", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Check if username is banned
+                if (CustomerDataValidator.isUsernameBanned(newUsername)) {
+                    JOptionPane.showMessageDialog(null, 
+                            "This username has been banned by the administrator.\n" +
+                            "Please contact support if you believe this was done in error\n" +
+                            "or choose a different username.", 
+                            "Username Banned", 
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Check if email is banned
+                if (CustomerDataValidator.isEmailBanned(newEmail)) {
+                    JOptionPane.showMessageDialog(null, 
+                            "This email address has been banned by the administrator.\n" +
+                            "Please contact support if you believe this was done in error\n" +
+                            "or use a different email address.", 
+                            "Email Banned", 
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Check for duplicate username (only if username changed)
+                if (!newUsername.equals(customer.getUsername())) {
+                    if (CustomerDataIO.searchName(newUsername) != null) {
+                        JOptionPane.showMessageDialog(null, "Username already taken!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                        return;
                     }
                 }
+
+                // Check for duplicate email (only if email changed)
+                if (!newEmail.equals(customer.getEmail())) {
+                    if (CustomerDataIO.searchEmail(newEmail) != null) {
+                        JOptionPane.showMessageDialog(null, "Email already registered!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+
+                // Validate password if it was changed
+                if (!password.isEmpty()) {
+                    if (!CustomerDataValidator.isValidPassword(password)) {
+                        JOptionPane.showMessageDialog(null, "Passwords is not valid! Must not contain any special characters such as commas, quotes, newlines. (At least 8 characters containing one uppercase letter)", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+
+                // All validations passed - save the updated information
+                customer.setUsername(newUsername);
+                customer.setEmail(newEmail);
+                if (!password.isEmpty()) {
+                    customer.setPassword(password);
+                }
+
                 CustomerDataIO.writeCustomer();
                 JOptionPane.showMessageDialog(null,
-                            "Account Information has been edited!",
+                            "Account Information has been edited!\nNote: All values have been trimed to remove extra spaces at front and end!",
                             "Account edit Successful",
                             JOptionPane.INFORMATION_MESSAGE);
-                
+
                 // Return to display mode
                 usernameField.setEditable(false);
                 emailField.setEditable(false);
                 passwordField.setEditable(false);
-
                 usernameField.setText(customer.getUsername());
                 emailField.setText(customer.getEmail());
                 passwordField.setText("***");
-
                 editButton.setBackground(DashboardUIUtils.PRIMARY_COLOR);
                 saveButton.setVisible(false);
 

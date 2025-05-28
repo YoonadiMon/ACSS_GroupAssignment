@@ -503,7 +503,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                     CustomerDataIO.allCustomers.add(newCustomer);
                     CustomerDataIO.writeCustomer(); // Save to file with approval status
                     JOptionPane.showMessageDialog(frame,
-                            "Account has been created! Your account needs approval by admin before you can login.\nTip: All values have been trimed to remove extra spaces at front and end!",
+                            "Account has been created! Your account needs approval by admin before you can login.\nNote: All values have been trimed to remove extra spaces at front and end!",
                             "Registration Successful",
                             JOptionPane.INFORMATION_MESSAGE);
                     // Clear fields and switch to login
