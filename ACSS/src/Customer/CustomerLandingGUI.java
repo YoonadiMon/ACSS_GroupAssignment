@@ -436,9 +436,24 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                     return;
                 }
 
+                // First check if the account has been deleted
+                DeletedCustomer deletedCustomer = CustomerDataIO.searchDeletedName(userOrEmail);
+                if (deletedCustomer == null) {
+                    deletedCustomer = CustomerDataIO.searchDeletedEmail(userOrEmail);
+                }
+
+                if (deletedCustomer != null && deletedCustomer.getPassword().equals(password)) {
+                    JOptionPane.showMessageDialog(frame,
+                            "Your account has been deleted by the administrator.\n" +
+                            "Please contact support if you believe this was done in error.\n" +
+                            "You may create a new account if you wish to continue using our services.",
+                            "Account Deleted",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 // Check if customer exists with these credentials (by username or email)
                 Customer customer = CustomerDataIO.validateLogin(userOrEmail, password);
-
                 if (customer != null) {
                     // Check if customer is approved
                     if (customer.isApproved()) {
@@ -457,7 +472,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Login error: " + ex.getMessage());
             }
-        } else if (e.getSource() == guestLoginBtn) {
+        }else if (e.getSource() == guestLoginBtn) {
             // Create a guest customer with limited access
             try {
                 GuestCustomer guestCustomer = new GuestCustomer();
@@ -467,7 +482,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Error accessing guest mode: " + ex.getMessage());
             }
-        } else if (e.getSource() == registerBtn) {
+        }else if (e.getSource() == registerBtn) {
             try {
                 String username = registerUsernameTF.getText().trim();
                 String email = registerEmailTF.getText().trim();
@@ -483,11 +498,25 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                     JOptionPane.showMessageDialog(frame, "Email already registered!", "Register Error", JOptionPane.ERROR_MESSAGE);
                 } else if (CustomerDataIO.searchName(username) != null) {
                     JOptionPane.showMessageDialog(frame, "Username already taken!", "Register Error", JOptionPane.ERROR_MESSAGE);
+                } else if (CustomerDataValidator.isEmailBanned(email)) {
+                    JOptionPane.showMessageDialog(frame, 
+                            "This email address has been banned by the administrator.\n" +
+                            "Please contact support if you believe this was done in error\n" +
+                            "or use a different email address.", 
+                            "Email Banned", 
+                            JOptionPane.ERROR_MESSAGE);
+                } else if (CustomerDataValidator.isUsernameBanned(username)) {
+                    JOptionPane.showMessageDialog(frame, 
+                            "This username has been banned by the administrator.\n" +
+                            "Please contact support if you believe this was done in error\n" +
+                            "or choose a different username.", 
+                            "Username Banned", 
+                            JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidUsername(username)) {
                     JOptionPane.showMessageDialog(frame, "Username is not valid! (At least 3 characters. Must not contain any special characters such as commas, quotes, newlines except underscore)", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidEmail(email)) {
                     JOptionPane.showMessageDialog(frame, "Email is not valid! Must not contain any special characters such as commas, quotes, newlines.", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
-                } else if (!CustomerDataValidator.isValidPassword(password)){
+                } else if (!CustomerDataValidator.isValidPassword(password)) {
                     JOptionPane.showMessageDialog(frame, "Passwords is not valid! Must not contain any special characters such as commas, quotes, newlines. (At least 8 characters containing one uppercase letter)", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!password.equals(confirmPassword)) {
                     JOptionPane.showMessageDialog(frame, "Passwords do not match!", "Password Error", JOptionPane.ERROR_MESSAGE);
@@ -496,12 +525,10 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                     Customer newCustomer = new Customer(username, email, password);
                     CustomerDataIO.allCustomers.add(newCustomer);
                     CustomerDataIO.writeCustomer(); // Save to file with approval status
-
                     JOptionPane.showMessageDialog(frame,
                             "Account has been created! Your account needs approval by admin before you can login.\nTip: All values have been trimed to remove extra spaces at front and end!",
                             "Registration Successful",
                             JOptionPane.INFORMATION_MESSAGE);
-
                     // Clear fields and switch to login
                     registerUsernameTF.setText("");
                     registerEmailTF.setText("");
@@ -512,7 +539,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Registering error: " + ex.getMessage());
             }
-        } else if (e.getSource() == switchToRegisterBtn) {
+        }else if (e.getSource() == switchToRegisterBtn) {
             cardLayout.show(cards, "register");
         } else if (e.getSource() == backToMainBtn || e.getSource() == backToMainFromRegisterBtn) {
             frame.dispose();

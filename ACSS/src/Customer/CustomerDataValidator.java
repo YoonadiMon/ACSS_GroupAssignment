@@ -68,4 +68,24 @@ public class CustomerDataValidator {
            && !username.contains("\"") 
            && !username.contains("\n");
     }
+    
+    public static boolean isUsernameBanned(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Search for the username in the deleted customers list
+        DeletedCustomer deletedCustomer = CustomerDataIO.searchDeletedName(username);
+        return deletedCustomer != null;
+    }
+
+    public static boolean isEmailBanned(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Search for the email in the deleted customers list
+        DeletedCustomer deletedCustomer = CustomerDataIO.searchDeletedEmail(email);
+        return deletedCustomer != null;
+    }
 }
