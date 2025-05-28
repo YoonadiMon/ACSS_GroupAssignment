@@ -48,15 +48,11 @@ public class CustomerDashboard implements ActionListener   {
         frame = new JFrame("Customer Dashboard");
         frame.setSize(860, 620);
         frame.setLocationRelativeTo(null);
-        WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
-        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        // Card layout to switch between login and register pages
-        cardLayout = new CardLayout();
+        cardLayout = new CardLayout(); // Card layout to switch between different pages
         cards = new JPanel(cardLayout);
         
         createPages();
-        
         createFeedbackPage();
         createCarHistoryPage();
         createFeedbackHistoryPage();
@@ -68,15 +64,14 @@ public class CustomerDashboard implements ActionListener   {
         cards.add(carHistoryPage, "CarHistory");
         cards.add(feedbackHistoryPanel, "FeedbacksHistory");
         
-        // Create navigation panel
-        JPanel navigationPanel = createNavigationPanel();
-        
-        // Add components to the main frame
+        JPanel navigationPanel = createNavigationPanel(); // Create navigation panel
         frame.setLayout(new BorderLayout());
-        frame.add(navigationPanel, BorderLayout.NORTH);
+        
+        frame.add(navigationPanel, BorderLayout.NORTH); // Add components to the main frame
         frame.add(cards, BorderLayout.CENTER);
         
         frame.setVisible(true);
+        WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
     }
     
     private void createPages() {
@@ -136,6 +131,48 @@ public class CustomerDashboard implements ActionListener   {
                         BorderFactory.createEmptyBorder(10, 0, 10, 0)));
             }
         }
+    }
+    
+    private JPanel createBasicPagePanel(String title) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        
+        // Top panel for the title
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.setBorder(new EmptyBorder(10, 40, 20, 40));
+        topPanel.setBackground(BACKGROUND_COLOR);
+        
+        // Title
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(0, 84, 159));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        topPanel.add(titleLabel);
+        
+        // Content panel
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBorder(new EmptyBorder(0, 40, 0, 40));
+        contentPanel.setBackground(BACKGROUND_COLOR);
+        
+        // Create a logout button panel (fixed at bottom right)
+        JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        logoutPanel.setBackground(BACKGROUND_COLOR);
+        JButton logoutButton = new JButton("Logout");
+        ButtonStyler.styleExitButton(logoutButton);
+        logoutButton.addActionListener(e->{
+            frame.dispose();
+            new CustomerLandingGUI();      
+        });
+        logoutPanel.add(logoutButton);
+        
+        // Add components to the panel
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(contentPanel, BorderLayout.CENTER);
+        panel.add(logoutPanel, BorderLayout.SOUTH);
+        
+        return panel;
     }
     
     private void createFeedbackPage() {
@@ -1033,48 +1070,6 @@ public class CustomerDashboard implements ActionListener   {
         } else {
             return "Car Purchased - ID: " + feedback.getItemId();
         }
-    }
-    
-    private JPanel createBasicPagePanel(String title) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(BACKGROUND_COLOR);
-        
-        // Top panel for the title
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.setBorder(new EmptyBorder(10, 40, 20, 40));
-        topPanel.setBackground(BACKGROUND_COLOR);
-        
-        // Title
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setForeground(new Color(0, 84, 159));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        topPanel.add(titleLabel);
-        
-        // Content panel
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setBorder(new EmptyBorder(0, 40, 0, 40));
-        contentPanel.setBackground(BACKGROUND_COLOR);
-        
-        // Create a logout button panel (fixed at bottom right)
-        JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        logoutPanel.setBackground(BACKGROUND_COLOR);
-        JButton logoutButton = new JButton("Logout");
-        ButtonStyler.styleExitButton(logoutButton);
-        logoutButton.addActionListener(e->{
-            frame.dispose();
-            new CustomerLandingGUI();      
-        });
-        logoutPanel.add(logoutButton);
-        
-        // Add components to the panel
-        panel.add(topPanel, BorderLayout.NORTH);
-        panel.add(contentPanel, BorderLayout.CENTER);
-        panel.add(logoutPanel, BorderLayout.SOUTH);
-        
-        return panel;
     }
     
     @Override

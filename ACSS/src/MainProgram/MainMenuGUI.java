@@ -87,17 +87,31 @@ public class MainMenuGUI implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == exitButton) {
-            verifyAdminPassword();
-        } else if (e.getSource() == customerButton) {
-            x.setVisible(false);
-            new CustomerLandingGUI();
-        } else if (e.getSource() == managerButton) {
-            x.setVisible(false);
-            new ManagerLogin();
-        } else if (e.getSource() == salesmanButton) {
-            x.setVisible(false);
-            new SalesmanGUI(x.getWidth(), x.getHeight());
+        try {
+            if (e.getSource() == exitButton) {
+                verifyAdminPassword();
+            } else if (e.getSource() == customerButton) {
+                x.setVisible(false);
+                new CustomerLandingGUI();
+            } else if (e.getSource() == managerButton) {
+                x.setVisible(false);
+                new ManagerLogin();
+            } else if (e.getSource() == salesmanButton) {
+                x.setVisible(false);
+                new SalesmanGUI(x.getWidth(), x.getHeight());
+            }
+        } catch (Exception ex) {
+            // Show the original window again if new window creation fails
+            x.setVisible(true);
+
+            // Log the error
+            ex.printStackTrace();
+
+            // Show error message dialog
+            JOptionPane.showMessageDialog(x, 
+                "Unable to open the requested window. Please try again.", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 }
