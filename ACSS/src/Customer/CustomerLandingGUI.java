@@ -194,21 +194,18 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 String userOrEmail = loginUserOrEmailTF.getText().trim();
-
                 if (userOrEmail.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "Please enter your username or email first.");
                     return;
                 }
 
                 Customer customer = CustomerDataIO.getIDfromUsernameorEmail(userOrEmail);
-
                 if (customer == null) {
                     JOptionPane.showMessageDialog(frame, "User not found. Please check your username or email.");
                     return;
                 }
 
                 String customerId = customer.getCustomerId();
-
                 if (customerId.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "Customer ID is empty. Please contact admin.");
                     return;
@@ -219,40 +216,22 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                     return;
                 }
 
-                // Load saved question and answer
-                String savedQuestion = null;
-                String savedAnswer = null;
+                // Use the proper CSV method to get security question
+                CustomersForgetPwd securityData = CustomersForgetPwd.getSecurityQuestion(customerId);
 
-                try (BufferedReader reader = new BufferedReader(new FileReader("data/CustomersForgetPwd.txt"))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        if (line.startsWith(customerId + ",")) {
-                            String[] parts = line.split(",", 3);
-                            if (parts.length == 3) {
-                                savedQuestion = parts[1];
-                                savedAnswer = parts[2];
-                            }
-                            break;
-                        }
-                    }
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(frame, "Error reading security questions. Please contact admin.");
-                    return;
-                }
-
-                if (savedQuestion == null) {
+                if (securityData == null) {
                     JOptionPane.showMessageDialog(frame, "Security question not found. Please contact admin.");
                     return;
                 }
 
-                String userAnswer = JOptionPane.showInputDialog(frame, "Security Question:\n" + savedQuestion);
-
+                String userAnswer = JOptionPane.showInputDialog(frame, "Security Question:\n" + securityData.getQuestion());
                 if (userAnswer == null) {
                     // User cancelled
                     return;
                 }
 
-                if (userAnswer.trim().equalsIgnoreCase(savedAnswer.trim())) {
+                // Use the proper verification method
+                if (CustomersForgetPwd.verifySecurityAnswer(customerId, userAnswer.trim())) {
                     JOptionPane.showMessageDialog(frame, "Security answer verified! You may now reset your password.");
                     frame.dispose();
                     new CustomerDashboard(customer);
@@ -261,8 +240,6 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                 }
             }
         });
-
-
 
         // Add components to panel with spacing
         loginPanel.add(titleLabel);

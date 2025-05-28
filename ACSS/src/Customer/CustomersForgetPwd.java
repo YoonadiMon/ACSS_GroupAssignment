@@ -1,5 +1,4 @@
 package Customer;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -31,12 +30,53 @@ public class CustomersForgetPwd {
     public String getQuestion() { return question; }
     public String getAnswer() { return answer; }
     
+    // Helper method to escape CSV fields
+    private static String escapeCSVField(String field) {
+        if (field == null) return "\"\"";
+        // Wrap in quotes and escape any existing quotes by doubling them
+        return "\"" + field.replace("\"", "\"\"") + "\"";
+    }
+    
+    // Helper method to parse a CSV line properly
+    private static String[] parseCSVLine(String line) {
+        List<String> result = new ArrayList<>();
+        boolean inQuotes = false;
+        StringBuilder currentField = new StringBuilder();
+        
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            
+            if (c == '"') {
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    // Double quote - add single quote to field
+                    currentField.append('"');
+                    i++; // Skip next quote
+                } else {
+                    // Toggle quote state
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == ',' && !inQuotes) {
+                // Field separator
+                result.add(currentField.toString());
+                currentField = new StringBuilder();
+            } else {
+                currentField.append(c);
+            }
+        }
+        
+        // Add final field
+        result.add(currentField.toString());
+        
+        return result.toArray(new String[0]);
+    }
+    
     // Check if customerId already exists in the file
     public static boolean customerExists(String customerId) {
         try (BufferedReader reader = new BufferedReader(new FileReader(QUESTION_FILE_NAME))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith(customerId + ",")) {
+                String[] parts = parseCSVLine(line);
+                if (parts.length >= 1 && parts[0].equals(customerId)) {
                     return true;
                 }
             }
@@ -45,14 +85,25 @@ public class CustomersForgetPwd {
         }
         return false;
     }
-
+    
     // Save question and answer to file if customerId does not exist
     public boolean saveSecurityQuestion() {
         if (customerExists(customerId)) {
             return false; // Already exists
         }
+        
+        // Ensure directory exists
+        File directory = new File("data");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(QUESTION_FILE_NAME, true))) {
-            writer.write(customerId + "," + question + "," + answer);
+            // Format as proper CSV: customerId,question,answer
+            String csvLine = escapeCSVField(customerId) + "," + 
+                           escapeCSVField(question) + "," + 
+                           escapeCSVField(answer);
+            writer.write(csvLine);
             writer.newLine();
             return true;
         } catch (IOException e) {
@@ -66,13 +117,17 @@ public class CustomersForgetPwd {
         File file = new File(QUESTION_FILE_NAME);
         List<String> lines = new ArrayList<>();
         boolean replaced = false;
-
+        
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith(customerId + ",")) {
+                String[] parts = parseCSVLine(line);
+                if (parts.length >= 1 && parts[0].equals(customerId)) {
                     // Replace this line with the new question and answer
-                    lines.add(customerId + "," + question + "," + answer);
+                    String csvLine = escapeCSVField(customerId) + "," + 
+                                   escapeCSVField(question) + "," + 
+                                   escapeCSVField(answer);
+                    lines.add(csvLine);
                     replaced = true;
                 } else {
                     lines.add(line);
@@ -82,12 +137,15 @@ public class CustomersForgetPwd {
             e.printStackTrace();
             return false;
         }
-
+        
         if (!replaced) {
-            // If not found, add new entry (optional)
-            lines.add(customerId + "," + question + "," + answer);
+            // If not found, add new entry
+            String csvLine = escapeCSVField(customerId) + "," + 
+                           escapeCSVField(question) + "," + 
+                           escapeCSVField(answer);
+            lines.add(csvLine);
         }
-
+        
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
             for (String l : lines) {
                 writer.write(l);
@@ -99,6 +157,29 @@ public class CustomersForgetPwd {
             return false;
         }
     }
-
-
+    
+    // Method to retrieve security question for a customer (useful for password reset)
+    public static CustomersForgetPwd getSecurityQuestion(String customerId) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(QUESTION_FILE_NAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = parseCSVLine(line);
+                if (parts.length >= 3 && parts[0].equals(customerId)) {
+                    return new CustomersForgetPwd(parts[0], parts[1], parts[2]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    // Method to verify security answer
+    public static boolean verifySecurityAnswer(String customerId, String providedAnswer) {
+        CustomersForgetPwd securityData = getSecurityQuestion(customerId);
+        if (securityData != null) {
+            return securityData.getAnswer().equals(providedAnswer);
+        }
+        return false;
+    }
 }
