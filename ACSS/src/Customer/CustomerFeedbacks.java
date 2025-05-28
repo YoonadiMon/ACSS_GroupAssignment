@@ -130,7 +130,7 @@ public class CustomerFeedbacks {
             List<String> lines = Files.readAllLines(Paths.get(CustomerFeedbacks.FEEDBACK_FILE_PATH));
 
             for (String line : lines) {
-                String[] parts = line.split(",");
+                String[] parts = parseCSVLine(line); // Use proper CSV parsing
                 if (parts.length >= 5) {
                     CustomerFeedbacks feedback = new CustomerFeedbacks(
                         parts[0], parts[1], parts[2], 
@@ -144,5 +144,37 @@ public class CustomerFeedbacks {
         }
 
         return feedbacks;
+    }
+    
+    private static String[] parseCSVLine(String line) {
+        List<String> result = new ArrayList<>();
+        boolean inQuotes = false;
+        StringBuilder currentField = new StringBuilder();
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (c == '"') {
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    // Double quote - add single quote to field
+                    currentField.append('"');
+                    i++; // Skip next quote
+                } else {
+                    // Toggle quote state
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == ',' && !inQuotes) {
+                // Field separator
+                result.add(currentField.toString());
+                currentField = new StringBuilder();
+            } else {
+                currentField.append(c);
+            }
+        }
+
+        // Add final field
+        result.add(currentField.toString());
+
+        return result.toArray(new String[0]);
     }
 }

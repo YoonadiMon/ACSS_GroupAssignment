@@ -391,15 +391,13 @@ public class CustomerDashboard implements ActionListener   {
         // Show simple rating dialog
         String ratingInput = JOptionPane.showInputDialog(
                 feedbackPage,
-                "Please rate " + itemName + " (1-5 stars):",
+                "Please rate (" + itemName + ") (1-5 stars):",
                 "Rating",
                 JOptionPane.QUESTION_MESSAGE);
-
         // Check if user canceled the rating dialog
         if (ratingInput == null || ratingInput.trim().isEmpty()) {
             return;
         }
-
         // Parse rating
         int rating;
         try {
@@ -420,30 +418,41 @@ public class CustomerDashboard implements ActionListener   {
                 JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        // Show review dialog
-        String review = JOptionPane.showInputDialog(
-                feedbackPage,
-                "Please share your feedback about " + itemName + ":",
-                "Feedback",
-                JOptionPane.PLAIN_MESSAGE);
-
-        // If user cancels review, use empty string
-        if (review == null) {
-            review = "";
+        // Show review dialog with validation loop
+        String review = null;
+        while (review == null || review.trim().isEmpty()) {
+            review = JOptionPane.showInputDialog(
+                    feedbackPage,
+                    "Please share your feedback about " + itemName + ":\n(Feedback cannot be empty)",
+                    "Feedback",
+                    JOptionPane.PLAIN_MESSAGE);
+            // If user cancels, exit the method
+            if (review == null) {
+                return;
+            }
+            // Check if review is empty or only whitespace
+            if (review.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                    feedbackPage,
+                    "Feedback cannot be empty. Please enter your feedback.",
+                    "Empty Feedback",
+                    JOptionPane.WARNING_MESSAGE);
+            }
         }
 
-        // Save feedback
+
+        // Properly escape for CSV: replace quotes with double quotes and wrap in quotes
+        String sanitizedReview = "\"" + review.replace("\"", "\"\"") + "\"";
+
         CustomerFeedbacks feedback = new CustomerFeedbacks(
                 customer.getCustomerId(),
                 itemId,
                 feedbackType,
                 rating,
-                review
+                sanitizedReview
         );
 
         boolean success = feedback.saveFeedback();
-
         if (success) {
             JOptionPane.showMessageDialog(
                     feedbackPage,
@@ -458,7 +467,7 @@ public class CustomerDashboard implements ActionListener   {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void createCarHistoryPage() {
         carHistoryPage = createBasicPagePanel("Booking & Purchase History");
 
