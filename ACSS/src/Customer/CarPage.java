@@ -372,7 +372,6 @@ public class CarPage implements DashboardPage {
         bookButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
 
         // Add different action listeners based on user type
-        System.out.println(isGuest);
         if (isGuest) {
             // Guest user - show registration required message
             bookButton.addActionListener(new ActionListener() {
