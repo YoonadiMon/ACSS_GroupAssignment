@@ -16,10 +16,7 @@ public class MainPage implements DashboardPage {
     public JPanel createPage(BaseCustomer baseCustomer, JFrame frame) {
         
         if (!(baseCustomer instanceof Customer)) {
-            // Early return with an error panel
-            JPanel errorPanel = new JPanel();
-            errorPanel.add(new JLabel("Invalid customer data. Expected Customer type."));
-            return errorPanel;
+            return createErrorPanel("This page is only accessible to regular customers.");
         }
         
         Customer customer = (Customer) baseCustomer;
@@ -146,6 +143,19 @@ public class MainPage implements DashboardPage {
         setupActionListeners(customer, mainPage, editButton, saveButton, usernameField, emailField, passwordField, forgotPasswordLbl);
 
         return mainPage;
+    }
+    
+    private JPanel createErrorPanel(String message) {
+        JPanel errorPanel = new JPanel(new BorderLayout());
+        errorPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JLabel errorLabel = new JLabel(message);
+        errorLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        errorLabel.setForeground(Color.RED);
+        errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        errorPanel.add(errorLabel, BorderLayout.CENTER);
+        return errorPanel;
     }
     
     private void setupActionListeners(Customer customer, JPanel mainPage, JButton editButton, JButton saveButton, 
