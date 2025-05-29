@@ -84,7 +84,7 @@ public class CustomerDashboard implements ActionListener   {
         
         mainPage = mainPageCreator.createPage(customer, frame);
         carPage = carPageCreator.createPage(customer, frame);
-        //feedbackPage = feedbackPageCreator.createPage(customer, frame);
+        
         
     }
     
