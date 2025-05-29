@@ -1,185 +1,259 @@
 package Manager;
 
+import Salesman.Salesman;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
-public class ManageStaffSalesman {
-    private static final List<User> staffList = new ArrayList<>();
-    private static final List<User> salesmanList = new ArrayList<>();
+public class ManageStaffSalesman extends JFrame {
+    private static final String FILE_NAME = "data/salesmanList.txt";
+    private final List<User> staffList = new ArrayList<>();
+    private Object manager;
 
-    record User(String id, String name) {
+    // GUI Components
+    private JTextField idField, nameField, searchIdField;
+    private JTextArea outputArea;
+    private JButton addButton, deleteButton, updateButton, searchButton, listButton;
 
-        @Override
-        public String toString() {
-            return "ID: " + id + ", Name: " + name;
-        }
-
-        public String toFileString() {
-            return id + "," + name;
-        }
+    public ManageStaffSalesman(Object manager) {
+        super("Staff & Salesman Management");
+        this.manager = manager;
+        initialize();
+        loadFromFile();
     }
 
-    public static void main(String[] args) {
-        loadUsersFromFile("data/staffList.txt", staffList);
-        loadUsersFromFile("data/salesmanList.txt", salesmanList);
+    private void initialize() {
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setSize(800, 600);
+        setLocationRelativeTo(null);
 
-        try (Scanner scanner = new Scanner(System.in)) {
-            int choice;
-            do {
-                showMenu();
-                choice = scanner.nextInt();
-                scanner.nextLine(); // consume newline
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                returnToManagerDashboard();
+            }
+        });
 
-                switch (choice) {
-                    case 1 -> addUser(scanner);
-                    case 2 -> deleteUser(scanner);
-                    case 3 -> searchUser(scanner);
-                    case 4 -> updateUser(scanner);
-                    case 5 -> listAllUsers();
-                    case 0 -> {
-                        System.out.println("Exiting system...");
-                        saveUsersToFile("data/staffList.txt", staffList);
-                        saveUsersToFile("data/salesmanList.txt", salesmanList);
-                        return;
-                    }
-                    default -> System.out.println("Invalid choice. Try again.");
-                }
-            } while (true);
-        }
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel formPanel = createFormPanel();
+        JPanel buttonPanel = createButtonPanel();
+        outputArea = new JTextArea(15, 50);
+        outputArea.setEditable(false);
+        outputArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+
+        mainPanel.add(formPanel, BorderLayout.NORTH);
+        mainPanel.add(buttonPanel, BorderLayout.CENTER);
+        mainPanel.add(scrollPane, BorderLayout.SOUTH);
+
+        add(mainPanel);
+        setVisible(true);
     }
 
-    private static void showMenu() {
-        System.out.println("\n--- Managing Staff Interface ---");
-        System.out.println("1. Add Staff/Salesman");
-        System.out.println("2. Delete Staff/Salesman");
-        System.out.println("3. Search Staff/Salesman");
-        System.out.println("4. Update Staff/Salesman");
-        System.out.println("5. List All Users");
-        System.out.println("0. Exit");
-        System.out.print("Enter your choice: ");
+    private JPanel createFormPanel() {
+        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder("Staff/Salesman Info"));
+
+        panel.add(new JLabel("Search by ID:"));
+        searchIdField = new JTextField();
+        panel.add(searchIdField);
+
+        panel.add(new JLabel("ID:"));
+        idField = new JTextField();
+        panel.add(idField);
+
+        panel.add(new JLabel("Name:"));
+        nameField = new JTextField();
+        panel.add(nameField);
+
+        return panel;
     }
 
-    private static void addUser(Scanner scanner) {
-        System.out.print("Enter ID: ");
-        String id = scanner.nextLine().trim();
-        System.out.print("Enter Name: ");
-        String name = scanner.nextLine().trim();
-        System.out.print("Enter Role (Staff/Salesman): ");
-        String role = scanner.nextLine().trim();
+    private JPanel createButtonPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-        User newUser = new User(id, name);
-        if (role.equalsIgnoreCase("Staff")) {
-            staffList.add(newUser);
-            System.out.println("Staff added.");
-        } else if (role.equalsIgnoreCase("Salesman")) {
-            salesmanList.add(newUser);
-            System.out.println("Salesman added.");
-        } else {
-            System.out.println("Invalid role! Please enter Staff or Salesman.");
-        }
+        addButton = new JButton("Add");
+        addButton.addActionListener(this::addStaff);
+        panel.add(addButton);
+
+        deleteButton = new JButton("Delete");
+        deleteButton.addActionListener(this::deleteStaff);
+        panel.add(deleteButton);
+
+        searchButton = new JButton("Search");
+        searchButton.addActionListener(this::searchStaff);
+        panel.add(searchButton);
+
+        updateButton = new JButton("Update");
+        updateButton.addActionListener(this::updateStaff);
+        panel.add(updateButton);
+
+        listButton = new JButton("List All");
+        listButton.addActionListener(this::listAll);
+        panel.add(listButton);
+
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> returnToManagerDashboard());
+        panel.add(backButton);
+
+        return panel;
     }
 
-    private static void deleteUser(Scanner scanner) {
-        System.out.print("Enter ID to delete: ");
-        String id = scanner.nextLine().trim();
+    private void addStaff(ActionEvent e) {
+        String id = idField.getText().trim();
+        String name = nameField.getText().trim();
 
-        if (removeUserFromList(staffList, id)) {
-            System.out.println("Staff deleted.");
-        } else if (removeUserFromList(salesmanList, id)) {
-            System.out.println("Salesman deleted.");
-        } else {
-            System.out.println("User not found.");
-        }
-    }
-
-    private static void searchUser(Scanner scanner) {
-        System.out.print("Enter ID to search: ");
-        String id = scanner.nextLine().trim();
-
-        User found = findUserById(staffList, id);
-        if (found != null) {
-            System.out.println("Found in Staff List: " + found);
+        if (id.isEmpty() || name.isEmpty()) {
+            showMessage("Please fill in both ID and Name.");
             return;
         }
 
-        found = findUserById(salesmanList, id);
-        if (found != null) {
-            System.out.println("Found in Salesman List: " + found);
-        } else {
-            System.out.println("User not found.");
-        }
-    }
-
-    private static void updateUser(Scanner scanner) {
-        System.out.print("Enter ID to update: ");
-        String id = scanner.nextLine().trim();
-
-        User user = findUserById(staffList, id);
-        if (user != null) {
-            System.out.print("Enter new name: ");
-            String newName = scanner.nextLine().trim();
-            staffList.set(staffList.indexOf(user), new User(user.id(), newName));
-            System.out.println("Staff updated.");
+        if (findById(id) != null) {
+            showMessage("ID already exists.");
             return;
         }
 
-        user = findUserById(salesmanList, id);
+        staffList.add(new User(id, name));
+        saveToFile();
+        showMessage("Staff/Salesman added successfully.");
+        clearFields();
+    }
+
+    private void deleteStaff(ActionEvent e) {
+        String id = searchIdField.getText().trim();
+        User user = findById(id);
         if (user != null) {
-            System.out.print("Enter new name: ");
-            String newName = scanner.nextLine().trim();
-            salesmanList.set(salesmanList.indexOf(user), new User(user.id(), newName));
-            System.out.println("Salesman updated.");
+            staffList.remove(user);
+            saveToFile();
+            showMessage("Deleted successfully.");
+            clearFields();
         } else {
-            System.out.println("User not found.");
+            showMessage("ID not found.");
         }
     }
 
-    private static void listAllUsers() {
-        System.out.println("\n--- Staff List ---");
-        staffList.forEach(System.out::println);
-
-        System.out.println("\n--- Salesman List ---");
-        salesmanList.forEach(System.out::println);
+    private void searchStaff(ActionEvent e) {
+        String id = searchIdField.getText().trim();
+        User user = findById(id);
+        if (user != null) {
+            outputArea.setText("Staff Found:\n" + user.toString());
+            idField.setText(user.id);
+            nameField.setText(user.name);
+        } else {
+            showMessage("ID not found.");
+        }
     }
 
-    private static boolean removeUserFromList(List<User> list, String id) {
-        return list.removeIf(user -> user.id().equalsIgnoreCase(id));
+    private void updateStaff(ActionEvent e) {
+        String id = searchIdField.getText().trim();
+        User user = findById(id);
+        if (user != null) {
+            String newName = nameField.getText().trim();
+            if (!newName.isEmpty()) {
+                user.name = newName;
+                saveToFile();
+                showMessage("Updated successfully.");
+            }
+        } else {
+            showMessage("ID not found.");
+        }
     }
 
-    private static User findUserById(List<User> list, String id) {
-        return list.stream()
-                .filter(user -> user.id().equalsIgnoreCase(id))
+    private void listAll(ActionEvent e) {
+        if (staffList.isEmpty()) {
+            showMessage("No staff/salesman to show.");
+        } else {
+            StringBuilder sb = new StringBuilder("--- Staff & Salesman List ---\n");
+            staffList.forEach(u -> sb.append(u.toString()).append("\n"));
+            outputArea.setText(sb.toString());
+        }
+    }
+
+    private void showMessage(String msg) {
+        outputArea.setText(msg);
+    }
+
+    private void clearFields() {
+        searchIdField.setText("");
+        idField.setText("");
+        nameField.setText("");
+    }
+
+    private User findById(String id) {
+        return staffList.stream()
+                .filter(u -> u.id.equalsIgnoreCase(id))
                 .findFirst()
                 .orElse(null);
     }
 
-    private static void saveUsersToFile(String filename, List<User> list) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
-            for (User user : list) {
-                writer.write(user.toFileString());
-                writer.newLine();
+    private void loadFromFile() {
+        staffList.clear();
+        File file = new File(FILE_NAME);
+        file.getParentFile().mkdirs();
+
+        if (!file.exists()) {
+            showMessage("No existing staff data found.");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",", 2);
+                if (parts.length == 2) {
+                    staffList.add(new User(parts[0].trim(), parts[1].trim()));
+                }
             }
+            showMessage("Loaded " + staffList.size() + " records.");
         } catch (IOException e) {
-            System.err.println("Error saving to " + filename + ": " + e.getMessage());
+            showMessage("Failed to load data: " + e.getMessage());
         }
     }
 
-    private static void loadUsersFromFile(String filename, List<User> list) {
-        list.clear();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 2) {
-                    list.add(new User(parts[0], parts[1]));
-                }
+    private void saveToFile() {
+        File file = new File(FILE_NAME);
+        file.getParentFile().mkdirs();
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+            for (User u : staffList) {
+                writer.println(u.id + "," + u.name);
             }
-        } catch (FileNotFoundException e) {
-            System.out.println("No existing file found: " + filename);
         } catch (IOException e) {
-            System.err.println("Error loading from " + filename + ": " + e.getMessage());
+            showMessage("Failed to save data: " + e.getMessage());
         }
+    }
+
+    private void returnToManagerDashboard() {
+        dispose();
+        try {
+            Class<?> managerDashboardClass = Class.forName("Manager.ManagerDashboard");
+            java.lang.reflect.Constructor<?> constructor = managerDashboardClass.getConstructor(manager.getClass());
+            constructor.newInstance(manager);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    static class User {
+        String id;
+        String name;
+
+        User(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public String toString() {
+            return "ID: " + id + " | Name: " + name;
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new ManageStaffSalesman(null));
     }
 }

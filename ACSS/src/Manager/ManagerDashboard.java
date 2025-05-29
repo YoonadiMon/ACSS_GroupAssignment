@@ -124,12 +124,14 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         Object source = e.getSource();
 
         if (source == manageStaffSalesmanButton) {
-            openManageStaffSalesman();
+            setVisible(false);
+            new ManageStaffSalesman(manager);
         } else if (source == manageCustomerButton) {
             setVisible(false);
             new ManageCustomer(manager);
         } else if (source == manageCarInventoryButton) {
-            openManageCarInventory();
+            setVisible(false);
+            new ManageCarInventory(manager);
         } else if (source == paymentFeedbackButton) {
             openPaymentFeedback();
         } else if (source == generateReportsButton) {
@@ -169,22 +171,6 @@ public class ManagerDashboard extends JFrame implements ActionListener {
 //        dialog.add(content);
 //        dialog.setVisible(true);
 //    }
-
-    private void openManageCarInventory() {
-        JDialog dialog = createFeatureDialog("Car Inventory Management");
-        JPanel content = new JPanel(new GridLayout(5, 1, 5, 5));
-        content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        content.add(new JLabel("Car Inventory Management:", SwingConstants.CENTER));
-        content.add(new JButton("Add Car Details"));
-        content.add(new JButton("Delete Car Details"));
-        content.add(new JButton("Update Car Details"));
-        content.add(new JButton("Search Car Details"));
-        content.add(new JButton("List All Cars"));
-
-        dialog.add(content);
-        dialog.setVisible(true);
-    }
 
     private void openPaymentFeedback() {
         JDialog dialog = new JDialog(this, "Payment & Feedback Analysis", true);

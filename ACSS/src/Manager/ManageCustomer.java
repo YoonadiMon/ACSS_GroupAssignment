@@ -189,11 +189,11 @@ public class ManageCustomer extends JFrame {
 
         // Confirm restoration
         int confirm = JOptionPane.showConfirmDialog(
-            this,
-            "Are you sure you want to restore this deleted customer?",
-            "Confirm Restoration",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE
+                this,
+                "Are you sure you want to restore this deleted customer?",
+                "Confirm Restoration",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
@@ -213,7 +213,7 @@ public class ManageCustomer extends JFrame {
     private void listDeletedCustomers(ActionEvent e) {
         // Load deleted customers data first
         CustomerDataIO.readDeletedCustomer();
-        
+
         if (CustomerDataIO.allDeletedCustomers.isEmpty()) {
             showMessage("No deleted customers to show.");
         } else {
@@ -305,29 +305,29 @@ public class ManageCustomer extends JFrame {
 
     private String formatCustomerInfo(Customer customer) {
         return String.format("ID: %s\nName: %s\nEmail: %s\nApproved: %s\nUser Type: %s",
-                customer.getCustomerId(), 
-                customer.getUsername(), 
-                customer.getEmail(), 
+                customer.getCustomerId(),
+                customer.getUsername(),
+                customer.getEmail(),
                 customer.isApproved() ? "Yes" : "No",
                 customer.getUserType());
     }
 
     private String formatDeletedCustomerInfo(DeletedCustomer customer) {
         return String.format("ID: %s\nName: %s\nEmail: %s\nUser Type: %s\nStatus: DELETED",
-                customer.getUserId(), 
-                customer.getUsername(), 
-                customer.getEmail(), 
+                customer.getUserId(),
+                customer.getUsername(),
+                customer.getEmail(),
                 customer.getUserType());
     }
 
     private void loadCustomersFromFile() {
         // Use CustomerDataIO to load data
         CustomerDataIO.readCustomer();
-        
+
         // Copy to local list for compatibility with existing code
         customerList.clear();
         customerList.addAll(CustomerDataIO.allCustomers);
-        
+
         showMessage("Loaded " + customerList.size() + " customers.");
     }
 
@@ -336,13 +336,13 @@ public class ManageCustomer extends JFrame {
         if (parts.length != 5) {
             throw new IllegalArgumentException("Invalid customer data format. Expected 5 fields, got " + parts.length);
         }
-        
+
         String customerId = parts[0].trim();
         String name = parts[1].trim();
         String email = parts[2].trim();
         String password = parts[3].trim();
         boolean approved = Boolean.parseBoolean(parts[4].trim());
-        
+
         return new Customer(customerId, name, email, password, approved);
     }
 
@@ -373,10 +373,10 @@ public class ManageCustomer extends JFrame {
         try {
             // Close current window
             this.dispose();
-            
+
             // Create and show ManagerDashboard using reflection
             Class<?> managerDashboardClass = Class.forName("Manager.ManagerDashboard");
-            
+
             // Try different constructor signatures
             java.lang.reflect.Constructor<?> constructor = null;
             try {
@@ -401,18 +401,18 @@ public class ManageCustomer extends JFrame {
                     }
                 }
             }
-            
+
             if (constructor != null) {
                 constructor.newInstance(manager);
             } else {
                 throw new Exception("No suitable constructor found");
             }
-            
+
         } catch (Exception e) {
             // Fallback - try simpler approach or just close
             System.err.println("Could not return to ManagerDashboard: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Alternative: Try to call it directly if possible
             try {
                 SwingUtilities.invokeLater(() -> {

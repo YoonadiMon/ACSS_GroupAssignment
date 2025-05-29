@@ -18,8 +18,24 @@ public class Car {
     private String status; // available / booked / paid / cancel
     private String salesmanId; // the ID of the salesman responsible for this car
 
-    //constructor 
-    public Car(String carId, String brand, int price, String status, String salesmanId) {
+    public void setCarId(String carId) {
+        this.carId = carId;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setSalesmanId(String salesmanId) {
+        this.salesmanId = salesmanId;
+    }
+
+    //constructor
+    public Car(String carId, String brand, double price, String status, String salesmanId) {
         this.carId = carId;
         this.brand = brand;
         this.price = price;
@@ -31,20 +47,24 @@ public class Car {
     public String getCarId() {
         return carId;
     }
+
     public String getBrand() {
         return brand;
     }
+
     public int getPrice() {
         return (int) price;
     }
+
     public String getStatus() {
         return status;
     }
+
     public String getSalesmanId() {
         return salesmanId;
     }
+
     public void setStatus(String status) {
         this.status = status;
     }
-
 }
