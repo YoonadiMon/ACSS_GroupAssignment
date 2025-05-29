@@ -29,21 +29,13 @@ public class CustomerDashboardGuest {
         frame.setLocationRelativeTo(null);
         WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
         
-        // Create a regular Customer object from GuestCustomer for the CarPage
-        Customer regularCustomer = createRegularCustomerFromGuest(guestCustomer);
-        
-        CarPage carPage = new CarPage(true); // Pass true to indicate guest mode
-        JPanel carPagePanel = carPage.createPage(regularCustomer, frame);
+        // Now this will work because GuestCustomer extends BaseCustomer
+        CarPage carPage = new CarPage();
+        JPanel carPagePanel = carPage.createPage(guestCustomer, frame);
         
         // Add the car page to the frame
         frame.add(carPagePanel, BorderLayout.CENTER);
         
         frame.setVisible(true);
-    }
-    
-    private Customer createRegularCustomerFromGuest(GuestCustomer guestCustomer) {
-        // Create a temporary Customer object with guest information
-        Customer tempCustomer = new Customer(guestCustomer.getUserId(), guestCustomer.getUsername(), guestCustomer.getEmail(), guestCustomer.getPassword());
-        return tempCustomer;
     }
 }

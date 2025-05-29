@@ -15,12 +15,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Reusable CarPage that can handle both regular customers and guests
+ *
  * @author YOON
  */
 public class CarPage implements DashboardPage {
     
-    private Customer customer;
+    // Change this field type from Customer to BaseCustomer
+    private BaseCustomer customer;
     private boolean isGuest;
     private ArrayList<Car> allCarsList;
     private ArrayList<Car> filteredCarsList;
@@ -45,11 +46,14 @@ public class CarPage implements DashboardPage {
     }
     
     @Override
-    public JPanel createPage(Customer customer, JFrame frame) {
-        // Store the customer reference
-        this.customer = customer;
-        this.parentPanel = null; // Will be set later
-        
+    public JPanel createPage(BaseCustomer customer, JFrame frame) {
+        // Store the customer reference (change the field type to BaseCustomer)
+        this.customer = customer; 
+        this.parentPanel = null;
+
+        // Determine if this is a guest based on user type
+        this.isGuest = "GUEST".equals(customer.getUserType());
+
         // Page Unique Code
         String pageTitle = isGuest ? "Available Cars (Guest View: " + customer.getUsername() + ")" : "Available Cars";
         JPanel CarPage = DashboardUIUtils.createBasicPagePanel(pageTitle, frame);
@@ -79,28 +83,28 @@ public class CarPage implements DashboardPage {
         // Create and add filter panel
         JPanel filterPanel = createFilterPanel();
         contentPanel.add(filterPanel);
-        
+
         // Add spacing between filter and car list
         contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // Create the car list container
         createCarListContainer();
-        
+
         // Add the car container to a scroll pane
         scrollPane = new JScrollPane(carListContainer);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         contentPanel.add(scrollPane);
-        
+
         // Add guest-specific footer if needed
         if (isGuest) {
             JPanel footerPanel = createGuestFooter(frame);
             CarPage.add(footerPanel, BorderLayout.SOUTH);
         }
-        
+
         // Initial display of all cars
         updateCarDisplay();
-        
+
         return CarPage;
     }
     
@@ -397,14 +401,14 @@ public class CarPage implements DashboardPage {
     }
     
     private void handleCarBooking(Car car, JPanel parentPanel) {
-        String customerId = customer.getCustomerId(); // Get current logged in customer ID
+        String customerId = customer.getUserId(); 
 
         int confirm = JOptionPane.showConfirmDialog(
-            parentPanel,  // parent component (your panel or frame)
-            "Confirm booking for " + car.getBrand() + " (ID: " + car.getCarId() + ")",  // message
-            "Confirm Booking",  // dialog title
-            JOptionPane.OK_CANCEL_OPTION,  // options: OK and Cancel buttons
-            JOptionPane.QUESTION_MESSAGE  // icon type
+            parentPanel,
+            "Confirm booking for " + car.getBrand() + " (ID: " + car.getCarId() + ")",
+            "Confirm Booking",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE
         );
 
         if (confirm == JOptionPane.OK_OPTION) {
@@ -412,12 +416,12 @@ public class CarPage implements DashboardPage {
                 // Load existing requests
                 ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
 
-                 // Check if this car is already requested
+                // Check if this car is already requested
                 boolean alreadyRequested = false;
                 boolean rejected = false;
                 String reason = "";
                 for (CarRequest req : requests) {
-                    if (req.getCarID().equals(car.getCarId()) && req.getCustomerID().equals(customerId) ) {
+                    if (req.getCarID().equals(car.getCarId()) && req.getCustomerID().equals(customerId)) {
                         alreadyRequested = true;
                         if ((req.getRequestStatus().equals("rejected"))) {
                             rejected = true;
@@ -431,7 +435,7 @@ public class CarPage implements DashboardPage {
                 }
                 if (rejected) {
                     JOptionPane.showMessageDialog(parentPanel,
-                            "Your previous booking has been rejected by saleman.\nReason: " + reason,
+                            "Your previous booking has been rejected by salesman.\nReason: " + reason,
                             "Car Not Available",
                             JOptionPane.WARNING_MESSAGE);
                     return;
@@ -449,7 +453,7 @@ public class CarPage implements DashboardPage {
                         customerId,
                         car.getCarId(),
                         car.getSalesmanId(),
-                        "pending", // Initial status is pending
+                        "pending",
                         "."
                 );
 
@@ -463,9 +467,6 @@ public class CarPage implements DashboardPage {
                         "Status: Pending approval by salesman",
                         "Booking Submitted",
                         JOptionPane.INFORMATION_MESSAGE);
-
-                // Refresh the car list to update availability
-                //refreshCarPage();
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(parentPanel,

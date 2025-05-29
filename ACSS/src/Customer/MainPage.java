@@ -13,7 +13,8 @@ public class MainPage implements DashboardPage {
     private static JFrame mainFrame;
     
     @Override
-    public JPanel createPage(Customer customer, JFrame frame) {
+    public JPanel createPage(BaseCustomer baseCustomer, JFrame frame) {
+        Customer customer = (Customer) baseCustomer;
         JPanel mainPage = DashboardUIUtils.createBasicPagePanel("Welcome To ACSS, " + customer.getUsername() + "!", frame);
         JPanel contentPanel, accountPanel, headerPanel, fieldsPanel, emptyPanel, wrapperPanel;
         JLabel accountLabel, usernameLabel, emailLabel, passwordLabel, statusLabel, forgotPasswordLbl;
