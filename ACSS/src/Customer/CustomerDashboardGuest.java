@@ -30,7 +30,7 @@ public class CustomerDashboardGuest {
         WindowNav.setCloseOperation(frame, () -> new CustomerLandingGUI());
         
         // Now this will work because GuestCustomer extends BaseCustomer
-        CarPage carPage = new CarPage();
+        CarPage carPage = new CarPage(true);
         JPanel carPagePanel = carPage.createPage(guestCustomer, frame);
         
         // Add the car page to the frame

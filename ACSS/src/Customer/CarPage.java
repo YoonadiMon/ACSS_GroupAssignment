@@ -52,7 +52,11 @@ public class CarPage implements DashboardPage {
         this.parentPanel = null;
 
         // Determine if this is a guest based on user type
-        this.isGuest = "GUEST".equals(customer.getUserType());
+        this.isGuest = "Guest".equals(customer.getUserType());
+        
+        if (!this.isGuest && "Guest".equals(customer.getUserType())) {
+            this.isGuest = true;
+        }
 
         // Page Unique Code
         String pageTitle = isGuest ? "Available Cars (Guest View: " + customer.getUsername() + ")" : "Available Cars";
@@ -370,6 +374,7 @@ public class CarPage implements DashboardPage {
         bookButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
 
         // Add different action listeners based on user type
+        System.out.println(isGuest);
         if (isGuest) {
             // Guest user - show registration required message
             bookButton.addActionListener(new ActionListener() {
