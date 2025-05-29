@@ -73,7 +73,7 @@ public class MainPage implements DashboardPage {
         passwordField = new JPasswordField();
         passwordField.setText("***");
         passwordField.setEditable(false);
-        
+
         // Account status
         statusLabel = new JLabel("Account Status:");
         statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
@@ -110,11 +110,16 @@ public class MainPage implements DashboardPage {
         accountPanel.add(headerPanel, BorderLayout.NORTH);
         accountPanel.add(fieldsPanel, BorderLayout.CENTER);
 
-        // Center the account panel in the content panel + Hide extra space 
-        wrapperPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        // Center the account panel in the content panel using BoxLayout
+        wrapperPanel = new JPanel();
+        wrapperPanel.setLayout(new BoxLayout(wrapperPanel, BoxLayout.Y_AXIS));
         wrapperPanel.setOpaque(false);
+
+        // Center the account panel horizontally
+        accountPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        wrapperPanel.add(Box.createVerticalGlue()); // Push content to center
         wrapperPanel.add(accountPanel);
-        
+
         // Add forgot password label
         forgotPasswordLbl = new JLabel("Add secuity question in case of forgotten password?");
         forgotPasswordLbl.setFont(new Font("Arial", Font.BOLD, 14));
@@ -122,13 +127,15 @@ public class MainPage implements DashboardPage {
         forgotPasswordLbl.setCursor(new Cursor(Cursor.HAND_CURSOR));
         forgotPasswordLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
         forgotPasswordLbl.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
-        
+
         wrapperPanel.add(forgotPasswordLbl);
+        wrapperPanel.add(Box.createVerticalGlue()); // Push content to center
+
         contentPanel.add(wrapperPanel);
 
         // Add action listeners
         setupActionListeners(customer, mainPage, editButton, saveButton, usernameField, emailField, passwordField, forgotPasswordLbl);
-        
+
         return mainPage;
     }
     
