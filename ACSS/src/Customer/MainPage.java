@@ -14,6 +14,14 @@ public class MainPage implements DashboardPage {
     
     @Override
     public JPanel createPage(BaseCustomer baseCustomer, JFrame frame) {
+        
+        if (!(baseCustomer instanceof Customer)) {
+            // Early return with an error panel
+            JPanel errorPanel = new JPanel();
+            errorPanel.add(new JLabel("Invalid customer data. Expected Customer type."));
+            return errorPanel;
+        }
+        
         Customer customer = (Customer) baseCustomer;
         JPanel mainPage = DashboardUIUtils.createBasicPagePanel("Welcome To ACSS, " + customer.getUsername() + "!", frame);
         JPanel contentPanel, accountPanel, headerPanel, fieldsPanel, emptyPanel, wrapperPanel;
