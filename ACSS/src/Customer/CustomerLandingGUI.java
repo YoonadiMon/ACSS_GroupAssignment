@@ -201,7 +201,34 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
 
                 Customer customer = CustomerDataIO.getIDfromUsernameorEmail(userOrEmail);
                 if (customer == null) {
-                    JOptionPane.showMessageDialog(frame, "User not found. Please check your username or email.");
+                    int choice = JOptionPane.showConfirmDialog(
+                        frame,
+                        "User not found. Are you sure your username/email is correct?",
+                        "User Not Found",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                    );
+
+                    if (choice == JOptionPane.YES_OPTION) {
+                        // User confirms their credentials are correct, check if account was deleted
+                        DeletedCustomer deletedCustomer = CustomerDataIO.searchDeletedName(userOrEmail);
+                        if (deletedCustomer == null) {
+                            deletedCustomer = CustomerDataIO.searchDeletedEmail(userOrEmail);
+                        }
+                        if (deletedCustomer != null) {
+                            JOptionPane.showMessageDialog(frame,
+                                    "Your account has been deleted by the administrator.\n" +
+                                    "Please contact support if you believe this was done in error.\n" +
+                                    "You may create a new account if you wish to continue using our services.",
+                                    "Account Deleted",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame,
+                                    "Account not found. Please verify your credentials and try again.",
+                                    "Login Failed",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
                     return;
                 }
 
