@@ -16,13 +16,16 @@ public class MainMenuGUI implements ActionListener {
     JFrame x;
     JButton customerButton, managerButton, salesmanButton, exitButton;
     JLabel welcomeTxt, roleTxt;
-    private static final String ADMIN_PASSWORD = "admin123"; // Change this to your desired password
+    // Change this to the password needed to turn off system
+    private static final String ADMIN_PASSWORD = "admin123"; 
 
     public MainMenuGUI() {
-        x = new JFrame("--- Main Program ---");
+        x = new JFrame("Main Program");
         x.setSize(500, 300);
         x.setLocationRelativeTo(null); // Center the frame
         x.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 15)); // Use FlowLayout for button arrangement
+        x.setResizable(false);
+        x.setMinimumSize(new Dimension(450, 300));
 
         // Welcome Message
         welcomeTxt = new JLabel("Welcome to APU Car Sales System");
@@ -87,17 +90,31 @@ public class MainMenuGUI implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == exitButton) {
-            verifyAdminPassword();
-        } else if (e.getSource() == customerButton) {
-            x.setVisible(false);
-            new CustomerLandingGUI();
-        } else if (e.getSource() == managerButton) {
-            x.setVisible(false);
-            new ManagerLogin();
-        } else if (e.getSource() == salesmanButton) {
-            x.setVisible(false);
-            new SalesmanGUI(x.getWidth(), x.getHeight());
+        try {
+            if (e.getSource() == exitButton) {
+                verifyAdminPassword();
+            } else if (e.getSource() == customerButton) {
+                x.setVisible(false);
+                new CustomerLandingGUI();
+            } else if (e.getSource() == managerButton) {
+                x.setVisible(false);
+                new ManagerLogin();
+            } else if (e.getSource() == salesmanButton) {
+                x.setVisible(false);
+                new SalesmanGUI(x.getWidth(), x.getHeight());
+            }
+        } catch (Exception ex) {
+            // Show the original window again if new window creation fails
+            x.setVisible(true);
+
+            // Log the error
+            ex.printStackTrace();
+
+            // Show error message dialog
+            JOptionPane.showMessageDialog(x, 
+                "Unable to open the requested window. Please try again.", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 }
