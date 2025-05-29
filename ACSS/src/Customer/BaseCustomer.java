@@ -18,7 +18,7 @@ public abstract class BaseCustomer {
         this.password = password;
     }
     
-    // Common methods
+    // Common methods Getters and Setters
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
     public String getUsername() { return username; }
@@ -28,7 +28,7 @@ public abstract class BaseCustomer {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
     
-    // Abstract method that all users must implement
+    // Abstract method that all customer types must implement
     public abstract String getUserType();
 }
 

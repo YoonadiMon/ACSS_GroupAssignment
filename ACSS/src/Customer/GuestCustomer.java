@@ -19,7 +19,7 @@ public class GuestCustomer extends BaseCustomer  {
         );
     }
     
-    // Implementation of the abstract method from User class
+    // Implementation of the abstract method from BaseCustomer class
     @Override
     public String getUserType() {
         return "Guest";

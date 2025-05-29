@@ -314,7 +314,6 @@ public class MainPage implements DashboardPage {
                     return;
                 }
 
-                // No need to manually escape - the CustomersForgetPwd class handles CSV escaping
                 CustomersForgetPwd customerForgetPwd = new CustomersForgetPwd(customerId, question, answer);
 
                 if (CustomersForgetPwd.customerExists(customerId)) {

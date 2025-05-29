@@ -78,14 +78,10 @@ public class CustomerDashboard implements ActionListener   {
         // Create instances of page classes
         MainPage mainPageCreator = new MainPage();
         CarPage carPageCreator = new CarPage();
-        //FeedbackPage feedbackPageCreator = new FeedbackPage();
         
         // Create pages using the page creator instances
-        
         mainPage = mainPageCreator.createPage(customer, frame);
         carPage = carPageCreator.createPage(customer, frame);
-        
-        
     }
     
     private JPanel createNavigationPanel() {
