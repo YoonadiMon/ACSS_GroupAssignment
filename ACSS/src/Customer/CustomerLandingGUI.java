@@ -43,6 +43,7 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
         frame = new JFrame("Customer Account");
         frame.setSize(400, 550);
         frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
 
         // Card layout to switch between login and register pages
         cardLayout = new CardLayout();
