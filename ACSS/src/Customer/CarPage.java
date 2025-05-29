@@ -52,8 +52,6 @@ public class CarPage implements DashboardPage {
         this.parentPanel = null;
 
         // Determine if this is a guest based on user type
-        this.isGuest = "Guest".equals(customer.getUserType());
-        
         if (!this.isGuest && "Guest".equals(customer.getUserType())) {
             this.isGuest = true;
         }
