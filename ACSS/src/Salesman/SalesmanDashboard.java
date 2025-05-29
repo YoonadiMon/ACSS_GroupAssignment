@@ -1402,7 +1402,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
             String comment = commentField.getText().trim();
-            String finalComment = comment.isEmpty() ? "." : comment;
+            String finalComment = comment.isEmpty() ? "No Comments" : comment;
 
             if (!carID.isEmpty() && !customerID.isEmpty()) {
                 if (isCarPaid(carID)) {
@@ -1481,7 +1481,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
             String comment = commentField.getText().trim();
-            String finalComment = comment.isEmpty() ? "." : comment;
+            String finalComment = comment.isEmpty() ? "No comments" : comment;
 
             if (!carID.isEmpty() && !customerID.isEmpty()) {
 
@@ -1932,7 +1932,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         applySortButton.setBackground(new Color(230, 240, 255));
         applySortButton.setFocusPainted(false);
 
-        filterPanel.add(new JLabel("Search:"));
+        filterPanel.add(new JLabel("Search (CustomerID/CarID):"));
         filterPanel.add(searchField);
         filterPanel.add(searchButton);
         filterPanel.add(new JLabel("Sort by:"));
