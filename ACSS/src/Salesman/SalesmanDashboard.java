@@ -20,6 +20,7 @@ import Car.CarRequest;
 import static Car.CarRequest.carRequestsList;
 import Car.SalesRecords;
 import Car.SoldCarRecord;
+import Customer.DeletedCustomer;
 import Salesman.SalesmanList;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -922,7 +923,90 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         return row;
     }
 
+    private void checkAndCleanDeletedCustomerRequests() {
+        ArrayList<CarRequest> allRequests = CarRequest.loadCarRequestDataFromFile();
+        ArrayList<Car> allCars = CarList.loadCarDataFromFile();
+        boolean changesMade = false;
+
+        // Load deleted customers inline
+        ArrayList<DeletedCustomer> deletedCustomers = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("DeletedCustomerList.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length >= 4) {
+                    DeletedCustomer deletedCustomer = new DeletedCustomer(
+                            data[0].trim(), data[1].trim(), data[2].trim(), data[3].trim()
+                    );
+                    deletedCustomers.add(deletedCustomer);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading deleted customer file: " + e.getMessage());
+        }
+
+        // Rest of your existing code for checking requests...
+        for (CarRequest request : allRequests) {
+            // Check if customer exists in deleted customers list
+            boolean isCustomerDeleted = false;
+            for (DeletedCustomer deletedCustomer : deletedCustomers) {
+                if (deletedCustomer.getUserId().equals(request.getCustomerID())) {
+                    isCustomerDeleted = true;
+                    break;
+                }
+            }
+
+            // If customer is deleted, handle based on request status
+            if (isCustomerDeleted) {
+                String currentStatus = request.getRequestStatus();
+
+                // Handle pending requests - change to rejected
+                if (currentStatus.equalsIgnoreCase("pending")) {
+                    CarRequest.updateRequestStatusWithComment(
+                            request.getCarID(),
+                            request.getCustomerID(),
+                            request.getSalesmanID(),
+                            "rejected",
+                            "Auto-rejected: Customer account deleted"
+                    );
+
+                    // Update car status to available
+                    for (Car car : allCars) {
+                        if (car.getCarId().equals(request.getCarID())) {
+                            car.setStatus("available");
+                            break;
+                        }
+                    }
+                    CarList.saveUpdatedCarToFile(allCars);
+                    changesMade = true;
+                } // Handle booked requests - change to cancelled
+                else if (currentStatus.equalsIgnoreCase("booked")) {
+                    CarRequest.updateRequestStatusWithComment(
+                            request.getCarID(),
+                            request.getCustomerID(),
+                            request.getSalesmanID(),
+                            "cancelled",
+                            "Auto-cancelled: Customer account deleted"
+                    );
+
+                    // Update car status to available
+                    for (Car car : allCars) {
+                        if (car.getCarId().equals(request.getCarID())) {
+                            car.setStatus("available");
+                            break;
+                        }
+                    }
+                    CarList.saveUpdatedCarToFile(allCars);
+                    changesMade = true;
+                }
+            }
+        }
+    }
+
     public void updateStatusWindow() {
+
+        checkAndCleanDeletedCustomerRequests();
+
         JFrame updateFrame = new JFrame("Update Request");
         updateFrame.setSize(800, 500);
         updateFrame.setLocationRelativeTo(null);
