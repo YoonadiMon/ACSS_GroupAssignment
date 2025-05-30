@@ -179,13 +179,6 @@ public class CustomerDashboard implements ActionListener   {
         // Extract booking information (cars they looked at but haven't purchased)
         List<String> bookedCarIDs = new ArrayList<>();
         Map<String, String> bookedCarSalesmanMap = new HashMap<>(); // Maps carID to salesmanID
-
-        //for (CarRequest booking : bookings) {
-        //    String carID = booking.getCarID();
-        //    String salesmanID = booking.getSalesmanID();
-        //    bookedCarIDs.add(carID);
-        //    bookedCarSalesmanMap.put(carID, salesmanID);
-        //}
         
         for (CarRequest booking : bookings) {
             // Only include requests that were pending -> approved -> cancelled (meaning customer viewed the car but didn't buy)
