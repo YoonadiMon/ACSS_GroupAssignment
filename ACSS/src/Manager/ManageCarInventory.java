@@ -27,7 +27,7 @@ public class ManageCarInventory extends JFrame {
         super("Car Inventory Management System");
         this.manager = manager;
         initialize(); // Initialize GUI first
-        loadCarsFromFile(); // Then load data
+        carList = CarList.loadCarDataFromFile();// Then load data
     }
 
     private void initialize() {
@@ -271,12 +271,13 @@ public class ManageCarInventory extends JFrame {
     }
 
     private String formatCarInfo(Car car) {
+        double price = car.getPrice();
         return String.format("Car ID: %s\nBrand: %s\nPrice: $%.2f\nStatus: %s\nAssigned Salesman: %s",
                 car.getCarId(),
                 car.getBrand(),
-                car.getPrice(),
+                (double) car.getPrice(),
                 car.getStatus(),
-                car.getSalesmanId() != null && !car.getSalesmanId().isEmpty() ? car.getSalesmanId() : "Not Assigned");
+                (car.getSalesmanId() != null && !car.getSalesmanId().isEmpty()) ? car.getSalesmanId() : "Not Assigned");
     }
 
     private void loadCarsFromFile() {
@@ -418,6 +419,12 @@ public class ManageCarInventory extends JFrame {
     }
 
     public static void main(String[] args) {
+        File file = new File("data/carList.txt");
+        if (!file.exists()) {
+            CarList.initializeCars();
+            CarList.saveInitializedCarListToFile();
+        }
+
         SwingUtilities.invokeLater(() -> new ManageCarInventory(null));
     }
 

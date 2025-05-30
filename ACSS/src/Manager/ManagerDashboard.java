@@ -1,5 +1,6 @@
 package Manager;
 
+import Car.SoldCarRecord;
 import Customer.CustomerFeedbacks;
 import Car.SalesRecords;
 import Utils.ButtonStyler;
@@ -7,7 +8,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileReader;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.IOException;
+import Car.CarList;
+import Car.Car;
+import java.util.Map;
+import java.util.HashMap;
+
+
 
 public class ManagerDashboard extends JFrame implements ActionListener {
     private final ManagerLogin.Manager manager;
@@ -45,7 +58,7 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Initialize buttons with better styling
-        manageStaffSalesmanButton = createStyledButton("Staff & Salesman Mangement", new Color(70, 130, 180));
+        manageStaffSalesmanButton = createStyledButton("Staff & Salesman Management", new Color(70, 130, 180));
         manageCustomerButton = createStyledButton("Customer Management", new Color(60, 179, 113));
         manageCarInventoryButton = createStyledButton("Car Inventory Management", new Color(205, 92, 92));
         paymentFeedbackButton = createStyledButton("Payment & Feedback Analysis", new Color(255, 140, 0));
@@ -85,6 +98,7 @@ public class ManagerDashboard extends JFrame implements ActionListener {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(backgroundColor.brighter());
             }
+
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(backgroundColor);
@@ -146,10 +160,10 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         JPanel content = new JPanel(new GridLayout(4, 1, 5, 5));
         content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        content.add(new JLabel("Staff & Salesman Management:", SwingConstants.CENTER));
-        content.add(new JButton("Add Staff/Salesman"));
-        content.add(new JButton("Delete Staff/Salesman"));
-        content.add(new JButton("Update Staff/Salesman"));
+        content.add(new JLabel("Salesman Management:", SwingConstants.CENTER));
+        content.add(new JButton("Add Salesman"));
+        content.add(new JButton("Delete Salesman"));
+        content.add(new JButton("Update Salesman"));
         content.add(new JButton("Assign Car"));
         content.add(new JButton("List All"));
 
@@ -181,15 +195,12 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         // Create tabbed pane
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // Payment tab
-        JPanel paymentPanel = createPaymentTab();
-        tabbedPane.addTab("Payment Analysis", paymentPanel);
+        // Add tabs
+        tabbedPane.addTab("Payment Analysis", createPaymentTab());
+        tabbedPane.addTab("Feedback Analysis", createFeedbackTab());
 
-        // Feedback tab
-        JPanel feedbackPanel = createFeedbackTab();
-        tabbedPane.addTab("Feedback Analysis", feedbackPanel);
-
-        dialog.add(tabbedPane);
+        dialog.setLayout(new BorderLayout());
+        dialog.add(tabbedPane, BorderLayout.CENTER);
         dialog.setVisible(true);
     }
 
@@ -383,7 +394,6 @@ public class ManagerDashboard extends JFrame implements ActionListener {
             updatePaymentAnalysisLabels(analyzePaymentsPanel, newAnalytics);
         });
         analyticsButtonPanel.add(refreshAnalyticsBtn);
-        analyticsButtonPanel.add(new JButton("View Payment Trends"));
 
         analyzeContainer.add(analyzePaymentsPanel, BorderLayout.CENTER);
         analyzeContainer.add(analyticsButtonPanel, BorderLayout.SOUTH);
@@ -429,10 +439,10 @@ public class ManagerDashboard extends JFrame implements ActionListener {
     private void updatePaymentAnalysisLabels(JPanel panel, PaymentAnalytics analytics) {
         Component[] components = panel.getComponents();
         if (components.length >= 8) {
-            ((JLabel)components[1]).setText(String.valueOf(analytics.totalPayments));
-            ((JLabel)components[3]).setText(String.format("$%.2f", analytics.totalAmount));
-            ((JLabel)components[5]).setText(String.format("$%.2f", analytics.averageAmount));
-            ((JLabel)components[7]).setText(String.format("%d (%.1f%%)",
+            ((JLabel) components[1]).setText(String.valueOf(analytics.totalPayments));
+            ((JLabel) components[3]).setText(String.format("$%.2f", analytics.totalAmount));
+            ((JLabel) components[5]).setText(String.format("$%.2f", analytics.averageAmount));
+            ((JLabel) components[7]).setText(String.format("%d (%.1f%%)",
                     analytics.completedPayments, analytics.completionRate));
         }
         panel.revalidate();
@@ -583,7 +593,6 @@ public class ManagerDashboard extends JFrame implements ActionListener {
             updateFeedbackAnalysisLabels(analyzeFeedbacksPanel, newAnalytics);
         });
         feedbackAnalyticsButtonPanel.add(refreshFeedbackAnalyticsBtn);
-        feedbackAnalyticsButtonPanel.add(new JButton("Sentiment Analysis"));
 
         analyzeContainer.add(analyzeFeedbacksPanel, BorderLayout.CENTER);
         analyzeContainer.add(feedbackAnalyticsButtonPanel, BorderLayout.SOUTH);
@@ -632,15 +641,13 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         return analytics;
     }
 
-
-
     private void updateFeedbackAnalysisLabels(JPanel panel, FeedbackAnalytics analytics) {
         Component[] components = panel.getComponents();
         if (components.length >= 8) {
-            ((JLabel)components[1]).setText(String.valueOf(analytics.totalFeedbacks));
-            ((JLabel)components[3]).setText(String.format("%.2f/5", analytics.averageRating));
-            ((JLabel)components[5]).setText(String.format("%.1f%%", analytics.positiveRate));
-            ((JLabel)components[7]).setText(String.format("%d (%.1f%%)",
+            ((JLabel) components[1]).setText(String.valueOf(analytics.totalFeedbacks));
+            ((JLabel) components[3]).setText(String.format("%.2f/5", analytics.averageRating));
+            ((JLabel) components[5]).setText(String.format("%.1f%%", analytics.positiveRate));
+            ((JLabel) components[7]).setText(String.format("%d (%.1f%%)",
                     analytics.fiveStarCount, analytics.fiveStarRate));
         }
         panel.revalidate();
@@ -661,7 +668,199 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         JDialog dialog = new JDialog(this, "Reports", true);
         dialog.setSize(900, 600);
         dialog.setLocationRelativeTo(this);
+        dialog.setResizable(true);
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Sales Report", createSalesReportPanel());
+        tabbedPane.addTab("Inventory Report", createInventoryReportPanel());
+        tabbedPane.addTab("Salesman Performance", createSalesmanPerformancePanel());
+
+        dialog.setLayout(new BorderLayout());
+        dialog.add(tabbedPane, BorderLayout.CENTER);
+        dialog.setVisible(true);
     }
+
+    private JPanel createSalesReportPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JTextArea textArea = new JTextArea();
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        textArea.setEditable(false);
+
+        try {
+            List<SalesRecords> salesRecords = SalesRecords.loadSalesRecords();
+            int totalSales = salesRecords.size();
+            double totalRevenue = 0;
+            Map<String, Integer> salesPerSalesman = new HashMap<>();
+            Map<String, Double> revenuePerSalesman = new HashMap<>();
+
+            for (SalesRecords record : salesRecords) {
+                totalRevenue += record.getPrice();
+
+                // Sales per salesman
+                salesPerSalesman.put(record.getSalesmanID(),
+                        salesPerSalesman.getOrDefault(record.getSalesmanID(), 0) + 1);
+
+                revenuePerSalesman.put(record.getSalesmanID(),
+                        revenuePerSalesman.getOrDefault(record.getSalesmanID(), 0.0) + record.getPrice());
+            }
+
+            double avgSale = totalSales > 0 ? totalRevenue / totalSales : 0;
+
+            // Compose report
+            StringBuilder report = new StringBuilder();
+            report.append("====== Sales Report ======\n");
+            report.append("Total Sales: ").append(totalSales).append("\n");
+            report.append("Total Revenue: $").append(String.format("%.2f", totalRevenue)).append("\n");
+            report.append("Average Sale Value: $").append(String.format("%.2f", avgSale)).append("\n\n");
+
+            // Show sold cars (Car ID, Price, Buying Date)
+            List<SoldCarRecord> soldCars = SoldCarRecord.getAllSoldCarRecords();
+            if (!soldCars.isEmpty()) {
+                report.append("\n--- Sold Cars Log (Car ID, Price, Date) ---\n");
+                report.append(String.format("%-10s %-12s %-15s\n", "Car ID", "Price", "Date"));
+                report.append("---------------------------------------------\n");
+
+                for (SoldCarRecord sold : soldCars) {
+                    report.append(String.format("%-10s $%-11s %-15s\n",
+                            sold.getCarID(),
+                            sold.getCarPrice(),
+                            sold.getBuyingDate()));
+                }
+            }
+
+
+            textArea.setText(report.toString());
+
+        } catch (Exception e) {
+            textArea.setText("Error generating sales report: " + e.getMessage());
+        }
+
+        panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        return panel;
+    }
+
+
+    private JPanel createInventoryReportPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JTextArea textArea = new JTextArea();
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        textArea.setEditable(false);
+
+        try {
+            List<Car> cars = CarList.loadCarDataFromFile();
+            List<SoldCarRecord> soldRecords = SoldCarRecord.getAllSoldCarRecords();
+
+            int totalCars = cars.size();
+            int available = 0, paid = 0, reserved = 0, unassigned = 0;
+
+            StringBuilder availableCars = new StringBuilder("--- Available Cars ---\n");
+            StringBuilder paidCars = new StringBuilder("--- Paid (Sold) Cars ---\n");
+            StringBuilder reservedCars = new StringBuilder("--- Reserved Cars ---\n");
+            StringBuilder unassignedCars = new StringBuilder("--- Unassigned Cars ---\n");
+
+            for (Car car : cars) {
+                boolean isUnassigned = (car.getSalesmanId() == null || car.getSalesmanId().isEmpty());
+                if (isUnassigned) unassigned++;
+
+                String line = String.format("Car ID: %s, Brand: %s, Price: %.2f\n",
+                        car.getCarId(), car.getBrand(), (double) car.getPrice());
+
+                switch (car.getStatus().toLowerCase()) {
+                    case "available" -> {
+                        available++;
+                        availableCars.append(line);
+                    }
+                    case "paid" -> {
+                        paid++;
+                        paidCars.append(line);
+                    }
+                    case "reserved" -> {
+                        reserved++;
+                        reservedCars.append(line);
+                    }
+                }
+
+                if (isUnassigned) {
+                    unassignedCars.append(line);
+                }
+            }
+
+            if (reserved == 0) reservedCars.append("None\n");
+            if (unassigned == 0) unassignedCars.append("None\n");
+
+            StringBuilder report = new StringBuilder();
+            report.append("====== Inventory Report ======\n");
+            report.append("Total Cars: ").append(totalCars).append("\n");
+            report.append("Available: ").append(available).append("\n");
+            report.append("Paid (Sold): ").append(paid).append("\n");
+            report.append("Reserved: ").append(reserved).append("\n");
+            report.append("Unassigned Cars: ").append(unassigned).append("\n");
+            report.append("Sold Cars (from soldCars.txt): ").append(soldRecords.size()).append("\n\n");
+
+            report.append(availableCars).append("\n");
+            report.append(paidCars).append("\n");
+            report.append(reservedCars).append("\n");
+            report.append(unassignedCars);
+
+            textArea.setText(report.toString());
+
+        } catch (Exception e) {
+            textArea.setText("Error generating inventory report: " + e.getMessage());
+        }
+
+        panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        return panel;
+    }
+
+
+    private JPanel createSalesmanPerformancePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JTextArea textArea = new JTextArea();
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        textArea.setEditable(false);
+
+        try {
+            List<Car> cars = CarList.loadCarDataFromFile();
+            List<SalesRecords> records = SalesRecords.loadSalesRecords();
+            Map<String, Integer> carAssignments = new HashMap<>();
+            Map<String, Integer> salesMade = new HashMap<>();
+            Map<String, Double> salesRevenue = new HashMap<>();
+
+            for (Car car : cars) {
+                String sid = car.getSalesmanId();
+                if (sid != null && !sid.isEmpty()) {
+                    carAssignments.put(sid, carAssignments.getOrDefault(sid, 0) + 1);
+                }
+            }
+
+            for (SalesRecords r : records) {
+                String sid = r.getSalesmanID();
+                salesMade.put(sid, salesMade.getOrDefault(sid, 0) + 1);
+                salesRevenue.put(sid, salesRevenue.getOrDefault(sid, 0.0) + r.getPrice());
+            }
+
+            StringBuilder sb = new StringBuilder("====== Salesman Performance ======\n");
+            for (String sid : carAssignments.keySet()) {
+                int assigned = carAssignments.getOrDefault(sid, 0);
+                int sold = salesMade.getOrDefault(sid, 0);
+                double revenue = salesRevenue.getOrDefault(sid, 0.0);
+
+                sb.append(String.format("Salesman %s:\n", sid));
+                sb.append(String.format("   Assigned: %d cars\n", assigned));
+                sb.append(String.format("   Sold: %d\n", sold));
+                sb.append(String.format("   Revenue: $%.2f\n", revenue));
+                sb.append("\n");
+            }
+
+            textArea.setText(sb.toString().trim());
+        } catch (Exception e) {
+            textArea.setText("Error generating performance report: " + e.getMessage());
+        }
+
+        panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        return panel;
+    }
+
 
     private JDialog createFeatureDialog(String title) {
         JDialog dialog = new JDialog(this, title, true);
