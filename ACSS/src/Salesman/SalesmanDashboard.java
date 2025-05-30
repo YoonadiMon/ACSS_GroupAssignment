@@ -20,11 +20,14 @@ import Car.CarRequest;
 import static Car.CarRequest.carRequestsList;
 import Car.SalesRecords;
 import Car.SoldCarRecord;
+import static Customer.CustomerDataIO.allDeletedCustomers;
+import static Customer.CustomerDataIO.searchDeletedId;
 import Customer.DeletedCustomer;
 import Salesman.SalesmanList;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -928,39 +931,66 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         ArrayList<Car> allCars = CarList.loadCarDataFromFile();
         boolean changesMade = false;
 
-        // Load deleted customers inline
-        ArrayList<DeletedCustomer> deletedCustomers = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("DeletedCustomerList.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 4) {
-                    DeletedCustomer deletedCustomer = new DeletedCustomer(
-                            data[0].trim(), data[1].trim(), data[2].trim(), data[3].trim()
-                    );
-                    deletedCustomers.add(deletedCustomer);
+        // First try to load from the static list if it exists
+        if (allDeletedCustomers == null || allDeletedCustomers.isEmpty()) {
+            allDeletedCustomers = new ArrayList<>();
+
+            // Try multiple possible file locations
+            String[] possiblePaths = {
+                "DeletedCustomersList.txt", // Current directory
+                "data/DeletedCustomersList.txt", // In a data subdirectory
+                "src/main/resources/DeletedCustomersList.txt", // Common resource location
+                System.getProperty("user.dir") + "/DeletedCustomersList.txt" // Absolute path
+            };
+
+            boolean fileFound = false;
+            IOException lastException = null;
+
+            for (String filePath : possiblePaths) {
+                try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+                    System.out.println("Trying to load deleted customers from: " + new File(filePath).getAbsolutePath());
+
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] data = line.split(",");
+                        if (data.length >= 4) {
+                            DeletedCustomer deletedCustomer = new DeletedCustomer(
+                                    data[0].trim(), data[1].trim(), data[2].trim(), data[3].trim()
+                            );
+                            allDeletedCustomers.add(deletedCustomer);
+                        }
+                    }
+                    fileFound = true;
+                    break; // Stop trying paths if we found the file
+                } catch (IOException e) {
+                    lastException = e;
+                    // Continue to next possible path
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Error reading deleted customer file: " + e.getMessage());
+
+            if (!fileFound) {
+                String errorMsg = "Could not find DeletedCustomersList.txt in any of these locations:\n";
+                for (String path : possiblePaths) {
+                    errorMsg += "- " + new File(path).getAbsolutePath() + "\n";
+                }
+                if (lastException != null) {
+                    errorMsg += "Last error: " + lastException.getMessage();
+                }
+                System.err.println(errorMsg);
+                JOptionPane.showMessageDialog(null,
+                        "Could not load deleted customers list.\n" + errorMsg,
+                        "File Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         }
 
-        // Rest of your existing code for checking requests...
+        // Rest of your method remains the same...
         for (CarRequest request : allRequests) {
-            // Check if customer exists in deleted customers list
-            boolean isCustomerDeleted = false;
-            for (DeletedCustomer deletedCustomer : deletedCustomers) {
-                if (deletedCustomer.getUserId().equals(request.getCustomerID())) {
-                    isCustomerDeleted = true;
-                    break;
-                }
-            }
+            DeletedCustomer deletedCustomer = searchDeletedId(request.getCustomerID());
 
-            // If customer is deleted, handle based on request status
-            if (isCustomerDeleted) {
+            if (deletedCustomer != null) {
                 String currentStatus = request.getRequestStatus();
 
-                // Handle pending requests - change to rejected
                 if (currentStatus.equalsIgnoreCase("pending")) {
                     CarRequest.updateRequestStatusWithComment(
                             request.getCarID(),
@@ -969,18 +999,14 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
                             "rejected",
                             "Auto-rejected: Customer account deleted"
                     );
-
-                    // Update car status to available
                     for (Car car : allCars) {
                         if (car.getCarId().equals(request.getCarID())) {
                             car.setStatus("available");
                             break;
                         }
                     }
-                    CarList.saveUpdatedCarToFile(allCars);
                     changesMade = true;
-                } // Handle booked requests - change to cancelled
-                else if (currentStatus.equalsIgnoreCase("booked")) {
+                } else if (currentStatus.equalsIgnoreCase("booked")) {
                     CarRequest.updateRequestStatusWithComment(
                             request.getCarID(),
                             request.getCustomerID(),
@@ -988,21 +1014,583 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
                             "cancelled",
                             "Auto-cancelled: Customer account deleted"
                     );
-
-                    // Update car status to available
                     for (Car car : allCars) {
                         if (car.getCarId().equals(request.getCarID())) {
                             car.setStatus("available");
                             break;
                         }
                     }
-                    CarList.saveUpdatedCarToFile(allCars);
                     changesMade = true;
                 }
             }
         }
+
+        if (changesMade) {
+            CarList.saveUpdatedCarToFile(allCars);
+            System.out.println("Cleaned up requests for deleted customers");
+        }
     }
 
+//    public void updateStatusWindow() {
+//
+//        checkAndCleanDeletedCustomerRequests();
+//
+//        JFrame updateFrame = new JFrame("Update Request");
+//        updateFrame.setSize(800, 500);
+//        updateFrame.setLocationRelativeTo(null);
+//        updateFrame.setLayout(new BorderLayout(10, 10));
+//
+//        JLabel titleLabel = new JLabel("All Car Requests", JLabel.CENTER);
+//        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+//        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+//        updateFrame.add(titleLabel, BorderLayout.NORTH);
+//
+//        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Customer ID", "Car ID", "Status"}, 0) {
+//            @Override
+//            public boolean isCellEditable(int row, int column) {
+//                // Make all cells non-editable
+//                return false;
+//            }
+//        };
+//
+//        // Create the table with custom styling
+//        JTable requestTable = new JTable(tableModel) {
+//            @Override
+//            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+//                Component c = super.prepareRenderer(renderer, row, column);
+//
+//                // Alternate row coloring
+//                if (!isRowSelected(row)) {
+//                    c.setBackground(row % 2 == 0 ? new Color(250, 250, 250) : Color.WHITE);
+//                }
+//
+//                // Status column styling
+//                if (column == 2) {
+//                    String status = getValueAt(row, column).toString();
+//                    if (status.equalsIgnoreCase("Pending")) {
+//                        c.setForeground(new Color(255, 140, 0)); // Orange
+//                        c.setFont(c.getFont().deriveFont(Font.BOLD));
+//                    } else if (status.equalsIgnoreCase("Booked")) {
+//                        c.setForeground(new Color(0, 100, 0)); // Dark green
+//                        c.setFont(c.getFont().deriveFont(Font.BOLD));
+//                    } else if (status.equalsIgnoreCase("Paid")) {
+//                        c.setForeground(Color.RED);
+//                        c.setFont(c.getFont().deriveFont(Font.BOLD));
+//                    } else if (status.equalsIgnoreCase("Rejected")) {
+//                        c.setForeground(new Color(139, 0, 0)); // Dark red
+//                        c.setFont(c.getFont().deriveFont(Font.BOLD));
+//                    } else if (status.equalsIgnoreCase("Cancelled")) {
+//                        c.setForeground(Color.DARK_GRAY);
+//                        c.setFont(c.getFont().deriveFont(Font.BOLD));
+//                    } else {
+//                        c.setForeground(Color.BLACK);
+//                    }
+//                } else {
+//                    c.setForeground(Color.BLACK);
+//                }
+//
+//                return c;
+//            }
+//        };
+//
+//        // Table styling
+//        requestTable.setRowHeight(25);
+//        requestTable.setShowGrid(false);
+//        requestTable.setIntercellSpacing(new Dimension(0, 1));
+//        requestTable.setFont(new Font("Arial", Font.PLAIN, 12));
+//        requestTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//
+//        // Header styling
+//        JTableHeader header = requestTable.getTableHeader();
+//        header.setBackground(new Color(230, 240, 255)); // Light blue
+//        header.setForeground(Color.BLACK);
+//        header.setFont(new Font("Arial", Font.BOLD, 13));
+//        header.setReorderingAllowed(false);
+//
+//        JScrollPane scrollPane = new JScrollPane(requestTable);
+//        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+//        updateFrame.add(scrollPane, BorderLayout.CENTER);
+//
+//        // Search Panel
+//        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+//        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+//
+//        JTextField searchField = new JTextField(20);
+//        JButton searchButton = new JButton("Search");
+//        JComboBox<String> statusFilter = new JComboBox<>(new String[]{"All", "Pending", "Booked", "Paid", "Rejected", "Cancelled"});
+//        statusFilter.setSelectedItem("All");
+//
+//        searchPanel.add(new JLabel("Search (Customer ID / Car ID):"));
+//        searchPanel.add(searchField);
+//        searchPanel.add(searchButton);
+//        searchPanel.add(new JLabel("Status Filter:"));
+//        searchPanel.add(statusFilter);
+//        updateFrame.add(searchPanel, BorderLayout.BEFORE_FIRST_LINE);
+//
+//        // Input Panel
+//        JPanel inputPanel = new JPanel();
+//        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
+//        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+//
+//        JTextField customerIDField = new JTextField(15);
+//        JTextField carIDField = new JTextField(15);
+//        JTextField commentField = new JTextField(20);
+//
+//        JButton approveBtn = new JButton("Approve");
+//        JButton rejectBtn = new JButton("Reject");
+//        JButton cancelBtn = new JButton("Cancel");
+//        JButton closeButton = new JButton("Go Back");
+//
+//        // Set consistent button size
+//        Dimension buttonSize = new Dimension(100, 30);
+//        approveBtn.setPreferredSize(buttonSize);
+//        rejectBtn.setPreferredSize(buttonSize);
+//        cancelBtn.setPreferredSize(buttonSize);
+//        closeButton.setPreferredSize(buttonSize);
+//
+//        // Form rows
+//        JPanel row0 = createFormRow("Customer ID:", customerIDField, 120);
+//        JPanel row1 = createFormRow("Car ID:", carIDField, 120);
+//        JPanel row2 = createFormRow("Comment (optional):", commentField, 120);
+//
+//        // Button row
+//        JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+//        buttonRow.add(approveBtn);
+//        buttonRow.add(rejectBtn);
+//        buttonRow.add(cancelBtn);
+//        buttonRow.add(closeButton);
+//
+//        inputPanel.add(row0);
+//        inputPanel.add(row1);
+//        inputPanel.add(row2);
+//        inputPanel.add(buttonRow);
+//        updateFrame.add(inputPanel, BorderLayout.SOUTH);
+//
+//        // Selection listener
+//        requestTable.getSelectionModel().addListSelectionListener(e -> {
+//            if (!e.getValueIsAdjusting()) {
+//                int selectedRow = requestTable.getSelectedRow();
+//                if (selectedRow >= 0) {
+//                    customerIDField.setText(requestTable.getValueAt(selectedRow, 0).toString());
+//                    carIDField.setText(requestTable.getValueAt(selectedRow, 1).toString());
+//                }
+//            }
+//        });
+//
+//        // Load data with filtering
+//        Runnable loadRequests = () -> {
+//            tableModel.setRowCount(0);
+//            ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+//            String selectedStatus = statusFilter.getSelectedItem().toString();
+//
+//            for (CarRequest req : requests) {
+//                if (req.getSalesmanID().equals(currentSalesman.ID)) {
+//                    if (selectedStatus.equals("All") || req.getRequestStatus().equalsIgnoreCase(selectedStatus)) {
+//                        tableModel.addRow(new Object[]{
+//                            req.getCustomerID(),
+//                            req.getCarID(),
+//                            req.getRequestStatus()
+//                        });
+//                    }
+//                }
+//            }
+//        };
+//
+//        // Initial load
+//        loadRequests.run();
+//
+//        // Search button action
+//        searchButton.addActionListener(e -> {
+//            String searchInput = searchField.getText().trim();
+//            String selectedStatus = statusFilter.getSelectedItem().toString();
+//
+//            if (!searchInput.isEmpty()) {
+//                ArrayList<CarRequest> requestList = CarRequest.loadCarRequestDataFromFile();
+//                tableModel.setRowCount(0);
+//                boolean found = false;
+//
+//                for (CarRequest req : requestList) {
+//                    if (req.getSalesmanID().equals(currentSalesman.ID)
+//                            && (req.getCustomerID().equalsIgnoreCase(searchInput)
+//                            || req.getCarID().equalsIgnoreCase(searchInput))
+//                            && (selectedStatus.equals("All")
+//                            || req.getRequestStatus().equalsIgnoreCase(selectedStatus))) {
+//
+//                        tableModel.addRow(new Object[]{
+//                            req.getCustomerID(),
+//                            req.getCarID(),
+//                            req.getRequestStatus()
+//                        });
+//                        found = true;
+//                    }
+//                }
+//
+//                if (!found) {
+//                    JOptionPane.showMessageDialog(updateFrame,
+//                            "No matching request found for: " + searchInput,
+//                            "Search Result", JOptionPane.INFORMATION_MESSAGE);
+//                }
+//            }
+//            loadRequests.run();
+//        });
+//
+//        // Status filter action
+//        statusFilter.addActionListener(e -> loadRequests.run());
+//
+//        approveBtn.addActionListener(e -> {
+//            String customerID = customerIDField.getText().trim();
+//            String carID = carIDField.getText().trim();
+//            String comment = commentField.getText().trim();
+//            //String finalComment = comment.isEmpty() ? "." : comment;
+//            String finalComment = comment.isEmpty() ? "Approved by salesman" : comment;
+//
+//            // Validate inputs
+//            if (carID.isEmpty() || customerID.isEmpty()) {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "Please enter both Customer ID and Car ID",
+//                        "Input Error", JOptionPane.ERROR_MESSAGE);
+//                return;
+//            }
+//
+//            // Load all data
+//            ArrayList<Car> allCars = CarList.loadCarDataFromFile();
+//            ArrayList<CarRequest> allRequests = CarRequest.loadCarRequestDataFromFile();
+//
+//            // Find the car
+//            Car targetCar = null;
+//            for (Car car : allCars) {
+//                if (car.getCarId().equalsIgnoreCase(carID)) {
+//                    targetCar = car;
+//                    break;
+//                }
+//            }
+//
+//            if (targetCar == null) {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "Car not found in inventory",
+//                        "Error", JOptionPane.ERROR_MESSAGE);
+//                return;
+//            }
+//
+//            // Check for paid status
+//            if (targetCar.getStatus().equalsIgnoreCase("paid")) {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "This car has already been paid for and cannot be modified.",
+//                        "Action Blocked", JOptionPane.ERROR_MESSAGE);
+//                return;
+//            }
+//
+//            // Find all requests for this car+customer
+//            ArrayList<CarRequest> customerRequests = new ArrayList<>();
+//            for (CarRequest req : allRequests) {
+//                if (req.getCarID().equalsIgnoreCase(carID)
+//                        && req.getCustomerID().equalsIgnoreCase(customerID)
+//                        && req.getSalesmanID().equals(currentSalesman.ID)) {
+//                    customerRequests.add(req);
+//                }
+//            }
+//
+//            // Check if there's any cancelled request
+//            boolean hasCancelledRequest = false;
+//            for (CarRequest req : customerRequests) {
+//                if (req.getRequestStatus().equalsIgnoreCase("cancelled")) {
+//                    hasCancelledRequest = true;
+//                    break;
+//                }
+//            }
+//
+//            // Check if there's a pending request
+//            boolean hasPendingRequest = false;
+//            for (CarRequest req : customerRequests) {
+//                if (req.getRequestStatus().equalsIgnoreCase("pending")) {
+//                    hasPendingRequest = true;
+//                    break;
+//                }
+//            }
+//
+//            // Rule: If cancelled exists but no pending, block action
+//            if (hasCancelledRequest && !hasPendingRequest) {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "This booking was previously cancelled.\n"
+//                        + "Cannot approve/reject unless a new request is made.",
+//                        "Cancelled Booking", JOptionPane.WARNING_MESSAGE);
+//                return;
+//            }
+//
+//            // Find the most recent pending request (if exists)
+//            CarRequest targetRequest = null;
+//            for (CarRequest req : customerRequests) {
+//                if (req.getRequestStatus().equalsIgnoreCase("pending")) {
+//                    targetRequest = req;
+//                    break;
+//                }
+//            }
+//
+//            if (targetRequest == null) {
+//                // Check if request already exists in any status
+//                if (!customerRequests.isEmpty()) {
+//                    CarRequest existingRequest = customerRequests.get(0);
+//                    if (existingRequest.getRequestStatus().equalsIgnoreCase("rejected")) {
+//                        JOptionPane.showMessageDialog(updateFrame,
+//                                "This request has already been rejected and cannot be approved.",
+//                                "Invalid Operation", JOptionPane.WARNING_MESSAGE);
+//                        return;
+//                    }
+//                    if (existingRequest.getRequestStatus().equalsIgnoreCase("booked")) {
+//                        JOptionPane.showMessageDialog(updateFrame,
+//                                "This request is already approved.",
+//                                "Information", JOptionPane.INFORMATION_MESSAGE);
+//                        return;
+//                    }
+//                }
+//
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "No pending request found for this customer and car",
+//                        "Error", JOptionPane.ERROR_MESSAGE);
+//                return;
+//            }
+//
+//            // Check if car is already booked (by others)
+//            if (targetCar.getStatus().equalsIgnoreCase("booked")) {
+//                boolean bookedByThisCustomer = false;
+//                boolean otherPendingRequestsExist = false;
+//
+//                // Check all requests for this car (not just from this customer)
+//                for (CarRequest req : allRequests) {
+//                    if (req.getCarID().equalsIgnoreCase(carID)) {
+//                        if (req.getCustomerID().equalsIgnoreCase(customerID)
+//                                && req.getRequestStatus().equalsIgnoreCase("booked")) {
+//                            bookedByThisCustomer = true;
+//                        } else if (!req.getCustomerID().equalsIgnoreCase(customerID)
+//                                && req.getRequestStatus().equalsIgnoreCase("pending")) {
+//                            otherPendingRequestsExist = true;
+//                        }
+//                    }
+//                }
+//
+//                if (!bookedByThisCustomer) {
+//                    int option = JOptionPane.showConfirmDialog(updateFrame,
+//                            "This car is already booked by another customer.\n"
+//                            + "Do you want to cancel the existing booking and approve this request?",
+//                            "Car Already Booked", JOptionPane.YES_NO_OPTION);
+//
+//                    if (option == JOptionPane.YES_OPTION) {
+//                        // Cancel the existing booking first
+//                        for (CarRequest req : allRequests) {
+//                            if (req.getCarID().equalsIgnoreCase(carID)
+//                                    && req.getRequestStatus().equalsIgnoreCase("booked")) {
+//                                // Update the existing booked request to cancelled
+//                                CarRequest.updateRequestStatusWithComment(
+//                                        req.getCarID(), req.getCustomerID(), req.getSalesmanID(),
+//                                        "cancelled", "Cancelled to approve new request for customer " + customerID);
+//
+//                                // Set car status back to available temporarily
+//                                targetCar.setStatus("available");
+//                                CarList.saveUpdatedCarToFile(allCars);
+//                                break;
+//                            }
+//                        }
+//                    } else {
+//                        return; // User chose not to proceed
+//                    }
+//                }
+//            }
+//
+//            // Process approval
+//            boolean requestUpdated = CarRequest.updateRequestStatusWithComment(
+//                    carID, customerID, currentSalesman.ID, "booked", finalComment);
+//
+//            if (requestUpdated) {
+//                // Update car status
+//                targetCar.setStatus("booked");
+//                CarList.saveUpdatedCarToFile(allCars);
+//
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "Request approved successfully!\n"
+//                        + "Car: " + carID + "\n"
+//                        + "Customer: " + customerID + "\n"
+//                        + "Status: Booked",
+//                        "Approval Successful", JOptionPane.INFORMATION_MESSAGE);
+//
+//                // Refresh UI
+//                loadRequests.run();
+//                customerIDField.setText("");
+//                carIDField.setText("");
+//                commentField.setText("");
+//            } else {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "Failed to update request status",
+//                        "Error", JOptionPane.ERROR_MESSAGE);
+//            }
+//        });
+//
+//        // Similar changes for rejectBtn and cancelBtn action listeners
+//        // (Add customer ID validation and field clearing)
+//        rejectBtn.addActionListener(e -> {
+//            String customerID = customerIDField.getText().trim();
+//            String carID = carIDField.getText().trim();
+//            String comment = commentField.getText().trim();
+//            String finalComment = comment.isEmpty() ? "No Comments" : comment;
+//
+//            if (!carID.isEmpty() && !customerID.isEmpty()) {
+//                if (isCarPaid(carID)) {
+//                    JOptionPane.showMessageDialog(updateFrame,
+//                            "This car has already been paid for and cannot be modified.",
+//                            "Action Blocked", JOptionPane.ERROR_MESSAGE);
+//                    return;
+//                }
+//
+//                ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+//                boolean requestFound = false;
+//
+//                for (CarRequest req : requests) {
+//                    if (req.getCarID().equalsIgnoreCase(carID)
+//                            && req.getCustomerID().equalsIgnoreCase(customerID)
+//                            && req.getSalesmanID().equals(currentSalesman.ID)) {
+//                        requestFound = true;
+//
+//                        // Check if status is cancelled
+//                        if (req.getRequestStatus().equalsIgnoreCase("cancelled")) {
+//                            JOptionPane.showMessageDialog(updateFrame,
+//                                    "This request has been cancelled and cannot be rejected.",
+//                                    "Invalid Operation", JOptionPane.WARNING_MESSAGE);
+//                            return;
+//                        }
+//
+//                        // Check if status is booked
+//                        if (req.getRequestStatus().equalsIgnoreCase("booked")) {
+//                            JOptionPane.showMessageDialog(updateFrame,
+//                                    "This request has already been approved (booked). You cannot reject it.",
+//                                    "Invalid Operation", JOptionPane.WARNING_MESSAGE);
+//                            return;
+//                        }
+//                    }
+//                }
+//
+//                if (!requestFound) {
+//                    JOptionPane.showMessageDialog(updateFrame,
+//                            "No matching request found for the given Customer ID and Car ID",
+//                            "Error", JOptionPane.ERROR_MESSAGE);
+//                    return;
+//                }
+//
+//                boolean requestUpdated = CarRequest.updateRequestStatusWithComment(
+//                        carID, customerID, currentSalesman.ID, "rejected", finalComment);
+//
+//                if (requestUpdated) {
+//                    ArrayList<Car> allCars = CarList.loadCarDataFromFile();
+//                    for (Car car : allCars) {
+//                        if (car.getCarId().equalsIgnoreCase(carID)) {
+//                            car.setStatus("available");
+//                            break;
+//                        }
+//                    }
+//                    CarList.saveUpdatedCarToFile(allCars);
+//                    JOptionPane.showMessageDialog(updateFrame,
+//                            "Request rejected and car status updated");
+//                    loadRequests.run();
+//                    customerIDField.setText("");
+//                    carIDField.setText("");
+//                    commentField.setText("");
+//                } else {
+//                    JOptionPane.showMessageDialog(updateFrame,
+//                            "Failed to update request",
+//                            "Error", JOptionPane.ERROR_MESSAGE);
+//                }
+//            } else {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "Please enter both Customer ID and Car ID",
+//                        "Input Error", JOptionPane.ERROR_MESSAGE);
+//            }
+//        });
+//
+//        cancelBtn.addActionListener(e
+//                -> {
+//            String customerID = customerIDField.getText().trim();
+//            String carID = carIDField.getText().trim();
+//            String comment = commentField.getText().trim();
+//            String finalComment = comment.isEmpty() ? "No comments" : comment;
+//
+//            if (!carID.isEmpty() && !customerID.isEmpty()) {
+//
+//                // Block if car is paid
+//                if (isCarPaid(carID)) {
+//                    JOptionPane.showMessageDialog(updateFrame,
+//                            "This car has already been paid for and cannot be cancelled.",
+//                            "Action Blocked", JOptionPane.ERROR_MESSAGE);
+//                    return;
+//                }
+//
+//                ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+//                ArrayList<Car> allCars = CarList.loadCarDataFromFile();
+//                boolean requestFound = false;
+//
+//                for (CarRequest req : requests) {
+//                    if (req.getCarID().equalsIgnoreCase(carID)
+//                            && req.getCustomerID().equalsIgnoreCase(customerID)
+//                            && req.getSalesmanID().equals(currentSalesman.ID)) {
+//                        requestFound = true;
+//                        if (!req.getRequestStatus().equalsIgnoreCase("booked")) {
+//                            JOptionPane.showMessageDialog(updateFrame,
+//                                    "Only 'booked' requests can be cancelled.",
+//                                    "Invalid Operation", JOptionPane.WARNING_MESSAGE);
+//                            return;
+//                        }
+//
+//                        boolean requestUpdated = CarRequest.updateRequestStatusWithComment(
+//                                carID, customerID, currentSalesman.ID, "cancelled", finalComment);
+//
+//                        if (requestUpdated) {
+//                            for (Car car : allCars) {
+//                                if (car.getCarId().equalsIgnoreCase(carID)) {
+//                                    car.setStatus("available");
+//                                    break;
+//                                }
+//                            }
+//                            CarList.saveUpdatedCarToFile(allCars);
+//                            JOptionPane.showMessageDialog(updateFrame,
+//                                    "Request cancelled and car status updated to 'available'\n"
+//                                    + "The car is now available for other customers to book",
+//                                    "Cancellation Successful", JOptionPane.INFORMATION_MESSAGE);
+//                            loadRequests.run();
+//                            customerIDField.setText("");
+//                            carIDField.setText("");
+//                            commentField.setText("");
+//                            return;
+//                        } else {
+//                            JOptionPane.showMessageDialog(updateFrame,
+//                                    "Failed to update request",
+//                                    "Error", JOptionPane.ERROR_MESSAGE);
+//                            return;
+//                        }
+//                    }
+//                }
+//
+//                if (!requestFound) {
+//                    JOptionPane.showMessageDialog(updateFrame,
+//                            "No matching request found for the given Customer ID and Car ID",
+//                            "Error", JOptionPane.ERROR_MESSAGE);
+//                }
+//            } else {
+//                JOptionPane.showMessageDialog(updateFrame,
+//                        "Please enter both Customer ID and Car ID",
+//                        "Input Error", JOptionPane.ERROR_MESSAGE);
+//            }
+//        }
+//        );
+//
+//        closeButton.addActionListener(e
+//                -> {
+//            updateFrame.dispose();
+//            new SalesmanDashboard(currentSalesman);
+//        }
+//        );
+//
+//        WindowNav.setCloseOperation(updateFrame, () -> new SalesmanDashboard(currentSalesman));
+//
+//        updateFrame.setVisible(
+//                true);
+//    }
     public void updateStatusWindow() {
 
         checkAndCleanDeletedCustomerRequests();
@@ -1149,9 +1737,15 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             }
         });
 
-        // Load data with filtering
+        // Load data with filtering - UPDATED to include cleanup
         Runnable loadRequests = () -> {
+            // Clean up deleted customer requests first
+            checkAndCleanDeletedCustomerRequests();
+
+            // Clear table
             tableModel.setRowCount(0);
+
+            // Load fresh data (after cleanup)
             ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
             String selectedStatus = statusFilter.getSelectedItem().toString();
 
@@ -1177,6 +1771,8 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             String selectedStatus = statusFilter.getSelectedItem().toString();
 
             if (!searchInput.isEmpty()) {
+                // Clean up first, then load fresh data
+                checkAndCleanDeletedCustomerRequests();
                 ArrayList<CarRequest> requestList = CarRequest.loadCarRequestDataFromFile();
                 tableModel.setRowCount(0);
                 boolean found = false;
@@ -1202,8 +1798,9 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
                             "No matching request found for: " + searchInput,
                             "Search Result", JOptionPane.INFORMATION_MESSAGE);
                 }
+            } else {
+                loadRequests.run();
             }
-            loadRequests.run();
         });
 
         // Status filter action
@@ -1213,7 +1810,6 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
             String comment = commentField.getText().trim();
-            //String finalComment = comment.isEmpty() ? "." : comment;
             String finalComment = comment.isEmpty() ? "Approved by salesman" : comment;
 
             // Validate inputs
@@ -1396,8 +1992,6 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             }
         });
 
-        // Similar changes for rejectBtn and cancelBtn action listeners
-        // (Add customer ID validation and field clearing)
         rejectBtn.addActionListener(e -> {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
@@ -1476,8 +2070,7 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
             }
         });
 
-        cancelBtn.addActionListener(e
-                -> {
+        cancelBtn.addActionListener(e -> {
             String customerID = customerIDField.getText().trim();
             String carID = carIDField.getText().trim();
             String comment = commentField.getText().trim();
@@ -1548,20 +2141,16 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
                         "Please enter both Customer ID and Car ID",
                         "Input Error", JOptionPane.ERROR_MESSAGE);
             }
-        }
-        );
+        });
 
-        closeButton.addActionListener(e
-                -> {
+        closeButton.addActionListener(e -> {
             updateFrame.dispose();
             new SalesmanDashboard(currentSalesman);
-        }
-        );
+        });
 
         WindowNav.setCloseOperation(updateFrame, () -> new SalesmanDashboard(currentSalesman));
 
-        updateFrame.setVisible(
-                true);
+        updateFrame.setVisible(true);
     }
 
     private boolean isCarPaid(String carID) {

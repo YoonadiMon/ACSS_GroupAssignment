@@ -9,6 +9,6 @@ f1363ffa,C004,S002,booked,Approved by salesman
 f1363ffa,C010,S002,rejected,.
 14cb8731,C015,S002,paid,You bought the car
 f1363ffa,C014,S002,paid,Payment completed
-75c6649e,C005,S001,pending,.
+75c6649e,C005,S001,rejected,Auto-rejected: Customer account deleted
 14cb8731,C005,S001,pending,.
 14cb8731,C008,S002,pending,.
