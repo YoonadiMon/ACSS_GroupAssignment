@@ -2,6 +2,7 @@ package Manager;
 
 import Car.Car;
 import Car.CarList;
+import Car.CarRequest;
 import Salesman.Salesman;
 import Salesman.SalesmanList;
 import javax.swing.*;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ManageStaffSalesman extends JFrame {
+
     private List<Salesman> salesmanList;
     private static final String FILE_NAME = "data/salesmanList.txt";
     private Object manager;
@@ -177,8 +179,8 @@ public class ManageStaffSalesman extends JFrame {
 
             String carIds = assignedCars.isEmpty() ? "None" : String.join(", ", assignedCars);
 
-            outputArea.setText("Salesman Found:\nID: " + salesman.getID() + " | Name: " + salesman.getName() +
-                    "\nAssigned Car(s): " + carIds);
+            outputArea.setText("Salesman Found:\nID: " + salesman.getID() + " | Name: " + salesman.getName()
+                    + "\nAssigned Car(s): " + carIds);
             idField.setText(salesman.getID());
             nameField.setText(salesman.getName());
             assignedCarField.setText(carIds);
@@ -261,6 +263,73 @@ public class ManageStaffSalesman extends JFrame {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void updateRelatedCarDataAfterDeletion(String salesmanId) {
+        // Update car requests
+        ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+        ArrayList<CarRequest> updatedRequests = new ArrayList<>();
+
+        for (CarRequest request : requests) {
+            if (request.getSalesmanID().equalsIgnoreCase(salesmanId)) {
+                String currentStatus = request.getRequestStatus().toLowerCase();
+                String newStatus = request.getRequestStatus();
+                String comment = request.getComment();
+
+                // Skip if already paid or sold
+                if (!currentStatus.equals("paid") && !currentStatus.equals("sold")) {
+                    if ("pending".equalsIgnoreCase(currentStatus)) {
+                        newStatus = "rejected";
+                        comment = "Request rejected - salesman " + salesmanId + " has been deleted";
+                    } else if ("booked".equalsIgnoreCase(currentStatus)) {
+                        newStatus = "cancelled";
+                        comment = "Booking cancelled - salesman " + salesmanId + " has been deleted";
+                    }
+                }
+
+                updatedRequests.add(new CarRequest(
+                        request.getCustomerID(),
+                        request.getCarID(),
+                        request.getSalesmanID(),
+                        newStatus,
+                        comment
+                ));
+            } else {
+                updatedRequests.add(request);
+            }
+        }
+
+        // Save updated requests
+        CarRequest.writeCarRequests(updatedRequests);
+
+        // Update car list - set status to available for cars assigned to this salesman
+        ArrayList<Car> cars = CarList.loadCarDataFromFile();
+        ArrayList<Car> updatedCars = new ArrayList<>();
+
+        for (Car car : cars) {
+            if (car.getSalesmanId().equalsIgnoreCase(salesmanId)) {
+                String currentStatus = car.getStatus().toLowerCase();
+                String newStatus = car.getStatus();
+
+                // Only update if not paid or sold
+                if (!currentStatus.equals("paid") && !currentStatus.equals("sold")) {
+                    newStatus = "available";
+                }
+
+                updatedCars.add(new Car(
+                        car.getCarId(),
+                        car.getBrand(),
+                        car.getPrice(),
+                        newStatus,
+                        car.getSalesmanId() // You might want to clear this too or set to "unassigned"
+                ));
+            } else {
+                updatedCars.add(car);
+            }
+        }
+
+        // Save updated cars
+        CarList.saveUpdatedCarToFile(updatedCars);
     }
 
 //    public static void main(String[] args) {
