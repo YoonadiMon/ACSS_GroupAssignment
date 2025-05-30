@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -894,103 +895,121 @@ public class SalesmanDashboard extends UserDashboard implements ActionListener {
         ArrayList<Car> allCars = CarList.loadCarDataFromFile();
         boolean changesMade = false;
 
-        // First try to load from the static list if it exists
+        // Load deleted customers list if not already loaded
         if (allDeletedCustomers == null || allDeletedCustomers.isEmpty()) {
-            allDeletedCustomers = new ArrayList<>();
-
-            // Try multiple possible file locations
-            String[] possiblePaths = {
-                "DeletedCustomersList.txt", // Current directory
-                "data/DeletedCustomersList.txt", // In a data subdirectory
-                "src/main/resources/DeletedCustomersList.txt", // Common resource location
-                System.getProperty("user.dir") + "/DeletedCustomersList.txt" // Absolute path
-            };
-
-            boolean fileFound = false;
-            IOException lastException = null;
-
-            for (String filePath : possiblePaths) {
-                try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-                    System.out.println("Trying to load deleted customers from: " + new File(filePath).getAbsolutePath());
-
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        String[] data = line.split(",");
-                        if (data.length >= 4) {
-                            DeletedCustomer deletedCustomer = new DeletedCustomer(
-                                    data[0].trim(), data[1].trim(), data[2].trim(), data[3].trim()
-                            );
-                            allDeletedCustomers.add(deletedCustomer);
-                        }
-                    }
-                    fileFound = true;
-                    break; // Stop trying paths if we found the file
-                } catch (IOException e) {
-                    lastException = e;
-                    // Continue to next possible path
-                }
-            }
-
-            if (!fileFound) {
-                String errorMsg = "Could not find DeletedCustomersList.txt in any of these locations:\n";
-                for (String path : possiblePaths) {
-                    errorMsg += "- " + new File(path).getAbsolutePath() + "\n";
-                }
-                if (lastException != null) {
-                    errorMsg += "Last error: " + lastException.getMessage();
-                }
-                System.err.println(errorMsg);
-                JOptionPane.showMessageDialog(null,
-                        "Could not load deleted customers list.\n" + errorMsg,
-                        "File Error", JOptionPane.ERROR_MESSAGE);
-                return;
+            allDeletedCustomers = loadDeletedCustomersList();
+            if (allDeletedCustomers == null) {
+                return; // Failed to load deleted customers list
             }
         }
 
-        // Rest of your method remains the same...
+        // Process all requests
         for (CarRequest request : allRequests) {
-            DeletedCustomer deletedCustomer = searchDeletedId(request.getCustomerID());
-
-            if (deletedCustomer != null) {
-                String currentStatus = request.getRequestStatus();
-
-                if (currentStatus.equalsIgnoreCase("pending")) {
-                    CarRequest.updateRequestStatusWithComment(
-                            request.getCarID(),
-                            request.getCustomerID(),
-                            request.getSalesmanID(),
-                            "rejected",
-                            "Auto-rejected: Customer account deleted"
-                    );
-                    for (Car car : allCars) {
-                        if (car.getCarId().equals(request.getCarID())) {
-                            car.setStatus("available");
-                            break;
-                        }
-                    }
-                    changesMade = true;
-                } else if (currentStatus.equalsIgnoreCase("booked")) {
-                    CarRequest.updateRequestStatusWithComment(
-                            request.getCarID(),
-                            request.getCustomerID(),
-                            request.getSalesmanID(),
-                            "cancelled",
-                            "Auto-cancelled: Customer account deleted"
-                    );
-                    for (Car car : allCars) {
-                        if (car.getCarId().equals(request.getCarID())) {
-                            car.setStatus("available");
-                            break;
-                        }
-                    }
-                    changesMade = true;
-                }
+            if (isCustomerDeleted(request.getCustomerID())) {
+                changesMade |= processDeletedCustomerRequest(request, allCars);
             }
         }
 
+        // Save changes if any were made
         if (changesMade) {
             CarList.saveUpdatedCarToFile(allCars);
-            System.out.println("Cleaned up requests for deleted customers");
+            System.out.println("Successfully cleaned up requests for deleted customers");
+        }
+    }
+
+// Helper method to load deleted customers list
+    private ArrayList<DeletedCustomer> loadDeletedCustomersList() {
+        ArrayList<DeletedCustomer> deletedCustomers = new ArrayList<>();
+        String[] possiblePaths = {
+            "DeletedCustomersList.txt",
+            "data/DeletedCustomersList.txt",
+            "src/main/resources/DeletedCustomersList.txt",
+            System.getProperty("user.dir") + "/DeletedCustomersList.txt"
+        };
+
+        for (String filePath : possiblePaths) {
+            try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+                System.out.println("Loading deleted customers from: " + new File(filePath).getAbsolutePath());
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] data = line.split(",");
+                    if (data.length >= 4) {
+                        deletedCustomers.add(new DeletedCustomer(
+                                data[0].trim(), data[1].trim(), data[2].trim(), data[3].trim()
+                        ));
+                    }
+                }
+                return deletedCustomers;
+            } catch (IOException e) {
+                // Try next path
+            }
+        }
+
+        // If we get here, no file was found
+        String errorMsg = "Could not find DeletedCustomersList.txt in any of these locations:\n"
+                + Arrays.stream(possiblePaths)
+                        .map(path -> "- " + new File(path).getAbsolutePath())
+                        .collect(Collectors.joining("\n"));
+
+        System.err.println(errorMsg);
+        JOptionPane.showMessageDialog(null,
+                "Could not load deleted customers list.\n" + errorMsg,
+                "File Error", JOptionPane.ERROR_MESSAGE);
+        return null;
+    }
+
+// Helper method to check if customer is deleted
+    private boolean isCustomerDeleted(String customerId) {
+        return searchDeletedId(customerId) != null;
+    }
+
+// Helper method to process requests from deleted customers
+    private boolean processDeletedCustomerRequest(CarRequest request, ArrayList<Car> allCars) {
+        String currentStatus = request.getRequestStatus();
+        boolean changesMade = false;
+
+        if (currentStatus.equalsIgnoreCase("pending")) {
+            // Update request status in request.txt
+            boolean requestUpdated = CarRequest.updateRequestStatusWithComment(
+                    request.getCarID(),
+                    request.getCustomerID(),
+                    request.getSalesmanID(),
+                    "rejected",
+                    "Auto-rejected: Customer account deleted"
+            );
+
+            if (requestUpdated) {
+                // Update car status in car list
+                updateCarStatus(allCars, request.getCarID(), "available");
+                changesMade = true;
+            }
+        } else if (currentStatus.equalsIgnoreCase("booked")) {
+            // Update request status in request.txt
+            boolean requestUpdated = CarRequest.updateRequestStatusWithComment(
+                    request.getCarID(),
+                    request.getCustomerID(),
+                    request.getSalesmanID(),
+                    "cancelled",
+                    "Auto-cancelled: Customer account deleted"
+            );
+
+            if (requestUpdated) {
+                // Update car status in car list
+                updateCarStatus(allCars, request.getCarID(), "available");
+                changesMade = true;
+            }
+        }
+
+        return changesMade;
+    }
+
+// Helper method to update car status
+    private void updateCarStatus(ArrayList<Car> allCars, String carId, String newStatus) {
+        for (Car car : allCars) {
+            if (car.getCarId().equals(carId)) {
+                car.setStatus(newStatus);
+                break;
+            }
         }
     }
 
