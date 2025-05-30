@@ -324,7 +324,7 @@ public class CarPage implements DashboardPage {
         carListContainer.revalidate();
         carListContainer.repaint();
     }
-    
+
     private JPanel createCarBox(Car car, JPanel parentPanel) {
         // Main container for car info
         JPanel carBox = new JPanel();
@@ -362,14 +362,17 @@ public class CarPage implements DashboardPage {
         infoPanel.add(priceLabel);
         infoPanel.add(salesmanLabel);
 
-        // Right panel for the Book button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        // Right panel for buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setBackground(new Color(240, 240, 240));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Create and style the Book button
         JButton bookButton = new JButton("Book");
         ButtonStyler.stylePrimaryButton(bookButton);
         bookButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+        bookButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Add different action listeners based on user type
         if (isGuest) {
@@ -394,6 +397,35 @@ public class CarPage implements DashboardPage {
         }
 
         buttonPanel.add(bookButton);
+
+        // Add wishlist button only for registered customers (not guests)
+        if (!isGuest) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(0, 8))); // Spacing between buttons
+            
+            JButton wishlistButton = new JButton("♡ Wishlist");
+            wishlistButton.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            wishlistButton.setBackground(new Color(255, 255, 255));
+            wishlistButton.setForeground(new Color(150, 150, 150));
+            wishlistButton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(6, 15, 6, 15)));
+            wishlistButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            wishlistButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            // Check if car is already in wishlist and update button appearance
+            if (isCarInWishlist(car.getCarId())) {
+                updateWishlistButtonStyle(wishlistButton, true);
+            }
+
+            wishlistButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    handleWishlistToggle(car, wishlistButton, parentPanel);
+                }
+            });
+
+            buttonPanel.add(wishlistButton);
+        }
 
         // Add components to the main car box
         carBox.add(infoPanel, BorderLayout.CENTER);
@@ -476,6 +508,88 @@ public class CarPage implements DashboardPage {
                         "Booking Error",
                         JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    private void handleWishlistToggle(Car car, JButton wishlistButton, JPanel parentPanel) {
+        String customerId = customer.getUserId();
+        String carId = car.getCarId();
+
+        try {
+            if (isCarInWishlist(carId)) {
+                // Remove from wishlist
+                removeFromWishlist(carId);
+                updateWishlistButtonStyle(wishlistButton, false);
+                JOptionPane.showMessageDialog(parentPanel,
+                        car.getBrand() + " has been removed from your wishlist.",
+                        "Removed from Wishlist",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                // Add to wishlist
+                addToWishlist(carId);
+                updateWishlistButtonStyle(wishlistButton, true);
+                JOptionPane.showMessageDialog(parentPanel,
+                        car.getBrand() + " has been added to your wishlist!",
+                        "Added to Wishlist",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(parentPanel,
+                    "Error updating wishlist: " + ex.getMessage(),
+                    "Wishlist Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateWishlistButtonStyle(JButton button, boolean inWishlist) {
+        if (inWishlist) {
+            button.setText("♥ In Wishlist");
+            button.setBackground(new Color(255, 182, 193)); // Light pink
+            button.setForeground(new Color(220, 20, 60)); // Crimson
+            button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(220, 20, 60), 1),
+                    BorderFactory.createEmptyBorder(6, 15, 6, 15)));
+        } else {
+            button.setText("♡ Wishlist");
+            button.setBackground(new Color(255, 255, 255));
+            button.setForeground(new Color(150, 150, 150));
+            button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(6, 15, 6, 15)));
+        }
+    }
+
+    private boolean isCarInWishlist(String carId) {
+        try {
+            String customerId = customer.getUserId();
+            return CustomerCarWishlist.isCarInWishlist(customerId, carId);
+        } catch (Exception e) {
+            System.err.println("Error checking wishlist: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void addToWishlist(String carId) {
+        try {
+            String customerId = customer.getUserId();
+            boolean added = CustomerCarWishlist.addToWishlist(customerId, carId);
+            if (!added) {
+                throw new RuntimeException("Car is already in wishlist");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add car to wishlist: " + e.getMessage());
+        }
+    }
+
+    private void removeFromWishlist(String carId) {
+        try {
+            String customerId = customer.getUserId();
+            boolean removed = CustomerCarWishlist.removeFromWishlist(customerId, carId);
+            if (!removed) {
+                throw new RuntimeException("Car was not found in wishlist");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to remove car from wishlist: " + e.getMessage());
         }
     }
 }
