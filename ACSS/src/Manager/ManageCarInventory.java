@@ -8,6 +8,8 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import Salesman.Salesman;
+import Salesman.SalesmanList;
 
 public class ManageCarInventory extends JFrame {
     private List<Car> carList = new ArrayList<>();
@@ -16,7 +18,8 @@ public class ManageCarInventory extends JFrame {
 
     // GUI Components
     private JTextArea outputArea;
-    private JTextField carIdField, brandField, priceField, statusField, salesmanIdField, searchCarIdField;
+    private JTextField carIdField, brandField, priceField, statusField, searchCarIdField;
+    private JComboBox<String> salesmanIdField;
     private JButton addButton;
     private JButton deleteButton;
     private JButton updateButton;
@@ -92,19 +95,29 @@ public class ManageCarInventory extends JFrame {
         panel.add(priceField);
 
         // Status Field
-        panel.add(new JLabel("Status:"));
-        statusField = new JTextField();
-        statusField.setToolTipText("e.g., Available, Sold, Reserved");
-        panel.add(statusField);
+        //panel.add(new JLabel("Status:"));
+        //statusField = new JTextField();
+        //statusField.setToolTipText(" Available");
+        //panel.add(statusField);
 
         // Salesman ID Field
         panel.add(new JLabel("Assign Salesman:"));
-        salesmanIdField = new JTextField();
-        salesmanIdField.setToolTipText("Enter Salesman ID to assign");
+        salesmanIdField = new JComboBox<>();
+        salesmanIdField.setToolTipText("Select unassigned Salesman ID");
+        refreshSalesmanComboBox(); // populate dropdown on load
         panel.add(salesmanIdField);
 
         return panel;
     }
+
+    private void refreshSalesmanComboBox() {
+        salesmanIdField.removeAllItems();
+        List<String> unassigned = getUnassignedSalesmanIds();
+        for (String id : unassigned) {
+            salesmanIdField.addItem(id);
+        }
+    }
+
 
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -146,11 +159,11 @@ public class ManageCarInventory extends JFrame {
         String carId = carIdField.getText().trim();
         String brand = brandField.getText().trim();
         String priceStr = priceField.getText().trim();
-        String status = statusField.getText().trim();
-        String salesmanId = salesmanIdField.getText().trim();
+        String status = "Available";
+        String salesmanId = (String) salesmanIdField.getSelectedItem();
 
         // Validation
-        if (carId.isEmpty() || brand.isEmpty() || priceStr.isEmpty() || status.isEmpty()) {
+        if (carId.isEmpty() || brand.isEmpty() || priceStr.isEmpty()) {
             showMessage("Please fill in all required fields (Car ID, Brand, Price, Status)");
             return;
         }
@@ -173,9 +186,26 @@ public class ManageCarInventory extends JFrame {
 
             showMessage("Car added successfully.");
             clearFields();
+            refreshSalesmanComboBox();
+
         } catch (NumberFormatException ex) {
             showMessage("Invalid price format. Please enter a valid number.");
         }
+    }
+
+    private List<String> getUnassignedSalesmanIds() {
+        List<Salesman> allSalesmen = SalesmanList.loadSalesmanDataFromFile(); // Assumes this static method exists
+        List<String> unassigned = new ArrayList<>();
+
+        for (Salesman s : allSalesmen) {
+            boolean assigned = carList.stream()
+                    .anyMatch(car -> car.getSalesmanId() != null && car.getSalesmanId().equalsIgnoreCase(s.getID()));
+            if (!assigned) {
+                unassigned.add(s.getID());
+            }
+        }
+
+        return unassigned;
     }
 
     private void deleteCar(ActionEvent e) {
@@ -221,8 +251,8 @@ public class ManageCarInventory extends JFrame {
             carIdField.setText(found.getCarId());
             brandField.setText(found.getBrand());
             priceField.setText(String.valueOf(found.getPrice()));
-            statusField.setText(found.getStatus());
-            salesmanIdField.setText(found.getSalesmanId() != null ? found.getSalesmanId() : "");
+            //statusField.setText(found.getStatus());
+            salesmanIdField.setSelectedItem(found.getSalesmanId() != null ? found.getSalesmanId() : "");
         } else {
             showMessage("Car not found.");
         }
@@ -259,12 +289,12 @@ public class ManageCarInventory extends JFrame {
                 }
             }
 
-            String newStatus = statusField.getText().trim();
-            if (!newStatus.isEmpty()) {
-                found.setStatus(newStatus);
-            }
+            //String newStatus = statusField.getText().trim();
+            //if (!newStatus.isEmpty()) {
+              //  found.setStatus(newStatus);
+            //}
 
-            String newSalesmanId = salesmanIdField.getText().trim();
+            String newSalesmanId = salesmanIdField.getSelectedItem().toString();
             found.setSalesmanId(newSalesmanId);
 
             saveCarsToFile();
@@ -273,6 +303,7 @@ public class ManageCarInventory extends JFrame {
             showMessage("Car not found.");
         }
     }
+
 
     private void listAllCars(ActionEvent e) {
         if (carList.isEmpty()) {
@@ -390,8 +421,8 @@ public class ManageCarInventory extends JFrame {
         carIdField.setText("");
         brandField.setText("");
         priceField.setText("");
-        statusField.setText("");
-        salesmanIdField.setText("");
+        //statusField.setText("");
+        salesmanIdField.setSelectedItem("");
     }
 
     private void showMessage(String message) {
