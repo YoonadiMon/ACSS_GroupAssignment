@@ -157,7 +157,7 @@ public class ManageStaffSalesman extends JFrame {
     }
 
     private void updateRelatedCarDataAfterDeletion(String salesmanId) {
-        // Update car requests
+        // Update car requests (unchanged from previous version)
         ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
         ArrayList<CarRequest> updatedRequests = new ArrayList<>();
 
@@ -167,7 +167,6 @@ public class ManageStaffSalesman extends JFrame {
                 String newStatus = request.getRequestStatus();
                 String comment = request.getComment();
 
-                // Skip if already paid or sold
                 if (!currentStatus.equals("paid") && !currentStatus.equals("sold")) {
                     if ("pending".equalsIgnoreCase(currentStatus)) {
                         newStatus = "rejected";
@@ -189,11 +188,9 @@ public class ManageStaffSalesman extends JFrame {
                 updatedRequests.add(request);
             }
         }
-
-        // Save updated requests
         CarRequest.writeCarRequests(updatedRequests);
 
-        // Update car list - set status to available for cars assigned to this salesman
+        // PROPERLY Update car list
         ArrayList<Car> cars = CarList.loadCarDataFromFile();
         ArrayList<Car> updatedCars = new ArrayList<>();
 
@@ -201,25 +198,29 @@ public class ManageStaffSalesman extends JFrame {
             if (car.getSalesmanId().equalsIgnoreCase(salesmanId)) {
                 String currentStatus = car.getStatus().toLowerCase();
                 String newStatus = car.getStatus();
+                String newSalesmanId = car.getSalesmanId(); // Default to current
 
-                // Only update if not paid or sold
                 if (!currentStatus.equals("paid") && !currentStatus.equals("sold")) {
                     newStatus = "available";
-                }
+                    newSalesmanId = "unassigned"; // This is the crucial change
 
-                updatedCars.add(new Car(
-                        car.getCarId(),
-                        car.getBrand(),
-                        car.getPrice(),
-                        newStatus,
-                        car.getSalesmanId() // Keeping salesman ID for record
-                ));
+                    updatedCars.add(new Car(
+                            car.getCarId(),
+                            car.getBrand(),
+                            car.getPrice(),
+                            newStatus,
+                            newSalesmanId // Now using the updated value
+                    ));
+                } else {
+                    // For paid/sold cars, keep original assignment
+                    updatedCars.add(car);
+                }
             } else {
                 updatedCars.add(car);
             }
         }
 
-        // Save updated cars
+        // Make sure we're using the correct save method
         CarList.saveUpdatedCarToFile(updatedCars);
     }
 

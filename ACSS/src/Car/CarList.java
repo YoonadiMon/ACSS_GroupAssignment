@@ -41,17 +41,19 @@ public class CarList {
 //            System.out.println("Problem with file output.");
 //        }
 //    }
-
     public static void saveUpdatedCarToFile(ArrayList<Car> updatedCars) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/CarList.txt"))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("data/carList.txt"))) {
             for (Car car : updatedCars) {
-                writer.write(car.getCarId() + "," + car.getBrand() + "," + car.getPrice() + ","
-                        + car.getStatus() + "," + car.getSalesmanId());
-                writer.newLine();
-
+                writer.println(String.join(",",
+                        car.getCarId(),
+                        car.getBrand(),
+                        String.valueOf(car.getPrice()),
+                        car.getStatus(),
+                        car.getSalesmanId() // Make sure this is included
+                ));
             }
         } catch (IOException e) {
-            System.out.println("Error writing to CarList.txt: " + e.getMessage());
+            System.out.println("Error saving car list: " + e.getMessage());
         }
     }
 
