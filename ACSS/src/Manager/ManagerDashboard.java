@@ -17,6 +17,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import Car.CarList;
 import Car.Car;
+import MainProgram.MainMenuGUI;
+import Utils.WindowNav;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -34,7 +36,7 @@ public class ManagerDashboard extends JFrame implements ActionListener {
 
         setTitle("Manager Dashboard");
         setSize(600, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(true);
 
