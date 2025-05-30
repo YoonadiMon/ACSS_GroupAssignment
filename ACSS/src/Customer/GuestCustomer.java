@@ -19,7 +19,7 @@ public class GuestCustomer extends BaseCustomer  {
         );
     }
     
-    // Implementation of the abstract method from User class
+    // Implementation of the abstract method from BaseCustomer class
     @Override
     public String getUserType() {
         return "Guest";
@@ -45,17 +45,8 @@ public class GuestCustomer extends BaseCustomer  {
     
     // Method to generate a random guest password
     private static String generateGuestPassword() {
-        // Generate a random password with 8 characters
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        
-        for (int i = 0; i < 8; i++) {
-            int index = random.nextInt(chars.length());
-            sb.append(chars.charAt(index));
-        }
-        
-        return sb.toString();
+        // Generate a empty password for guest user
+        return "";
     }
     
     // Convert to a regular customer (extra in case it is needed not in used for now)

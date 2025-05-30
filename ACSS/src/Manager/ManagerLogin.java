@@ -34,7 +34,7 @@ public class ManagerLogin extends JFrame {
 
     public ManagerLogin() {
         // Debug: Print the absolute path where Java is looking for the file
-        System.out.println("Looking for manager file at: " + new File(DATA_FILE).getAbsolutePath());
+        //System.out.println("Looking for manager file at: " + new File(DATA_FILE).getAbsolutePath());
 
         createDefaultManagerDataIfMissing(DATA_FILE);
         loadManagersFromFile(DATA_FILE);

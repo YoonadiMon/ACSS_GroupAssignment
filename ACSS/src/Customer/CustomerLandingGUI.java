@@ -517,11 +517,11 @@ public class CustomerLandingGUI implements ActionListener, KeyListener {
                             "Username Banned", 
                             JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidUsername(username)) {
-                    JOptionPane.showMessageDialog(frame, "Username is not valid! (At least 3 characters. Must not contain any special characters such as commas, quotes, newlines except underscore)", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Username is not valid! \nAt least 3 characters. Must not contain any special characters such as commas, quotes, newlines except underscore.", "Invalid Username Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidEmail(email)) {
                     JOptionPane.showMessageDialog(frame, "Email is not valid! Must not contain any special characters such as commas, quotes, newlines.", "Invalid Email Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!CustomerDataValidator.isValidPassword(password)) {
-                    JOptionPane.showMessageDialog(frame, "Passwords is not valid! Must not contain any special characters such as commas, quotes, newlines. (At least 8 characters containing one uppercase letter)", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Password is not valid! Must not contain any special characters such as commas, quotes, newlines. \nAt least 8 characters containing one uppercase letter.", "Invalid Password Error", JOptionPane.ERROR_MESSAGE);
                 } else if (!password.equals(confirmPassword)) {
                     JOptionPane.showMessageDialog(frame, "Passwords do not match!", "Password Error", JOptionPane.ERROR_MESSAGE);
                 } else {

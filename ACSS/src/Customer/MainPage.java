@@ -13,7 +13,13 @@ public class MainPage implements DashboardPage {
     private static JFrame mainFrame;
     
     @Override
-    public JPanel createPage(Customer customer, JFrame frame) {
+    public JPanel createPage(BaseCustomer baseCustomer, JFrame frame) {
+        
+        if (!(baseCustomer instanceof Customer)) {
+            return createErrorPanel("This page is only accessible to regular customers.");
+        }
+        
+        Customer customer = (Customer) baseCustomer;
         JPanel mainPage = DashboardUIUtils.createBasicPagePanel("Welcome To ACSS, " + customer.getUsername() + "!", frame);
         JPanel contentPanel, accountPanel, headerPanel, fieldsPanel, emptyPanel, wrapperPanel;
         JLabel accountLabel, usernameLabel, emailLabel, passwordLabel, statusLabel, forgotPasswordLbl;
@@ -137,6 +143,19 @@ public class MainPage implements DashboardPage {
         setupActionListeners(customer, mainPage, editButton, saveButton, usernameField, emailField, passwordField, forgotPasswordLbl);
 
         return mainPage;
+    }
+    
+    private JPanel createErrorPanel(String message) {
+        JPanel errorPanel = new JPanel(new BorderLayout());
+        errorPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JLabel errorLabel = new JLabel(message);
+        errorLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        errorLabel.setForeground(Color.RED);
+        errorLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        errorPanel.add(errorLabel, BorderLayout.CENTER);
+        return errorPanel;
     }
     
     private void setupActionListeners(Customer customer, JPanel mainPage, JButton editButton, JButton saveButton, 
@@ -295,7 +314,6 @@ public class MainPage implements DashboardPage {
                     return;
                 }
 
-                // No need to manually escape - the CustomersForgetPwd class handles CSV escaping
                 CustomersForgetPwd customerForgetPwd = new CustomersForgetPwd(customerId, question, answer);
 
                 if (CustomersForgetPwd.customerExists(customerId)) {

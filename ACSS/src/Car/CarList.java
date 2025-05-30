@@ -15,33 +15,32 @@ public class CarList {
 
     public static ArrayList<Car> carList = new ArrayList<>();
 
-    public static void initializeCars() {
-
-        carList.add(new Car("C001", "Toyota", 10000, "available", "S001"));
-        carList.add(new Car("C002", "Honda", 20000, "available", "S001"));
-        carList.add(new Car("C003", "Myvi", 15000, "available", "S002"));
-        carList.add(new Car("C004", "BMW", 100000, "available", "S002"));
-        carList.add(new Car("C005", "Mercedes", 120000, "paid", "S001"));
-        carList.add(new Car("C007", "Hyundai", 22000, "available", "S001"));
-        carList.add(new Car("C008", "Proton", 13000, "paid", "S002"));
-        carList.add(new Car("C010", "Mazda", 27000, "available", "S002"));
-        carList.add(new Car("C012", "Ford", 24000, "paid", "S001"));
-        carList.add(new Car("C014", "Tesla", 150000, "available", "S002"));
-
-    }
-
-    public static void saveInitializedCarListToFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/carList.txt"))) {
-            for (Car car : carList) {
-                writer.write(car.getCarId() + "," + car.getBrand() + "," + car.getPrice() + ","
-                        + car.getStatus() + "," + car.getSalesmanId());
-                writer.newLine();
-            }
-            System.out.println("Car list saved to file.");
-        } catch (IOException e) {
-            System.out.println("Problem with file output.");
-        }
-    }
+//    public static void initializeCars() {
+//        carList.add(new Car("C001", "Toyota", 10000, "available", "S001"));
+//        carList.add(new Car("C002", "Honda", 20000, "available", "S001"));
+//        carList.add(new Car("C003", "Myvi", 15000, "available", "S002"));
+//        carList.add(new Car("C004", "BMW", 100000, "available", "S002"));
+//        carList.add(new Car("C005", "Mercedes", 120000, "paid", "S001"));
+//        carList.add(new Car("C007", "Hyundai", 22000, "available", "S001"));
+//        carList.add(new Car("C008", "Proton", 13000, "paid", "S002"));
+//        carList.add(new Car("C010", "Mazda", 27000, "available", "S002"));
+//        carList.add(new Car("C012", "Ford", 24000, "paid", "S001"));
+//        carList.add(new Car("C014", "Tesla", 150000, "available", "S002"));
+//
+//    }
+//
+//    public static void saveInitializedCarListToFile() {
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/carList.txt"))) {
+//            for (Car car : carList) {
+//                writer.write(car.getCarId() + "," + car.getBrand() + "," + car.getPrice() + ","
+//                        + car.getStatus() + "," + car.getSalesmanId());
+//                writer.newLine();
+//            }
+//            System.out.println("Car list saved to file.");
+//        } catch (IOException e) {
+//            System.out.println("Problem with file output.");
+//        }
+//    }
 
     public static void saveUpdatedCarToFile(ArrayList<Car> updatedCars) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/CarList.txt"))) {

@@ -11,6 +11,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -18,66 +20,311 @@ import java.util.ArrayList;
  */
 public class CarPage implements DashboardPage {
     
-    private Customer customer;
+    // Change this field type from Customer to BaseCustomer
+    private BaseCustomer customer;
+    private boolean isGuest;
+    private ArrayList<Car> allCarsList;
+    private ArrayList<Car> filteredCarsList;
+    private JPanel carListContainer;
+    private JScrollPane scrollPane;
+    private JPanel contentPanel;
+    private JPanel parentPanel;
+    
+    // Filter components
+    private JComboBox<String> brandFilter;
+    private JTextField minPriceField;
+    private JTextField maxPriceField;
+
+    // Constructor for regular customers
+    public CarPage() {
+        this.isGuest = false;
+    }
+    
+    // Constructor for guests
+    public CarPage(boolean isGuest) {
+        this.isGuest = isGuest;
+    }
     
     @Override
-    public JPanel createPage(Customer customer, JFrame frame) {
-        // Store the customer reference
-        this.customer = customer;
-        
+    public JPanel createPage(BaseCustomer customer, JFrame frame) {
+        // Store the customer reference (change the field type to BaseCustomer)
+        this.customer = customer; 
+        this.parentPanel = null;
+
+        // Determine if this is a guest based on user type
+        if (!this.isGuest && "Guest".equals(customer.getUserType())) {
+            this.isGuest = true;
+        }
+
         // Page Unique Code
-        JPanel CarPage = DashboardUIUtils.createBasicPagePanel("Available Cars", frame);
+        String pageTitle = isGuest ? "Available Cars (Guest View: " + customer.getUsername() + ")" : "Available Cars";
+        JPanel CarPage = DashboardUIUtils.createBasicPagePanel(pageTitle, frame);
+        this.parentPanel = CarPage;
 
         // Load salesman data
         ArrayList<Salesman> salesmanList = SalesmanList.loadSalesmanDataFromFile();
 
         // Get the content panel (which is at index 1 in BorderLayout.CENTER)
-        JPanel contentPanel = (JPanel) ((BorderLayout) CarPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+        contentPanel = (JPanel) ((BorderLayout) CarPage.getLayout()).getLayoutComponent(BorderLayout.CENTER);
 
         // Set layout for the content panel
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
-        // Page-specific content 
-        ArrayList<Car> allCarsList = CarList.loadCarDataFromFile();
-        ArrayList<Car> showCarsList = new ArrayList<>();
+        // Load all available cars
+        allCarsList = CarList.loadCarDataFromFile();
+        filteredCarsList = new ArrayList<>();
         for (Car car : allCarsList) {
             if (car.getStatus().equals("available")) {
-                showCarsList.add(car);
+                filteredCarsList.add(car);
             }
         }
 
         // Add some spacing at the top
         contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        // Create a panel to hold car boxes with some margin on the sides
-        JPanel carListContainer = new JPanel();
-        carListContainer.setLayout(new BoxLayout(carListContainer, BoxLayout.Y_AXIS));
-        carListContainer.setBorder(BorderFactory.createEmptyBorder(0, 50, 20, 50));
-        carListContainer.setBackground(Color.WHITE);
+        // Create and add filter panel
+        JPanel filterPanel = createFilterPanel();
+        contentPanel.add(filterPanel);
 
-        // Create a box for each car
-        for (Car car : showCarsList) {
-            JPanel carBox = createCarBox(car, CarPage);
-            carListContainer.add(carBox);
-            carListContainer.add(Box.createRigidArea(new Dimension(0, 15))); // Space between car boxes
-        }
+        // Add spacing between filter and car list
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // Add the car container to a scroll pane in case there are many cars
-        JScrollPane scrollPane = new JScrollPane(carListContainer);
+        // Create the car list container
+        createCarListContainer();
+
+        // Add the car container to a scroll pane
+        scrollPane = new JScrollPane(carListContainer);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         contentPanel.add(scrollPane);
-        
+
+        // Add guest-specific footer if needed
+        if (isGuest) {
+            JPanel footerPanel = createGuestFooter(frame);
+            CarPage.add(footerPanel, BorderLayout.SOUTH);
+        }
+
+        // Initial display of all cars
+        updateCarDisplay();
+
         return CarPage;
     }
     
-    /**
-     * Creates a panel displaying information about a car with a book button
-     * 
-     * @param car The car to display
-     * @param parentPanel The parent panel for showing dialogs
-     * @return A JPanel containing the car information and book button
-     */
+    private JPanel createGuestFooter(JFrame frame) {
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        footerPanel.setBackground(new Color(240, 240, 240));
+        footerPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        
+        JLabel signUpPrompt = new JLabel("Create an account to book cars");
+        signUpPrompt.setFont(new Font("SansSerif", Font.BOLD, 16));
+        signUpPrompt.setForeground(new Color(0, 84, 159));
+        
+        JButton signUpButton = new JButton("Sign Up");
+        ButtonStyler.stylePrimaryButton(signUpButton);
+        signUpButton.setPreferredSize(new Dimension(140, 40));
+
+        signUpButton.addActionListener(e -> {
+            JOptionPane.showMessageDialog(frame,
+                    "Redirecting to registration page",
+                    "Sign Up",
+                    JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();
+            new CustomerLandingGUI(); 
+        });
+        
+        footerPanel.add(signUpPrompt);
+        footerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        footerPanel.add(signUpButton);
+        
+        return footerPanel;
+    }
+    
+    private JPanel createFilterPanel() {
+        JPanel filterPanel = new JPanel();
+        filterPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        filterPanel.setBackground(Color.WHITE);
+        filterPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(8, 15, 8, 15)));
+        filterPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+
+        // Brand Filter
+        JLabel brandLabel = new JLabel("Brand:");
+        brandLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        
+        brandFilter = new JComboBox<>();
+        brandFilter.addItem("All Brands");
+        
+        // Populate brand filter with unique brands from available cars
+        Set<String> uniqueBrands = new HashSet<>();
+        for (Car car : filteredCarsList) {
+            uniqueBrands.add(car.getBrand());
+        }
+        for (String brand : uniqueBrands) {
+            brandFilter.addItem(brand);
+        }
+        
+        brandFilter.setPreferredSize(new Dimension(120, 25));
+        brandFilter.addActionListener(e -> applyFilters());
+
+        // Price Range Filter
+        JLabel priceLabel = new JLabel("Price:");
+        priceLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        
+        JLabel minLabel = new JLabel("Min:");
+        minLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        minPriceField = new JTextField(6);
+        minPriceField.setPreferredSize(new Dimension(80, 25));
+        
+        JLabel maxLabel = new JLabel("Max:");
+        maxLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        maxPriceField = new JTextField(6);
+        maxPriceField.setPreferredSize(new Dimension(80, 25));
+        
+        // Apply Filter Button
+        JButton applyButton = new JButton("Apply");
+        ButtonStyler.stylePrimaryButton(applyButton);
+        applyButton.setPreferredSize(new Dimension(80, 25));
+        applyButton.addActionListener(e -> applyFilters());
+        
+        // Clear Filter Button
+        JButton clearButton = new JButton("Clear");
+        clearButton.setPreferredSize(new Dimension(60, 25));
+        clearButton.setBackground(new Color(240, 240, 240));
+        clearButton.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+        clearButton.addActionListener(e -> clearFilters());
+
+        // Add components to filter panel
+        filterPanel.add(brandLabel);
+        filterPanel.add(brandFilter);
+        filterPanel.add(Box.createRigidArea(new Dimension(15, 0)));
+        filterPanel.add(priceLabel);
+        filterPanel.add(minLabel);
+        filterPanel.add(minPriceField);
+        filterPanel.add(maxLabel);
+        filterPanel.add(maxPriceField);
+        filterPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        filterPanel.add(applyButton);
+        filterPanel.add(clearButton);
+
+        return filterPanel;
+    }
+    
+    private void createCarListContainer() {
+        carListContainer = new JPanel();
+        carListContainer.setLayout(new BoxLayout(carListContainer, BoxLayout.Y_AXIS));
+        carListContainer.setBorder(BorderFactory.createEmptyBorder(0, 50, 20, 50));
+        carListContainer.setBackground(Color.WHITE);
+    }
+    
+    private void applyFilters() {
+        ArrayList<Car> filteredCars = new ArrayList<>();
+        
+        // Get filter values
+        String selectedBrand = (String) brandFilter.getSelectedItem();
+        String minPriceText = minPriceField.getText().trim();
+        String maxPriceText = maxPriceField.getText().trim();
+        
+        Double minPrice = null;
+        Double maxPrice = null;
+        
+        // Parse price values
+        try {
+            if (!minPriceText.isEmpty()) {
+                minPrice = Double.parseDouble(minPriceText);
+            }
+            if (!maxPriceText.isEmpty()) {
+                maxPrice = Double.parseDouble(maxPriceText);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(parentPanel,
+                    "Please enter valid numeric values for price range.",
+                    "Invalid Price Range",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Validate price range
+        if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+            JOptionPane.showMessageDialog(parentPanel,
+                    "Minimum price cannot be greater than maximum price.",
+                    "Invalid Price Range",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Apply filters
+        for (Car car : allCarsList) {
+            if (!car.getStatus().equals("available")) {
+                continue; // Skip non-available cars
+            }
+            
+            boolean matchesBrand = selectedBrand.equals("All Brands") || car.getBrand().equals(selectedBrand);
+            boolean matchesPrice = true;
+            
+            if (minPrice != null && car.getPrice() < minPrice) {
+                matchesPrice = false;
+            }
+            if (maxPrice != null && car.getPrice() > maxPrice) {
+                matchesPrice = false;
+            }
+            
+            if (matchesBrand && matchesPrice) {
+                filteredCars.add(car);
+            }
+        }
+        
+        // Update the filtered list and display
+        filteredCarsList = filteredCars;
+        updateCarDisplay();
+    }
+    
+    private void clearFilters() {
+        brandFilter.setSelectedItem("All Brands");
+        minPriceField.setText("");
+        maxPriceField.setText("");
+        
+        // Reset to show all available cars
+        filteredCarsList.clear();
+        for (Car car : allCarsList) {
+            if (car.getStatus().equals("available")) {
+                filteredCarsList.add(car);
+            }
+        }
+        
+        updateCarDisplay();
+    }
+    
+    private void updateCarDisplay() {
+        // Clear existing car boxes
+        carListContainer.removeAll();
+        
+        if (filteredCarsList.isEmpty()) {
+            // Show message when no cars match the filter
+            JPanel noResultsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            noResultsPanel.setBackground(Color.WHITE);
+            noResultsPanel.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
+            
+            JLabel noResultsLabel = new JLabel("No cars match your filter criteria.");
+            noResultsLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
+            noResultsLabel.setForeground(Color.GRAY);
+            
+            noResultsPanel.add(noResultsLabel);
+            carListContainer.add(noResultsPanel);
+        } else {
+            // Create car boxes for filtered results
+            for (Car car : filteredCarsList) {
+                JPanel carBox = createCarBox(car, parentPanel);
+                carListContainer.add(carBox);
+                carListContainer.add(Box.createRigidArea(new Dimension(0, 15))); // Space between car boxes
+            }
+        }
+        
+        // Refresh the display
+        carListContainer.revalidate();
+        carListContainer.repaint();
+    }
+
     private JPanel createCarBox(Car car, JPanel parentPanel) {
         // Main container for car info
         JPanel carBox = new JPanel();
@@ -104,10 +351,9 @@ public class CarPage implements DashboardPage {
         JLabel priceLabel = new JLabel("Price: $" + String.format("%,.2f", (double) car.getPrice()));
         priceLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-
         String salesmanId = car.getSalesmanId();
         String salesmanName = SalesmanList.getSalesmanNameById(salesmanId);
-        JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName + " ("+ salesmanId + ")");
+        JLabel salesmanLabel = new JLabel("Salesman: " + salesmanName + (isGuest ? "" : " (" + salesmanId + ")"));
         salesmanLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         // Add labels to the info panel
@@ -116,105 +362,234 @@ public class CarPage implements DashboardPage {
         infoPanel.add(priceLabel);
         infoPanel.add(salesmanLabel);
 
-        // Right panel for the Book button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        // Right panel for buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setBackground(new Color(240, 240, 240));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Create and style the Book button
         JButton bookButton = new JButton("Book");
         ButtonStyler.stylePrimaryButton(bookButton);
         bookButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+        bookButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Add action listener to the button
-        bookButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String customerId = customer.getCustomerId(); // Get current logged in customer ID
-
-                int confirm = JOptionPane.showConfirmDialog(
-                    parentPanel,  // parent component (your panel or frame)
-                    "Confirm booking for " + car.getBrand() + " (ID: " + car.getCarId() + ")",  // message
-                    "Confirm Booking",  // dialog title
-                    JOptionPane.OK_CANCEL_OPTION,  // options: OK and Cancel buttons
-                    JOptionPane.QUESTION_MESSAGE  // icon type
-                );
-
-                if (confirm == JOptionPane.OK_OPTION) {
-                    try {
-                        // Load existing requests
-                        ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
-
-                         // Check if this car is already requested
-                        boolean alreadyRequested = false;
-                        boolean rejected = false;
-                        String reason = "";
-                        for (CarRequest req : requests) {
-                            if (req.getCarID().equals(car.getCarId()) && req.getCustomerID().equals(customerId) ) {
-                                alreadyRequested = true;
-                                if ((req.getRequestStatus().equals("rejected"))) {
-                                    rejected = true;
-                                    reason = req.getComment();
-                                }
-                                break;
-                            }
-                        }
-                        if (reason.equals(".") || reason.trim().isEmpty()) {
-                            reason = "Not provided.";
-                        }
-                        if (rejected) {
-                            JOptionPane.showMessageDialog(parentPanel,
-                                    "Your previous booking has been rejected by saleman.\nReason: " + reason,
-                                    "Car Not Available",
-                                    JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-                        if (alreadyRequested) {
-                            JOptionPane.showMessageDialog(parentPanel,
-                                    "You have already made a request for a booking for this car previously. Please check your Cars History.",
-                                    "Car Not Available",
-                                    JOptionPane.WARNING_MESSAGE);
-                            return;
-                        }
-
-                        // Add new request
-                        CarRequest newRequest = new CarRequest(
-                                customerId,
-                                car.getCarId(),
-                                car.getSalesmanId(),
-                                "pending", // Initial status is pending
-                                "."
-                        );
-
-                        requests.add(newRequest);
-                        CarRequest.writeCarRequests(requests);
-
-                        // Show success message
-                        JOptionPane.showMessageDialog(parentPanel,
-                                "Car booking request submitted successfully!\n" +
-                                "Car: " + car.getBrand() + " (ID: " + car.getCarId() + ")\n" +
-                                "Status: Pending approval by salesman",
-                                "Booking Submitted",
-                                JOptionPane.INFORMATION_MESSAGE);
-
-                        // Refresh the car list to update availability
-                        //refreshCarPage();
-
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(parentPanel,
-                                "Error creating booking: " + ex.getMessage(),
-                                "Booking Error",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
+        // Add different action listeners based on user type
+        if (isGuest) {
+            // Guest user - show registration required message
+            bookButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JOptionPane.showMessageDialog(parentPanel,
+                        "Guests cannot book cars. Please register for an account to book this car.",
+                        "Registration Required",
+                        JOptionPane.INFORMATION_MESSAGE);
                 }
-            }
-        });
+            });
+        } else {
+            // Regular customer - handle booking
+            bookButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    handleCarBooking(car, parentPanel);
+                }
+            });
+        }
 
         buttonPanel.add(bookButton);
+
+        // Add wishlist button only for registered customers (not guests)
+        if (!isGuest) {
+            buttonPanel.add(Box.createRigidArea(new Dimension(0, 8))); // Spacing between buttons
+            
+            JButton wishlistButton = new JButton("♡ Wishlist");
+            wishlistButton.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            wishlistButton.setBackground(new Color(255, 255, 255));
+            wishlistButton.setForeground(new Color(150, 150, 150));
+            wishlistButton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(6, 15, 6, 15)));
+            wishlistButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            wishlistButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            // Check if car is already in wishlist and update button appearance
+            if (isCarInWishlist(car.getCarId())) {
+                updateWishlistButtonStyle(wishlistButton, true);
+            }
+
+            wishlistButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    handleWishlistToggle(car, wishlistButton, parentPanel);
+                }
+            });
+
+            buttonPanel.add(wishlistButton);
+        }
 
         // Add components to the main car box
         carBox.add(infoPanel, BorderLayout.CENTER);
         carBox.add(buttonPanel, BorderLayout.EAST);
 
         return carBox;
+    }
+    
+    private void handleCarBooking(Car car, JPanel parentPanel) {
+        String customerId = customer.getUserId(); 
+
+        int confirm = JOptionPane.showConfirmDialog(
+            parentPanel,
+            "Confirm booking for " + car.getBrand() + " (ID: " + car.getCarId() + ")",
+            "Confirm Booking",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirm == JOptionPane.OK_OPTION) {
+            try {
+                // Load existing requests
+                ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+
+                // Check if this car is already requested
+                boolean alreadyRequested = false;
+                boolean rejected = false;
+                String reason = "";
+                for (CarRequest req : requests) {
+                    if (req.getCarID().equals(car.getCarId()) && req.getCustomerID().equals(customerId)) {
+                        alreadyRequested = true;
+                        if ((req.getRequestStatus().equals("rejected"))) {
+                            rejected = true;
+                            reason = req.getComment();
+                        }
+                        break;
+                    }
+                }
+                if (reason.equals(".") || reason.trim().isEmpty()) {
+                    reason = "Not provided.";
+                }
+                if (rejected) {
+                    JOptionPane.showMessageDialog(parentPanel,
+                            "Your previous booking has been rejected by salesman.\nReason: " + reason,
+                            "Car Not Available",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                if (alreadyRequested) {
+                    JOptionPane.showMessageDialog(parentPanel,
+                            "You have already made a request for a booking for this car previously. Please check your Cars History.",
+                            "Car Not Available",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Add new request
+                CarRequest newRequest = new CarRequest(
+                        customerId,
+                        car.getCarId(),
+                        car.getSalesmanId(),
+                        "pending",
+                        "."
+                );
+
+                requests.add(newRequest);
+                CarRequest.writeCarRequests(requests);
+
+                // Show success message
+                JOptionPane.showMessageDialog(parentPanel,
+                        "Car booking request submitted successfully!\n" +
+                        "Car: " + car.getBrand() + " (ID: " + car.getCarId() + ")\n" +
+                        "Status: Pending approval by salesman",
+                        "Booking Submitted",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(parentPanel,
+                        "Error creating booking: " + ex.getMessage(),
+                        "Booking Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void handleWishlistToggle(Car car, JButton wishlistButton, JPanel parentPanel) {
+        String customerId = customer.getUserId();
+        String carId = car.getCarId();
+
+        try {
+            if (isCarInWishlist(carId)) {
+                // Remove from wishlist
+                removeFromWishlist(carId);
+                updateWishlistButtonStyle(wishlistButton, false);
+                JOptionPane.showMessageDialog(parentPanel,
+                        car.getBrand() + " has been removed from your wishlist.",
+                        "Removed from Wishlist",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                // Add to wishlist
+                addToWishlist(carId);
+                updateWishlistButtonStyle(wishlistButton, true);
+                JOptionPane.showMessageDialog(parentPanel,
+                        car.getBrand() + " has been added to your wishlist!",
+                        "Added to Wishlist",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(parentPanel,
+                    "Error updating wishlist: " + ex.getMessage(),
+                    "Wishlist Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateWishlistButtonStyle(JButton button, boolean inWishlist) {
+        if (inWishlist) {
+            button.setText("♥ In Wishlist");
+            button.setBackground(new Color(255, 182, 193)); // Light pink
+            button.setForeground(new Color(220, 20, 60)); // Crimson
+            button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(220, 20, 60), 1),
+                    BorderFactory.createEmptyBorder(6, 15, 6, 15)));
+        } else {
+            button.setText("♡ Wishlist");
+            button.setBackground(new Color(255, 255, 255));
+            button.setForeground(new Color(150, 150, 150));
+            button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(6, 15, 6, 15)));
+        }
+    }
+
+    private boolean isCarInWishlist(String carId) {
+        try {
+            String customerId = customer.getUserId();
+            return CustomerCarWishlist.isCarInWishlist(customerId, carId);
+        } catch (Exception e) {
+            System.err.println("Error checking wishlist: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void addToWishlist(String carId) {
+        try {
+            String customerId = customer.getUserId();
+            boolean added = CustomerCarWishlist.addToWishlist(customerId, carId);
+            if (!added) {
+                throw new RuntimeException("Car is already in wishlist");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to add car to wishlist: " + e.getMessage());
+        }
+    }
+
+    private void removeFromWishlist(String carId) {
+        try {
+            String customerId = customer.getUserId();
+            boolean removed = CustomerCarWishlist.removeFromWishlist(customerId, carId);
+            if (!removed) {
+                throw new RuntimeException("Car was not found in wishlist");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to remove car from wishlist: " + e.getMessage());
+        }
     }
 }

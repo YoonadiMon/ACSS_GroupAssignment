@@ -13,12 +13,12 @@ public class CarMain {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        CarList.initializeCars();
-        CarList.saveInitializedCarListToFile();
-
-        //CarRequest.saveInitialCarRequestsToFile();
-
-    }
+//    public static void main(String[] args) {
+//        CarList.initializeCars();
+//        CarList.saveInitializedCarListToFile();
+//
+//        //CarRequest.saveInitialCarRequestsToFile();
+//
+//    }
 
 }

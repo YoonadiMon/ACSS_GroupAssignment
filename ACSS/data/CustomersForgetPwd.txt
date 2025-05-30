@@ -1,2 +1,2 @@
-"14cb8731","What's your fav color?","Blue, and purple"
+"14cb8731","What's ur fav color?","blue,purple"
 "75c6649e","Is this acc deleted?","yes"

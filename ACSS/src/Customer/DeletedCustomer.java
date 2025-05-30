@@ -10,13 +10,6 @@ import java.util.ArrayList;
  * @author YOON
  */
 public class DeletedCustomer extends BaseCustomer {
-
-    // Implementation of the abstract method from User class
-    @Override
-    public String getUserType() {
-        return "Deleted Customer";
-    }
-
     public DeletedCustomer(String customerId, String name, String email, String password) {
         super(
                 customerId,
@@ -25,6 +18,12 @@ public class DeletedCustomer extends BaseCustomer {
                 password);
     }
 
+    // Implementation of the abstract method from BaseCustomer class
+    @Override
+    public String getUserType() {
+        return "Deleted Customer";
+    }
+    
     public String getUserId() {
         return userId;
     }

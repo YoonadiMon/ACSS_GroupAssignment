@@ -5,11 +5,6 @@ package Customer;
  * @author YOON
  */
 public class Customer extends BaseCustomer {
-    // Implementation of the abstract method from User class
-    @Override
-    public String getUserType() {
-        return "Customer";
-    }
     
     private boolean isApproved;
     
@@ -17,6 +12,12 @@ public class Customer extends BaseCustomer {
     public Customer(String name, String email, String password) {
         super(CustomerDataIO.generateCustomerId(), name, email, password);
         this.isApproved = false;  // Default to not approved
+    }
+    
+    // Implementation of the abstract method from BaseCustomer class
+    @Override
+    public String getUserType() {
+        return "Customer";
     }
     
     // Constructor with approval status

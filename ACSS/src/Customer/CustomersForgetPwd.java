@@ -81,6 +81,7 @@ public class CustomersForgetPwd {
                 }
             }
         } catch (IOException e) {
+            return false;
             // File might not exist yet, treat as no existing customer
         }
         return false;
