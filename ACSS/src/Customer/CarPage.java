@@ -439,7 +439,7 @@ public class CarPage implements DashboardPage {
 
         int confirm = JOptionPane.showConfirmDialog(
             parentPanel,
-            "Confirm booking for " + car.getBrand() + " (ID: " + car.getCarId() + ")",
+            "Book a meeting with salesman to view the car in person.\nConfirm booking for " + car.getBrand() + " (ID: " + car.getCarId() + ")?",
             "Confirm Booking",
             JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.QUESTION_MESSAGE
@@ -498,7 +498,7 @@ public class CarPage implements DashboardPage {
                 JOptionPane.showMessageDialog(parentPanel,
                         "Car booking request submitted successfully!\n" +
                         "Car: " + car.getBrand() + " (ID: " + car.getCarId() + ")\n" +
-                        "Status: Pending approval by salesman",
+                        "Status: Pending approval by salesman. (You can check your request status in Cars History.)\n-> Salesman will reach to you through your email for meeting details if it had been approved.\n",
                         "Booking Submitted",
                         JOptionPane.INFORMATION_MESSAGE);
 
