@@ -29,14 +29,12 @@ public class SalesmanGUI implements ActionListener {
     private JButton loginButton, exitButton;
     private int windowWidth, windowHeight;
 
-    public static void main(String[] args) {
+//    public static void main(String[] args) {
 //        SalesmanList.initializeSalesman();
 //        SalesmanList.saveInitializedSalesmanDataToFile();
-        
-        
-        
-        SwingUtilities.invokeLater(() -> new SalesmanGUI(400, 250));
-    }
+//        
+//        SwingUtilities.invokeLater(() -> new SalesmanGUI(400, 250));
+//    }
 
     public SalesmanGUI(int width, int height) {
         windowWidth = width;
