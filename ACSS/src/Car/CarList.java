@@ -67,7 +67,7 @@ public class CarList {
                     double price = Double.parseDouble(data[2]);
                     String status = data[3];
                     String salesmanId = data[4];
-                    loadedList.add(new Car(carId, brand, (int) price, status, salesmanId));
+                    loadedList.add(new Car(carId, brand, price, status, salesmanId));
                 }
             }
         } catch (IOException e) {

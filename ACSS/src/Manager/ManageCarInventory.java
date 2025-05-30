@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ManageCarInventory extends JFrame {
     private List<Car> carList = new ArrayList<>();
-    private static final String FILE_NAME = "data/CarList.txt";
+    private static final String FILE_NAME = "data/carList.txt";
     private Object manager; // Store the manager object to pass back
 
     // GUI Components
@@ -22,12 +22,15 @@ public class ManageCarInventory extends JFrame {
     private JButton updateButton;
     private JButton searchButton;
     private JButton listButton;
-
+    
     public ManageCarInventory(Object manager) {
         super("Car Inventory Management System");
         this.manager = manager;
         initialize(); // Initialize GUI first
-        carList = CarList.loadCarDataFromFile();// Then load data
+        carList = CarList.loadCarDataFromFile(); // ASSIGN the loaded data to carList
+
+        // Debug: Print how many cars were loaded
+        //System.out.println("Loaded " + carList.size() + " cars from file");
     }
 
     private void initialize() {
@@ -184,6 +187,12 @@ public class ManageCarInventory extends JFrame {
 
         Car found = findCarById(carId);
         if (found != null) {
+            // Check if car is available
+            if (!"available".equalsIgnoreCase(found.getStatus())) {
+                showMessage("Cannot delete car. Only available cars can be deleted.\nCurrent status: " + found.getStatus());
+                return;
+            }
+
             carList.remove(found);
             saveCarsToFile();
             showMessage("Car deleted successfully.");
@@ -203,6 +212,12 @@ public class ManageCarInventory extends JFrame {
         Car found = findCarById(carId);
         if (found != null) {
             outputArea.setText("Car Found:\n" + formatCarInfo(found));
+
+            // Check if car is available for editing
+            if (!"available".equalsIgnoreCase(found.getStatus())) {
+                outputArea.append("\n\nNOTE: This car is not available and cannot be edited.");
+            }
+
             carIdField.setText(found.getCarId());
             brandField.setText(found.getBrand());
             priceField.setText(String.valueOf(found.getPrice()));
@@ -222,6 +237,12 @@ public class ManageCarInventory extends JFrame {
 
         Car found = findCarById(carId);
         if (found != null) {
+            // Check if car is available for updates
+            if (!"available".equalsIgnoreCase(found.getStatus())) {
+                showMessage("Cannot update car. Only available cars can be updated.\nCurrent status: " + found.getStatus());
+                return;
+            }
+
             String newBrand = brandField.getText().trim();
             if (!newBrand.isEmpty()) {
                 found.setBrand(newBrand);
@@ -247,7 +268,7 @@ public class ManageCarInventory extends JFrame {
             found.setSalesmanId(newSalesmanId);
 
             saveCarsToFile();
-            showMessage("Car information updated.");
+            showMessage("Car information updated successfully.");
         } else {
             showMessage("Car not found.");
         }
@@ -280,38 +301,39 @@ public class ManageCarInventory extends JFrame {
                 (car.getSalesmanId() != null && !car.getSalesmanId().isEmpty()) ? car.getSalesmanId() : "Not Assigned");
     }
 
-    private void loadCarsFromFile() {
-        carList.clear();
-        File file = new File(FILE_NAME);
-
-        // Create directory if it doesn't exist
-        file.getParentFile().mkdirs();
-
-        if (!file.exists()) {
-            showMessage("No existing car data found. Starting with empty inventory.");
-            return;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            int loadedCount = 0;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (!line.isEmpty()) {
-                    try {
-                        Car car = parseCarFromLine(line);
-                        carList.add(car);
-                        loadedCount++;
-                    } catch (Exception ex) {
-                        System.err.println("Error parsing line: " + line + " - " + ex.getMessage());
-                    }
-                }
-            }
-            showMessage("Loaded " + loadedCount + " cars.");
-        } catch (IOException e) {
-            showMessage("Error loading cars from file: " + e.getMessage());
-        }
-    }
+//    private void loadCarsFromFile() {
+//        carList.clear();
+//        File file = new File(FILE_NAME);
+//        
+//
+//        // Create directory if it doesn't exist
+//        file.getParentFile().mkdirs();
+//
+//        if (!file.exists()) {
+//            showMessage("No existing car data found. Starting with empty inventory.");
+//            return;
+//        }
+//
+//        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+//            String line;
+//            int loadedCount = 0;
+//            while ((line = reader.readLine()) != null) {
+//                line = line.trim();
+//                if (!line.isEmpty()) {
+//                    try {
+//                        Car car = parseCarFromLine(line);
+//                        carList.add(car);
+//                        loadedCount++;
+//                    } catch (Exception ex) {
+//                        System.err.println("Error parsing line: " + line + " - " + ex.getMessage());
+//                    }
+//                }
+//            }
+//            showMessage("Loaded " + loadedCount + " cars.");
+//        } catch (IOException e) {
+//            showMessage("Error loading cars from file: " + e.getMessage());
+//        }
+//    }
 
     private Car parseCarFromLine(String line) {
         String[] parts = line.split(",");
@@ -328,6 +350,21 @@ public class ManageCarInventory extends JFrame {
         return new Car(carId, brand, price, status, salesmanId);
     }
 
+//    private void saveCarsToFile() {
+//        File file = new File(FILE_NAME);
+//
+//        // Create directory if it doesn't exist
+//        file.getParentFile().mkdirs();
+//
+//        try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+//            for (Car car : carList) {
+//                writer.println(car.toString());
+//            }
+//        } catch (IOException e) {
+//            showMessage("Error saving cars to file: " + e.getMessage());
+//        }
+//    }
+    
     private void saveCarsToFile() {
         File file = new File(FILE_NAME);
 
@@ -336,10 +373,15 @@ public class ManageCarInventory extends JFrame {
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
             for (Car car : carList) {
-                writer.println(car.toString());
+                // Format the data manually instead of using toString()
+                String salesmanId = (car.getSalesmanId() != null) ? car.getSalesmanId() : "";
+                writer.println(car.getCarId() + "," + car.getBrand() + "," + 
+                              car.getPrice() + "," + car.getStatus() + "," + salesmanId);
             }
+            System.out.println("Saved " + carList.size() + " cars to file.");
         } catch (IOException e) {
             showMessage("Error saving cars to file: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
