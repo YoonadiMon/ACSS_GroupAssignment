@@ -4,7 +4,7 @@
 7e498c54,C003,S002,paid,TESTING
 14cb8731,C003,S002,rejected,This car has been sold - payment completed
 14cb8731,C004,S002,rejected,.
-14cb8731,C007,S001,cancelled,.
+14cb8731,C007,S001,cancelled,Customer didn't purchase car
 f1363ffa,C004,S002,booked,Approved by salesman
 f1363ffa,C010,S002,rejected,.
 14cb8731,C015,S002,paid,You bought the car
