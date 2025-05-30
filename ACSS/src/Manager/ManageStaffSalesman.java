@@ -162,7 +162,6 @@ public class ManageStaffSalesman extends JFrame {
         }
     }
 
-
     private void searchSalesman(ActionEvent e) {
         String id = searchIdField.getText().trim();
         Salesman salesman = findById(id);
@@ -264,7 +263,7 @@ public class ManageStaffSalesman extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ManageStaffSalesman(null));
-    }
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(() -> new ManageStaffSalesman(null));
+//    }
 }

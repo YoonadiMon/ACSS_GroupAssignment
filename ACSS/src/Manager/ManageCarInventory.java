@@ -418,15 +418,15 @@ public class ManageCarInventory extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        File file = new File("data/carList.txt");
-        if (!file.exists()) {
-            CarList.initializeCars();
-            CarList.saveInitializedCarListToFile();
-        }
-
-        SwingUtilities.invokeLater(() -> new ManageCarInventory(null));
-    }
+//    public static void main(String[] args) {
+//        File file = new File("data/carList.txt");
+//        if (!file.exists()) {
+//            CarList.initializeCars();
+//            CarList.saveInitializedCarListToFile();
+//        }
+//
+//        SwingUtilities.invokeLater(() -> new ManageCarInventory(null));
+//    }
 
     JPanel getPanel() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

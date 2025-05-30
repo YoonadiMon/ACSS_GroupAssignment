@@ -897,15 +897,15 @@ public class ManagerDashboard extends JFrame implements ActionListener {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            // For testing purposes only
-            ManagerLogin.Manager testManager = new ManagerLogin.Manager(
-                    "manager1",
-                    "12345",
-                    "rainbow"
-            );
-            new ManagerDashboard(testManager);
-        });
-    }
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(() -> {
+//            // For testing purposes only
+//            ManagerLogin.Manager testManager = new ManagerLogin.Manager(
+//                    "manager1",
+//                    "12345",
+//                    "rainbow"
+//            );
+//            new ManagerDashboard(testManager);
+//        });
+//    }
 }

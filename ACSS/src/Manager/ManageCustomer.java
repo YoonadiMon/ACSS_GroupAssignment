@@ -427,9 +427,9 @@ public class ManageCustomer extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ManageCustomer(null));
-    }
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(() -> new ManageCustomer(null));
+//    }
 
     JPanel getPanel() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
