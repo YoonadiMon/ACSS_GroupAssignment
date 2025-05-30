@@ -140,24 +140,94 @@ public class ManageStaffSalesman extends JFrame {
         String id = searchIdField.getText().trim();
         Salesman salesman = findById(id);
         if (salesman != null) {
+            // Update related car data before removing
+            updateRelatedCarDataAfterDeletion(salesman.getID());
+
             // Log the deleted salesman
             saveDeletedSalesmanToFile(salesman);
 
             // Remove and save
             salesmanList.remove(salesman);
             saveToFile();
-            showMessage("Deleted successfully and logged to deletedSalesman.txt.");
+            showMessage("Salesman deleted successfully. Related car requests and statuses updated.");
             clearFields();
         } else {
             showMessage("ID not found.");
         }
     }
 
+    private void updateRelatedCarDataAfterDeletion(String salesmanId) {
+        // Update car requests
+        ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
+        ArrayList<CarRequest> updatedRequests = new ArrayList<>();
+
+        for (CarRequest request : requests) {
+            if (request.getSalesmanID().equalsIgnoreCase(salesmanId)) {
+                String currentStatus = request.getRequestStatus().toLowerCase();
+                String newStatus = request.getRequestStatus();
+                String comment = request.getComment();
+
+                // Skip if already paid or sold
+                if (!currentStatus.equals("paid") && !currentStatus.equals("sold")) {
+                    if ("pending".equalsIgnoreCase(currentStatus)) {
+                        newStatus = "rejected";
+                        comment = "Request rejected - salesman " + salesmanId + " has been deleted";
+                    } else if ("booked".equalsIgnoreCase(currentStatus)) {
+                        newStatus = "cancelled";
+                        comment = "Booking cancelled - salesman " + salesmanId + " has been deleted";
+                    }
+                }
+
+                updatedRequests.add(new CarRequest(
+                        request.getCustomerID(),
+                        request.getCarID(),
+                        request.getSalesmanID(),
+                        newStatus,
+                        comment
+                ));
+            } else {
+                updatedRequests.add(request);
+            }
+        }
+
+        // Save updated requests
+        CarRequest.writeCarRequests(updatedRequests);
+
+        // Update car list - set status to available for cars assigned to this salesman
+        ArrayList<Car> cars = CarList.loadCarDataFromFile();
+        ArrayList<Car> updatedCars = new ArrayList<>();
+
+        for (Car car : cars) {
+            if (car.getSalesmanId().equalsIgnoreCase(salesmanId)) {
+                String currentStatus = car.getStatus().toLowerCase();
+                String newStatus = car.getStatus();
+
+                // Only update if not paid or sold
+                if (!currentStatus.equals("paid") && !currentStatus.equals("sold")) {
+                    newStatus = "available";
+                }
+
+                updatedCars.add(new Car(
+                        car.getCarId(),
+                        car.getBrand(),
+                        car.getPrice(),
+                        newStatus,
+                        car.getSalesmanId() // Keeping salesman ID for record
+                ));
+            } else {
+                updatedCars.add(car);
+            }
+        }
+
+        // Save updated cars
+        CarList.saveUpdatedCarToFile(updatedCars);
+    }
+
     private void saveDeletedSalesmanToFile(Salesman s) {
         File file = new File(DELETED_SALESMAN_FILE);
         file.getParentFile().mkdirs();
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) { // append mode
+        try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) {
             writer.println(s.getID() + "," + s.getName() + "," + s.getPassword());
         } catch (IOException e) {
             System.out.println("Failed to log deleted salesman: " + e.getMessage());
@@ -264,75 +334,4 @@ public class ManageStaffSalesman extends JFrame {
             ex.printStackTrace();
         }
     }
-
-    private void updateRelatedCarDataAfterDeletion(String salesmanId) {
-        // Update car requests
-        ArrayList<CarRequest> requests = CarRequest.loadCarRequestDataFromFile();
-        ArrayList<CarRequest> updatedRequests = new ArrayList<>();
-
-        for (CarRequest request : requests) {
-            if (request.getSalesmanID().equalsIgnoreCase(salesmanId)) {
-                String currentStatus = request.getRequestStatus().toLowerCase();
-                String newStatus = request.getRequestStatus();
-                String comment = request.getComment();
-
-                // Skip if already paid or sold
-                if (!currentStatus.equals("paid") && !currentStatus.equals("sold")) {
-                    if ("pending".equalsIgnoreCase(currentStatus)) {
-                        newStatus = "rejected";
-                        comment = "Request rejected - salesman " + salesmanId + " has been deleted";
-                    } else if ("booked".equalsIgnoreCase(currentStatus)) {
-                        newStatus = "cancelled";
-                        comment = "Booking cancelled - salesman " + salesmanId + " has been deleted";
-                    }
-                }
-
-                updatedRequests.add(new CarRequest(
-                        request.getCustomerID(),
-                        request.getCarID(),
-                        request.getSalesmanID(),
-                        newStatus,
-                        comment
-                ));
-            } else {
-                updatedRequests.add(request);
-            }
-        }
-
-        // Save updated requests
-        CarRequest.writeCarRequests(updatedRequests);
-
-        // Update car list - set status to available for cars assigned to this salesman
-        ArrayList<Car> cars = CarList.loadCarDataFromFile();
-        ArrayList<Car> updatedCars = new ArrayList<>();
-
-        for (Car car : cars) {
-            if (car.getSalesmanId().equalsIgnoreCase(salesmanId)) {
-                String currentStatus = car.getStatus().toLowerCase();
-                String newStatus = car.getStatus();
-
-                // Only update if not paid or sold
-                if (!currentStatus.equals("paid") && !currentStatus.equals("sold")) {
-                    newStatus = "available";
-                }
-
-                updatedCars.add(new Car(
-                        car.getCarId(),
-                        car.getBrand(),
-                        car.getPrice(),
-                        newStatus,
-                        car.getSalesmanId() // You might want to clear this too or set to "unassigned"
-                ));
-            } else {
-                updatedCars.add(car);
-            }
-        }
-
-        // Save updated cars
-        CarList.saveUpdatedCarToFile(updatedCars);
-    }
-
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(() -> new ManageStaffSalesman(null));
-//    }
 }
